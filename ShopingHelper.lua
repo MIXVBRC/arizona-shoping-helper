@@ -40,7 +40,25 @@ local dependencies = {
         ['entity'] = 'ShopingHelper.Circle',
         ['args'] = {},
     },
+    {
+        ['type'] = 'default',
+        ['name'] = 'shop',
+        ['entity'] = 'ShopingHelper.Shop',
+        ['args'] = {},
+    },
     -- classes
+    {
+        ['type'] = 'class',
+        ['name'] = 'customEvents',
+        ['entity'] = 'ShopingHelper.CustomEvents',
+        ['args'] = {},
+    },
+    {
+        ['type'] = 'class',
+        ['name'] = 'color',
+        ['entity'] = 'ShopingHelper.Color',
+        ['args'] = {},
+    },
     {
         ['type'] = 'class',
         ['name'] = 'config',
@@ -85,25 +103,13 @@ local dependencies = {
     {
         ['type'] = 'class',
         ['name'] = 'shop',
-        ['entity'] = 'ShopingHelper.Shop',
+        ['entity'] = 'ShopingHelper.ShopManager',
         ['args'] = {
             {
                 ['type'] = 'global',
                 ['value'] = '_ShopingHelper',
             },
         },
-    },
-    {
-        ['type'] = 'class',
-        ['name'] = 'customEvents',
-        ['entity'] = 'ShopingHelper.CustomEvents',
-        ['args'] = {},
-    },
-    {
-        ['type'] = 'class',
-        ['name'] = 'color',
-        ['entity'] = 'ShopingHelper.Color',
-        ['args'] = {},
     },
     {
         ['type'] = 'class',

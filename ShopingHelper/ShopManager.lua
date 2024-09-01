@@ -54,18 +54,23 @@ function class:new(_sh)
         return result
     end
 
-    function private:isCentral(shop)
-        local cacheKey = private.sh.json:encode(shop.position)
-        if private.cache:get(cacheKey) == nil then
-            local objects = private.sh.helper:getObjectsByIds(private.centralModelIds, 3)
+    function private:isCentral(x, y, z)
+        local cacheKeyShop = private.sh.json:encode({x, y, z})
+        if private.cache:get(cacheKeyShop) == nil then
+            local cacheKeyObjects = 'objects_' .. private.sh.json:encode(private.centralModelIds)
+            local objects = private.cache:get(cacheKeyObjects)
+            if objects == nil then
+                objects = private.sh.helper:getObjectsByIds(private.centralModelIds)
+                private.cache:add(cacheKeyObjects, objects, 3)
+            end
             for _, object in ipairs(objects) do
-                local _, x, y, z = getObjectCoordinates(object)
+                local _, objectX, objectY, objectZ = getObjectCoordinates(object)
                 local distance = getDistanceBetweenCoords3d(
-                    shop.position.x, shop.position.y, shop.position.z,
+                    objectX, objectY, objectZ,
                     x, y, z
                 )
                 if distance < 2 then
-                    private.cache:add(cacheKey, shop)
+                    private.cache:add(cacheKeyShop, true)
                     return true
                 end
             end
@@ -82,32 +87,30 @@ function class:new(_sh)
                 private.shops = {}
                 local shops = {}
                 local titles = {}
-                for textId = 0, 2048 do
-                    if sampIs3dTextDefined(textId) then
-                        local text, _, x, y, z, _, _, _, _ = sampGet3dTextInfoById(textId)
-                        if text == private.sh.message:get('message_shop') then
-                            table.insert(shops, {
-                                ['position'] = {
-                                    ['x'] = x,
-                                    ['y'] = y,
-                                    ['z'] = z,
-                                },
-                            })
-                        elseif text:find('^%a+_%a+%s{......}.+{......}.+$') then
-                            table.insert(titles, {
-                                ['text'] = text,
-                                ['position'] = {
-                                    ['x'] = x,
-                                    ['y'] = y,
-                                    ['z'] = z,
-                                },
-                            })
-                        end
+                for _, textId in ipairs(private.sh.helper:getTextIds()) do
+                    local text, _, x, y, z, _, _, _, _ = sampGet3dTextInfoById(textId)
+                    if text == private.sh.message:get('message_shop') then
+                        table.insert(shops, {
+                            ['position'] = {
+                                ['x'] = x,
+                                ['y'] = y,
+                                ['z'] = z,
+                            },
+                        })
+                    elseif text:find('^%a+_%a+%s{......}.+{......}.+$') then
+                        table.insert(titles, {
+                            ['text'] = text,
+                            ['position'] = {
+                                ['x'] = x,
+                                ['y'] = y,
+                                ['z'] = z,
+                            },
+                        })
                     end
                 end
                 for _, shop in ipairs(shops) do
                     local minDistance = nil
-                    for _, title in ipairs(titles) do
+                    for titleIndex, title in ipairs(titles) do
                         local distance = getDistanceBetweenCoords3d(
                             shop.position.x, shop.position.y, shop.position.z,
                             title.position.x, title.position.y, title.position.z
@@ -115,25 +118,29 @@ function class:new(_sh)
                         if distance < 5 and minDistance == nil or distance < minDistance then
                             minDistance = distance
                             shop.title = title
+                            table.remove(titles, titleIndex)
                         end
                     end
-                    shop.distance = getDistanceBetweenCoords3d(
-                        shop.position.x, shop.position.y, shop.position.z,
-                        private.sh.player:getX(), private.sh.player:getY(), private.sh.player:getZ()
-                    )
                     if shop.title.text ~= nil then
                         shop.empty = false
                         shop.player = shop.title.text:match('^(.+)%s{......}.+{......}.+$')
                         shop.mod = shop.title.text:match('^.+{......}(.+){......}.+$')
                     else
                         shop.empty = true
-                        shop.player = nil
+                        shop.player = 'none'
                         shop.mod = private.sh.message:get('message_shop_empty')
                     end
                     shop.position = private.sh.helper:normalizePosition(shop.position.x, shop.position.y, shop.position.z)
-                    shop.central = private:isCentral(shop)
+                    shop.central = private:isCentral(shop.position.x, shop.position.y, shop.position.z)
                     shop.id = private.sh.helper:md5(shop.player .. shop.position.x .. shop.position.y .. shop.position.z)
-                    private.shops[shop.id] = shop
+                    private.shops[shop.id] = private.sh.dependencies.shop:new(
+                        shop.id,
+                        shop.position,
+                        shop.player,
+                        shop.mod,
+                        shop.empty,
+                        shop.central
+                    )
                 end
                 private.cache:add('shops', private.shops, 1)
             end
@@ -145,7 +152,7 @@ function class:new(_sh)
         if mod ~= nil then
             local shop = private:getNearby()
             private:setVisit(shop.id)
-            private.sh.customEvents:trigger('onVisitShop', textdrawId, mod, shop)
+            private.sh.customEvents:trigger('onVisitShop', shop, mod, textdrawId)
         end
     end
 
