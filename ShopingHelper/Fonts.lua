@@ -1,13 +1,12 @@
 local class = {}
-function class:new(_sh)
+function class:new()
     local public = {}
     local private = {
-        ['sh'] = _sh,
         ['cache'] = _sh.dependencies.cache:new(),
     }
 
     function public:get(name, height, flags)
-        local cacheKey = private.sh.helper:md5(name .. '-' .. height .. '-' .. flags)
+        local cacheKey = _sh.helper:md5(name .. '-' .. height .. '-' .. flags)
         local font = private.cache:get(cacheKey)
         if font == nil then
             font = renderCreateFont("Arial", 12, 4)

@@ -1,5 +1,5 @@
 local class = {}
-function class:new(_sh)
+function class:new()
     local public = {}
     local private = {
         ['cache'] = _sh.dependencies.cache:new(60),

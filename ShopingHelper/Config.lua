@@ -1,101 +1,78 @@
 local class = {}
-function class:new(_sh, _name, _default)
+function class:new(_name, _default)
     local public = {}
     local private = {
-        ['sh'] = _sh,
         ['name'] = (_name or 'config') .. '.ini',
-        ['data'] = {
-            ['json'] = {},
-        },
-        ['default'] = _default or {
-            ['json'] = {},
-        },
+        ['data'] = _default or {},
     }
 
     function private:getName()
         return private.name
     end
 
-    function private:getDefault()
-        return private.default
-    end
-
     function private:getJsonName(title, name)
         return title .. '-' .. name
     end
 
-    function private:decode(data)
-        return private.sh.json:decode(data)
-    end;
-
-    function private:encode(data)
-        return private.sh.json:encode(data)
-    end;
-
-    function private:addJson(title, name, data)
-        private.data.json[private:getJsonName(title, name)] = private:encode(data)
-        return public
-    end
-
-    function private:load()
-        local data = private.sh.ini.load(private:getDefault(), private:getName())
-        for _, json in pairs(data.json) do
-            json = private:decode(json)
-        end
-        private.data = data
-        return public
-    end
-
-    function private:save()
-        local data = private.data
-        for _, list in pairs(data.json) do
-            list = private:encode(list)
-        end
-        private.sh.ini.save(data, private:getName())
-        return public
-    end
-
     function public:get(title, name)
-        local data = nil
         if private.data[title] ~= nil then
-            data = private.data[title][name]
-            if data == 'json' then
-                data = private.data.json[private:getJsonName(title, name)]
-            end
             return private.data[title][name]
         end
-        return data
+        return nil
     end
 
     function public:set(title, name, data)
         if title ~= 'json' and data ~= 'json' then
-            if type(data) == 'table' then
-                private:addJson(title, name, data)
-                data = 'json'
-            end
-            if private.data[title] == nil then
-                private.data[title] = {}
-            end
+            private.data[title] = private.data[title] or {}
             private.data[title][name] = data
             private:save()
         end
         return public
     end
 
-    function public:init()
-        if private.default.json == nil then
-            private.default.json = {}
+    function private:collect()
+        for title, values in pairs(private.data) do
+            for name, value in pairs(values) do
+                if type(value) == 'table' then
+                    private.data.json = private.data.json or {}
+                    private.data.json[private:getJsonName(title, name)] = _sh.json.encode(value)
+                    private.data[title][name] = 'json'
+                end
+            end
         end
-        for title, settings in pairs(private.default) do
+    end
+
+    function private:disassemble(data)
+        private.data = {}
+        for title, values in pairs(data) do
             if title ~= 'json' then
-                for name, data in pairs(settings) do
-                    if type(data) == 'table' then
-                        private.default.json[private:getJsonName(title, name)] = private:encode(data)
-                        data = 'json'
+                private[title] = {}
+                for name, value in pairs(values) do
+                    private[title][name] = value
+                    if value == 'json' then
+                        private[title][name] = _sh.json.encode(data.json[private:getJsonName(title, name)])
                     end
                 end
             end
         end
+        private.data = data
+    end
+
+    function private:load()
+        private:collect()
+        local data = _sh.ini.load(private.data, private:getName())
+        private:disassemble(data)
+        return public
+    end
+
+    function private:save()
+        private:collect()
+        _sh.ini.save(private.data, private:getName())
+        private:disassemble(private.data)
+        return public
+    end
+
+    function public:init()
         private:load()
         private:save()
         return public

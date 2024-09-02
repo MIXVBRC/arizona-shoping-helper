@@ -1,9 +1,7 @@
 local class = {}
-function class:new(_sh)
+function class:new()
     local public = {}
-    local private = {
-        ['sh'] = _sh,
-    }
+    local private = {}
 
     function public:normalize(num, index)
         index = index or 1000
@@ -20,12 +18,12 @@ function class:new(_sh)
     end
 
     function public:md5(string)
-        return private.sh.md5.sumhexa(string)
+        return _sh.md5.sumhexa(string)
     end
 
     function public:utf8(string)
-        private.sh.encoding.default = 'CP1251'
-        return (private.sh.encoding.UTF8):decode(string)
+        _sh.encoding.default = 'CP1251'
+        return _sh.encoding.UTF8:decode(string)
     end
 
     function public:getObjectsByIds(ids)
@@ -49,6 +47,33 @@ function class:new(_sh)
             end
         end
         return textIds
+    end
+
+    function public:getAngle(x, y)
+        local angle = math.atan2(x, y) / math.pi * 180
+        if angle < 0 then
+            angle = angle + 360
+        end
+        return angle
+    end
+
+    function public:tableClone(_table)
+        return {table.unpack(_table)}
+    end
+
+    function public:trace(aX, aY, aZ, bX, bY, bZ)
+        local touch, data = processLineOfSight(
+            aX, aY, aZ,
+            bX, bY, bZ
+        )
+        return {
+            ['touch'] = touch,
+            ['position'] = {
+                ['x'] = data.pos[1],
+                ['y'] = data.pos[2],
+                ['z'] = data.pos[3],
+            },
+        }
     end
 
     return public

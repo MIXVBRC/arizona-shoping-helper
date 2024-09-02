@@ -1,8 +1,7 @@
 local class = {}
-function class:new(_sh)
+function class:new()
     local public = {}
     local private = {
-        ['sh'] = _sh,
         ['shops'] = {},
         ['visit'] = nil,
         ['mods'] = {
@@ -20,7 +19,12 @@ function class:new(_sh)
     }
 
     function public:getById(id)
-        return private.shops[id]
+        for _, shop in ipairs(private.shops) do
+            if shop.id == id then
+                return shop
+            end
+        end
+        return nil
     end
 
     function public:getAll()
@@ -28,7 +32,7 @@ function class:new(_sh)
     end
 
     function public:getVisit()
-        return private.shops[private.visit]
+        return public:getById(private.visit)
     end
 
     function private:setVisit(id)
@@ -40,10 +44,10 @@ function class:new(_sh)
         local result = nil
         local minDistance = nil
         if private.shops ~= nil then
-            for _, shop in pairs(private.shops) do
+            for _, shop in ipairs(private.shops) do
                 local distance = getDistanceBetweenCoords3d(
                     shop.position.x, shop.position.y, shop.position.z,
-                    private.sh.player:getX(), private.sh.player:getY(), private.sh.player:getZ()
+                    _sh.player:getX(), _sh.player:getY(), _sh.player:getZ()
                 )
                 if minDistance == nil or distance < minDistance then
                     minDistance = distance
@@ -55,14 +59,9 @@ function class:new(_sh)
     end
 
     function private:isCentral(x, y, z)
-        local cacheKeyShop = private.sh.json:encode({x, y, z})
+        local cacheKeyShop = _sh.json.encode({x, y, z})
         if private.cache:get(cacheKeyShop) == nil then
-            local cacheKeyObjects = 'objects_' .. private.sh.json:encode(private.centralModelIds)
-            local objects = private.cache:get(cacheKeyObjects)
-            if objects == nil then
-                objects = private.sh.helper:getObjectsByIds(private.centralModelIds)
-                private.cache:add(cacheKeyObjects, objects, 3)
-            end
+            local objects = _sh.helper:getObjectsByIds(private.centralModelIds)
             for _, object in ipairs(objects) do
                 local _, objectX, objectY, objectZ = getObjectCoordinates(object)
                 local distance = getDistanceBetweenCoords3d(
@@ -87,9 +86,9 @@ function class:new(_sh)
                 private.shops = {}
                 local shops = {}
                 local titles = {}
-                for _, textId in ipairs(private.sh.helper:getTextIds()) do
+                for _, textId in ipairs(_sh.helper:getTextIds()) do
                     local text, _, x, y, z, _, _, _, _ = sampGet3dTextInfoById(textId)
-                    if text == private.sh.message:get('message_shop') then
+                    if text == _sh.message:get('message_shop') then
                         table.insert(shops, {
                             ['position'] = {
                                 ['x'] = x,
@@ -115,44 +114,45 @@ function class:new(_sh)
                             shop.position.x, shop.position.y, shop.position.z,
                             title.position.x, title.position.y, title.position.z
                         )
-                        if distance < 5 and minDistance == nil or distance < minDistance then
+                        if distance < 5 and (minDistance == nil or distance < minDistance) then
                             minDistance = distance
                             shop.title = title
                             table.remove(titles, titleIndex)
+                            break
                         end
                     end
-                    if shop.title.text ~= nil then
+                    if shop.title ~= nil then
                         shop.empty = false
                         shop.player = shop.title.text:match('^(.+)%s{......}.+{......}.+$')
                         shop.mod = shop.title.text:match('^.+{......}(.+){......}.+$')
                     else
                         shop.empty = true
                         shop.player = 'none'
-                        shop.mod = private.sh.message:get('message_shop_empty')
+                        shop.mod = _sh.message:get('message_shop_empty')
                     end
-                    shop.position = private.sh.helper:normalizePosition(shop.position.x, shop.position.y, shop.position.z)
+                    shop.position = _sh.helper:normalizePosition(shop.position.x, shop.position.y, shop.position.z)
                     shop.central = private:isCentral(shop.position.x, shop.position.y, shop.position.z)
-                    shop.id = private.sh.helper:md5(shop.player .. shop.position.x .. shop.position.y .. shop.position.z)
-                    private.shops[shop.id] = private.sh.dependencies.shop:new(
+                    shop.id = _sh.helper:md5(shop.player .. shop.position.x .. shop.position.y .. shop.position.z)
+                    table.insert(private.shops, _sh.dependencies.shop:new(
                         shop.id,
                         shop.position,
                         shop.player,
                         shop.mod,
                         shop.empty,
                         shop.central
-                    )
+                    ))
                 end
                 private.cache:add('shops', private.shops, 1)
             end
         end end)
     end
 
-    function private.sh.events.onTextDrawSetString(textdrawId, text)
+    function _sh.events.onTextDrawSetString(textdrawId, text)
         local mod = private.mods[text]
         if mod ~= nil then
             local shop = private:getNearby()
             private:setVisit(shop.id)
-            private.sh.customEvents:trigger('onVisitShop', shop, mod, textdrawId)
+            _sh.customEvents:trigger('onVisitShop', shop, mod, textdrawId)
         end
     end
 

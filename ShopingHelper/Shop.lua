@@ -1,17 +1,17 @@
 local class = {}
-function class:new(id, position, player, mod, empty, central)
+function class:new(_id, _position, _player, _mod, _empty, _central)
     local public = {}
     local private = {
-        ['id'] = id,
-        ['position'] = position or {
+        ['id'] = _id,
+        ['position'] = _position or {
             ['x'] = 0,
             ['y'] = 0,
             ['z'] = 0,
         },
-        ['player'] = player or 'none',
-        ['mod'] = mod or 'sale',
-        ['empty'] = empty or true,
-        ['central'] = central or true,
+        ['player'] = _player or 'none',
+        ['mod'] = _mod or 'sale',
+        ['empty'] = _empty or true,
+        ['central'] = _central or true,
     }
 
     function public:getId()

@@ -1,8 +1,7 @@
 local class = {}
-function class:new(_sh)
+function class:new()
     local public = {}
     local private = {
-        ['sh'] = _sh,
         ['name'] = 'visit',
         ['colors'] = {
             ['white'] = 'ffffff',
@@ -27,11 +26,11 @@ function class:new(_sh)
     end
 
     function private:setOption(name, value)
-        private.sh.config:set(private:getName(), name, value)
+        _sh.config:set(private:getName(), name, value)
     end
 
     function private:getOption(name)
-        return private.sh.config:get(private:getName(), name)
+        return _sh.config:get(private:getName(), name)
     end
 
     function private:isActive()
@@ -137,7 +136,7 @@ function class:new(_sh)
     --         for textId = 0, 2048 do
     --             if sampIs3dTextDefined(textId) then
     --                 local text, _, posX, posY, posZ, _, _, _, _ = sampGet3dTextInfoById(textId)
-    --                 if text == private.sh.message:get('message_shop') then
+    --                 if text == _sh.message:get('message_shop') then
     --                     table.insert(result.tikets, {
     --                         ['text'] = text,
     --                         ['position'] = {
@@ -210,20 +209,20 @@ function class:new(_sh)
     --         nearby = {
     --             ['text'] = 'none',
     --             ['player'] = 'none',
-    --             ['mod'] = private.sh.message:get('message_shop_empty'),
+    --             ['mod'] = _sh.message:get('message_shop_empty'),
     --             ['position'] = nearby.position,
     --         }
     --     end
 
-    --     nearby.position = private.sh.helper:normalizePosition(nearby.position.x, nearby.position.y, nearby.position.z)
-    --     nearby.code = private.sh.helper:md5(nearby.player .. nearby.position.x .. nearby.position.y .. nearby.position.z)
+    --     nearby.position = _sh.helper:normalizePosition(nearby.position.x, nearby.position.y, nearby.position.z)
+    --     nearby.code = _sh.helper:md5(nearby.player .. nearby.position.x .. nearby.position.y .. nearby.position.z)
 
     --     return nearby
     -- end
 
     function private:work()
         local time = os.time()
-        local data = private.sh.shop:getTiketsAndShops()
+        local data = _sh.shop:getTiketsAndShops()
 
         for _, tiket in ipairs(data.tikets) do
 
@@ -232,11 +231,11 @@ function class:new(_sh)
             local polygons = 4
             local rotation = 0
             local distance = getDistanceBetweenCoords3d(
-                private.sh.player:getX(), private.sh.player:getY(), private.sh.player:getZ(),
+                _sh.player:getX(), _sh.player:getY(), _sh.player:getZ(),
                 tiket.position.x, tiket.position.y, tiket.position.z
             )
             local x, y = convert3DCoordsToScreen(tiket.position.x, tiket.position.y, tiket.position.z - 1)
-            local alpha = '0x' .. private.sh.color:getByNum(1 - math.floor(distance * 100 / private.distance) / 100)
+            local alpha = '0x' .. _sh.color:getByNum(1 - math.floor(distance * 100 / private.distance) / 100)
 
             local shopInfo = {}
             local shopDistance = nil
@@ -267,7 +266,7 @@ function class:new(_sh)
                 shopInfo = {
                     ['text'] = 'none',
                     ['player'] = 'none',
-                    ['mod'] = private.sh.message:get('message_shop_empty'),
+                    ['mod'] = _sh.message:get('message_shop_empty'),
                     ['position'] = {
                         ['x'] = tiket.position.x,
                         ['y'] = tiket.position.y,
@@ -276,20 +275,20 @@ function class:new(_sh)
                 }
             end
 
-            if private.sh.player.name == shopInfo.player then
+            if _sh.player.name == shopInfo.player then
                 color = private:getColor('player')
                 polygons = 3
                 rotation = 180
             else
-                if shopInfo.mod == private.sh.message:get('message_shop_sell') then
+                if shopInfo.mod == _sh.message:get('message_shop_sell') then
                     color = private:getColor('sell')
-                elseif shopInfo.mod == private.sh.message:get('message_shop_buy') then
+                elseif shopInfo.mod == _sh.message:get('message_shop_buy') then
                     color = private:getColor('buy')
-                elseif shopInfo.mod == private.sh.message:get('message_shop_sell_buy') then
+                elseif shopInfo.mod == _sh.message:get('message_shop_sell_buy') then
                     color = private:getColor('sell_buy')
-                elseif shopInfo.mod == private.sh.message:get('message_shop_edit') then
+                elseif shopInfo.mod == _sh.message:get('message_shop_edit') then
                     color = private:getColor('edit')
-                elseif shopInfo.mod == private.sh.message:get('message_shop_empty') then
+                elseif shopInfo.mod == _sh.message:get('message_shop_empty') then
                     if private:isEmpty() then
                         color = private:getColor('empty')
                     else
@@ -298,13 +297,13 @@ function class:new(_sh)
                 end
             end
 
-            shopInfo.position = private.sh.helper:normalizePosition(shopInfo.position.x, shopInfo.position.y, shopInfo.position.z)
-            local shopCode = private.sh.helper:md5(shopInfo.player .. shopInfo.position.x .. shopInfo.position.y .. shopInfo.position.z)
+            shopInfo.position = _sh.helper:normalizePosition(shopInfo.position.x, shopInfo.position.y, shopInfo.position.z)
+            local shopCode = _sh.helper:md5(shopInfo.player .. shopInfo.position.x .. shopInfo.position.y .. shopInfo.position.z)
             local visitShop = private:getVisitByCode(shopCode)
 
             if visitShop ~= nil and visitShop.time ~= nil then
 
-                if time <= visitShop.time and (visitShop.mod == shopInfo.mod or visitShop.mod == private.sh.message:get('message_shop_edit')) then
+                if time <= visitShop.time and (visitShop.mod == shopInfo.mod or visitShop.mod == _sh.message:get('message_shop_edit')) then
                     color = private:getColor('visit')
                     if private:isHiding() and not visitShop.select then
                         goto continue
@@ -342,7 +341,7 @@ function class:new(_sh)
         end
     end
 
-    function private.sh.events.onTextDrawSetString(textdrawId, text)
+    function _sh.events.onTextDrawSetString(textdrawId, text)
         local shop = private:getNearbyShop()
 
         local time = os.time() + 60 * private:getTime()

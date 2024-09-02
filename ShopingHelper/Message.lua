@@ -1,13 +1,12 @@
 local class = {}
-function class:new(_sh)
+function class:new()
     local public = {}
     local private = {
-        ['sh'] = _sh,
-        ['lang'] = 'ru',
-        ['config'] = _sh.dependencies.config:new(_sh, 'ShopingHelper_langs'), -- _name = ShopingHelper
+        ['lang'] = 'rus',
+        ['config'] = _sh.dependencies.config:new('ShopingHelper_langs'), -- _name = ShopingHelper
     }
 
-    function public:getLang()
+    function private:getLang()
         return private.lang
     end
 
@@ -16,7 +15,7 @@ function class:new(_sh)
         return public
     end
 
-    function public:replaceString(text, gsub)
+    function private:replaceString(text, gsub)
         if gsub ~= nil then
             for from, to in ipairs(gsub) do
                 text = text:gsub('#'..from..'#', to)
@@ -26,8 +25,8 @@ function class:new(_sh)
     end
 
     -- TODO: replase Color:getAll() to Color:get(color_name)
-    function public:replaceColor(text)
-        for name, color in pairs(private.sh.color:getAll()) do
+    function private:replaceColor(text)
+        for name, color in pairs(_sh.color:getAll()) do
             text = text:gsub('{'..name..'}', '{'..color..'}')
         end
         return text
@@ -36,7 +35,7 @@ function class:new(_sh)
     function public:get(name, gsub)
         local result = private.config:get(private:getLang(), name)
         if result ~= nil then
-            result = private.sh.helper:utf8(result)
+            result = _sh.helper:utf8(result)
             result = private:replaceString(result, gsub)
             result = private:replaceColor(result)
         end
