@@ -201,8 +201,9 @@ function class:new(_name, _defaultConfig)
         local renders = private.cache:get('renders')
         if renders == nil then
             renders = {}
+            local timeNow = os.time()
             for _, shop in ipairs(shops) do
-                
+
                 local render = {
                     ['text'] = '',
                     ['color'] = private:getColor('while'),
@@ -241,8 +242,9 @@ function class:new(_name, _defaultConfig)
 
                 if visit ~= nil and visit.time ~= nil then
                     if time <= visit.time and (visit.mod == shop:getMod() or visit.mod == _sh.message:get('message_shop_edit')) then
-                        render.color = private:getColor('visit')
                         shopTypes = {'visit'}
+                        render.color = private:getColor('visit')
+                        render.text = math.ceil((visit.time - timeNow) / 60) .. ' min';
                     else
                         visit.time = nil
                         private:changeVisit(shop:getId(), {
