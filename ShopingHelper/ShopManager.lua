@@ -101,7 +101,7 @@ function class:new()
                             shop.position.x, shop.position.y, shop.position.z,
                             title.position.x, title.position.y, title.position.z
                         )
-                        if distance < 5 and (minDistance == nil or distance < minDistance) then
+                        if distance < 3 and (minDistance == nil or distance < minDistance) then
                             minDistance = distance
                             shop.title = title
                             table.remove(titles, titleIndex)
@@ -129,7 +129,7 @@ function class:new()
                         shop.central
                     ))
                 end
-                private.cache:add('shops', private.shops, 1)
+                private.cache:add('shops', private.shops, 2)
             end
         end end)
     end

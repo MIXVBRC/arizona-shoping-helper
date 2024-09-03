@@ -5,6 +5,7 @@ function class:new(_name, _defaultConfig)
         ['configManager'] = _sh.dependencies.configManager:new(_name, _sh.config),
         ['commandManager'] = _sh.dependencies.commandManager:new(_name),
         ['cache'] = _sh.dependencies.cache:new(),
+        ['lastShopId'] = nil,
     }
 
     -- ACTIVE
@@ -44,6 +45,17 @@ function class:new(_name, _defaultConfig)
 
     function private:getColor(name)
         return private.configManager:getOption('colors')[name]
+    end
+
+    -- LAST
+
+    function private:getLastShopId()
+        return private.lastShopId
+    end
+
+    function private:setLastShopId(id)
+        private.lastShopId = id
+        return public
     end
 
     -- HIDINGS
@@ -153,8 +165,24 @@ function class:new(_name, _defaultConfig)
                 private:setTime(_sh.helper:toInt(time))
             end
         end)
+        private.commandManager:add('select', function (text)
+            if private.lastShopId ~= nil then
+                local visit = private:getVisit(private.lastShopId)
+                if visit.select then
+                    private:changeVisit(private.lastShopId, {
+                        ['select'] = false,
+                        ['text'] = '',
+                    })
+                else
+                    private:changeVisit(private.lastShopId, {
+                        ['select'] = true,
+                        ['text'] = text,
+                    })
+                end
+            end
+        end)
         for hiding, _ in pairs(private:getHidings()) do
-            private.commandManager:add(_sh.helper:implode('-', {'hiding',hiding}), function ()
+            private.commandManager:add(_sh.helper:implode('-', {'active',hiding}), function ()
                 private:toggleHiding(hiding)
             end)
         end
@@ -174,7 +202,7 @@ function class:new(_name, _defaultConfig)
         if renders == nil then
             renders = {}
             for _, shop in ipairs(shops) do
-
+                
                 local render = {
                     ['text'] = '',
                     ['color'] = private:getColor('while'),
@@ -184,7 +212,6 @@ function class:new(_name, _defaultConfig)
                     ['y'] = shop:getY(),
                     ['z'] = shop:getZ() + 0.16,
                 }
-
                 local shopTypes = {'player'}
 
                 if _sh.player:getName() == shop:getPlayer() then
@@ -210,6 +237,7 @@ function class:new(_name, _defaultConfig)
                 end
 
                 local visit = private:getVisit(shop:getId())
+                local show = false
 
                 if visit ~= nil and visit.time ~= nil then
                     if time <= visit.time and (visit.mod == shop:getMod() or visit.mod == _sh.message:get('message_shop_edit')) then
@@ -223,18 +251,19 @@ function class:new(_name, _defaultConfig)
                         })
                     end
                     if visit.select then
-                        render.color = private:getColor('while')
+                        render.color = private:getColor('select')
                         render.polygons = 3
                         render.rotation = 180
                         render.text = visit.text
+                        show = true
                     end
                 end
 
-                local show = false
-
-                for _, shopType in ipairs(shopTypes) do
-                    if private:getHiding(shopType) then
-                        show = true
+                if not show then
+                    for _, shopType in ipairs(shopTypes) do
+                        if private:getHiding(shopType) then
+                            show = true
+                        end
                     end
                 end
 
@@ -253,7 +282,9 @@ function class:new(_name, _defaultConfig)
                     local sceenX, sceenY = convert3DCoordsToScreen(render.x, render.y, render.z - 1)
                     renderDrawLine(sceenX, sceenY, sceenX, sceenY - 90, 1, alpha .. colors.stick)
                     renderDrawPolygon(sceenX, sceenY - 100, 20, 20, render.polygons, render.rotation, alpha .. render.color)
-                    if render.text ~= '' then
+                    if render.text ~= nil or render.text ~= '' then
+                        renderFontDrawText(_sh.font:get('Arial', 12, 4), render.text, sceenX + 15, sceenY - 110, alpha .. colors.text)
+                    else
                         renderFontDrawText(_sh.font:get('Arial', 12, 4), render.text, sceenX + 15, sceenY - 110, alpha .. colors.text)
                     end
                 end
@@ -264,6 +295,7 @@ function class:new(_name, _defaultConfig)
     -- EVENTS
 
     _sh.customEvents:add('onVisitShop', function (shop, mod, textdrawId)
+        private:setLastShopId(shop:getId())
         local time = os.time() + 60 * private:getTime()
         if private:getVisit(shop:getId()) ~= nil then
             private:changeVisit(

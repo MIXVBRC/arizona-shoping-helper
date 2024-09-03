@@ -111,20 +111,22 @@ function class:new()
     function public:implode(separator, array)
         local collect = ''
         for _, value in ipairs(array) do
-            if collect == '' then
-                collect = value
-            else
-                collect = collect .. separator .. value
+            if value ~= nil and value ~= '' then
+                if collect == '' then
+                    collect = value
+                else
+                    collect = collect .. separator .. value
+                end
             end
         end
         return collect
     end
 
     function public:toInt(string)
-        string = tostring(string);
-        string = string:match('%d+');
-        string = tonumber(string);
-        return string;
+        string = tostring(string)
+        string = string:match('%d+')
+        string = tonumber(string)
+        return string
     end
 
     return public

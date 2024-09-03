@@ -43,12 +43,14 @@ function class:new()
                         circle:getZ()
                     )
                     for _, point in ipairs(circle:getPoints()) do
-                        local distance = getDistanceBetweenCoords2d(
-                            point:getX(), point:getY(),
-                            intersectingCircle:getX(), intersectingCircle:getY()
-                        )
-                        if distance - intersectingCircle:getRadius() < -0.01 then
-                            circle:deletePoint(point)
+                        for _, _intersectingCircle in ipairs(intersectingCircles) do
+                            local distance = getDistanceBetweenCoords2d(
+                                point:getX(), point:getY(),
+                                _intersectingCircle:getX(), _intersectingCircle:getY()
+                            )
+                            if distance < intersectingCircle:getRadius() - 0.001 then
+                                circle:deletePoint(point)
+                            end
                         end
                     end
                 end

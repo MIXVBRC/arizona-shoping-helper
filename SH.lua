@@ -7,6 +7,7 @@ _sh = {
         ['url'] = 'https://vk.com/mixvbrc',
         ['command'] = 'sh',
     },
+    ['commands'] = {}
 }
 
 local this = {
@@ -16,6 +17,7 @@ local this = {
             ['entity'] = 'md5',
             ['dependencies'] = {},
             ['init'] = false,
+            ['base'] = true,
             ['args'] = {},
         },
         {
@@ -23,6 +25,7 @@ local this = {
             ['entity'] = 'encoding',
             ['dependencies'] = {},
             ['init'] = false,
+            ['base'] = true,
             ['args'] = {},
         },
         {
@@ -30,6 +33,7 @@ local this = {
             ['entity'] = 'inicfg',
             ['dependencies'] = {},
             ['init'] = false,
+            ['base'] = true,
             ['args'] = {},
         },
         {
@@ -37,13 +41,7 @@ local this = {
             ['entity'] = 'dkjson',
             ['dependencies'] = {},
             ['init'] = false,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'cache',
-            ['entity'] = 'ShopingHelper.Cache',
-            ['dependencies'] = {},
-            ['init'] = false,
+            ['base'] = true,
             ['args'] = {},
         },
         {
@@ -51,6 +49,15 @@ local this = {
             ['entity'] = 'lib.samp.events',
             ['dependencies'] = {},
             ['init'] = false,
+            ['base'] = true,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'cache',
+            ['entity'] = 'ShopingHelper.Cache',
+            ['dependencies'] = {},
+            ['init'] = false,
+            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -58,6 +65,7 @@ local this = {
             ['entity'] = 'ShopingHelper.Point',
             ['dependencies'] = {},
             ['init'] = false,
+            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -65,6 +73,7 @@ local this = {
             ['entity'] = 'ShopingHelper.Circle',
             ['dependencies'] = {},
             ['init'] = false,
+            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -72,6 +81,7 @@ local this = {
             ['entity'] = 'ShopingHelper.CircleManager',
             ['dependencies'] = {},
             ['init'] = false,
+            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -79,6 +89,7 @@ local this = {
             ['entity'] = 'ShopingHelper.Shop',
             ['dependencies'] = {},
             ['init'] = false,
+            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -86,15 +97,17 @@ local this = {
             ['entity'] = 'ShopingHelper.ConfigManager',
             ['dependencies'] = {},
             ['init'] = false,
+            ['base'] = false,
             ['args'] = {},
         },
         {
             ['name'] = 'commandManager',
             ['entity'] = 'ShopingHelper.CommandManager',
             ['dependencies'] = {},
-            ['init'] = false,
+            ['init'] = true,
+            ['base'] = false,
             ['args'] = {
-                'sh',
+                'active',
             },
         },
         {
@@ -102,6 +115,7 @@ local this = {
             ['entity'] = 'ShopingHelper.LowPoint',
             ['dependencies'] = {},
             ['init'] = false,
+            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -109,6 +123,7 @@ local this = {
             ['entity'] = 'ShopingHelper.CustomEvents',
             ['dependencies'] = {},
             ['init'] = true,
+            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -116,6 +131,7 @@ local this = {
             ['entity'] = 'ShopingHelper.Chat',
             ['dependencies'] = {},
             ['init'] = true,
+            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -123,6 +139,7 @@ local this = {
             ['entity'] = 'ShopingHelper.Color',
             ['dependencies'] = {},
             ['init'] = true,
+            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -130,6 +147,7 @@ local this = {
             ['entity'] = 'ShopingHelper.Font',
             ['dependencies'] = {},
             ['init'] = true,
+            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -137,6 +155,7 @@ local this = {
             ['entity'] = 'ShopingHelper.Helper',
             ['dependencies'] = {},
             ['init'] = true,
+            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -144,6 +163,7 @@ local this = {
             ['entity'] = 'ShopingHelper.Config',
             ['dependencies'] = {},
             ['init'] = true,
+            ['base'] = false,
             ['args'] = {
                 'ShopingHelper_base',
                 {},
@@ -154,6 +174,7 @@ local this = {
             ['entity'] = 'ShopingHelper.Message',
             ['dependencies'] = {},
             ['init'] = true,
+            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -161,6 +182,7 @@ local this = {
             ['entity'] = 'ShopingHelper.Player',
             ['dependencies'] = {},
             ['init'] = true,
+            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -168,13 +190,23 @@ local this = {
             ['entity'] = 'ShopingHelper.ShopManager',
             ['dependencies'] = {},
             ['init'] = true,
+            ['base'] = false,
             ['args'] = {},
         },
         {
             ['name'] = 'radius',
             ['entity'] = 'ShopingHelper.Radius',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'point',
+                'color',
+                'cache',
+                'helper',
+                'lowPoint',
+                'configManager',
+                'commandManager',
+            },
             ['init'] = true,
+            ['base'] = false,
             ['args'] = {
                 'radius',
                 {
@@ -183,6 +215,8 @@ local this = {
                     ['distance'] = 20,
                     ['colors'] = {
                         ['circle'] = 'ffffff',
+                        ['green'] = '00ff00',
+                        ['red'] = 'ff0000',
                     },
                 },
             },
@@ -192,11 +226,11 @@ local this = {
             ['entity'] = 'ShopingHelper.Visit',
             ['dependencies'] = {},
             ['init'] = true,
+            ['base'] = false,
             ['args'] = {
                 'visit',
                 {
                     ['active'] = true,
-                    ['empty'] = true,
                     ['hiding'] = {
                         ['player'] = true,
                         ['visit'] = true,
@@ -214,6 +248,7 @@ local this = {
                         ['sell_buy'] = '36e0e0',
                         ['edit'] = 'd2e036',
                         ['visit'] = 'e03636',
+                        ['select'] = 'ffffff',
                         ['empty'] = 'cc36e0',
                         ['stick'] = 'ffffff',
                         ['text'] = 'ffffff',
@@ -224,19 +259,23 @@ local this = {
     },
 }
 
-function this:init()
+function this:initDependencies()
     for _, dependency in ipairs(this.dependencies) do
         if dependency.entity ~= nil then
             _sh.dependencies[dependency.name] = require(dependency.entity)
             if _sh.dependencies[dependency.name] ~= nil then
                 if dependency.init then
                     _sh[dependency.name] = _sh.dependencies[dependency.name]:new(table.unpack(dependency.args))
-                else
+                elseif dependency.base then
                     _sh[dependency.name] = _sh.dependencies[dependency.name]
                 end
             end
         end
     end
+end
+
+function this:init()
+    this:initDependencies()
     _sh.chat:push(_sh.script.name)
 end
 

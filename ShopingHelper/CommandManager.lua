@@ -3,7 +3,7 @@ function class:new(_prefix)
     local public = {}
     local private = {
         ['prefix'] = _prefix,
-        ['commands'] = {},
+        -- ['commands'] = {},
     }
 
     function public:getCommandName(_name)
@@ -12,10 +12,11 @@ function class:new(_prefix)
 
     function public:add(_name, _function)
         local command = public:getCommandName(_name)
-        private.commands[command] = {
+        table.insert(_sh.commands, {
+            ['name'] = command,
             ['_function'] = _function,
-            ['description'] = _sh.message:get('command_'..command..'_description'),
-        }
+            ['description'] = _sh.message:get('command_'..command..'_description') or '',
+        })
         sampRegisterChatCommand(
             command,
             _function

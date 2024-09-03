@@ -13,16 +13,10 @@ function class:new(_name, _defaultConfig)
                 ['max'] = 60,
             },
         },
-        ['colors'] = {
-            ['lowPoint'] = {
-                ['green'] = '00ff00',
-                ['red'] = 'ff0000',
-            },
-        },
         ['configManager'] = _sh.dependencies.configManager:new(_name, _sh.config),
         ['commandManager'] = _sh.dependencies.commandManager:new(_name),
         ['cache'] = _sh.dependencies.cache:new(),
-        ['lowPoint'] = nil,
+        ['lowPoint'] = _sh.dependencies.lowPoint:new(),
     }
 
     -- ACTIVE
@@ -86,9 +80,6 @@ function class:new(_name, _defaultConfig)
                 private.configManager:setOption(name, value)
             end
         end
-        if _sh.dependencies.lowPoint ~= nil then
-            private.lowPoint = _sh.dependencies.lowPoint:new()
-        end
         private:initThreads()
         private:initCommands()
     end
@@ -119,23 +110,31 @@ function class:new(_name, _defaultConfig)
 
     -- LOGICK
 
-    function private:getCircles()
-        local circles = {}
+    function private:getShops()
+        local shops = {}
         for _, shop in ipairs(_sh.shopManager:getAll()) do
             if not shop:isCentral() then
                 local distance = _sh.helper:distanceToPlayer2d(shop:getX(), shop:getY())
                 if distance < private:getDistance() then
-                    table.insert(circles, {
-                        ['position'] = {
-                            ['x'] = shop:getX(),
-                            ['y'] = shop:getY(),
-                            ['z'] = shop:getZ() - 0.8,
-                        },
-                        ['radius'] = private.radius,
-                        ['polygons'] = private:getPolygons(),
-                    })
+                    table.insert(shops, shop)
                 end
             end
+        end
+        return shops
+    end
+
+    function private:getCircles(shops)
+        local circles = {}
+        for _, shop in ipairs(shops) do
+            table.insert(circles, {
+                ['position'] = {
+                    ['x'] = shop:getX(),
+                    ['y'] = shop:getY(),
+                    ['z'] = shop:getZ() - 0.8,
+                },
+                ['radius'] = private.radius,
+                ['polygons'] = private:getPolygons(),
+            })
         end
         return circles
     end
@@ -208,41 +207,47 @@ function class:new(_name, _defaultConfig)
     function private:work()
         local segments = private.cache:get('segments')
         if segments == nil then
-            local circleManager = _sh.dependencies.circleManager:new()
-            for _, circle in ipairs(private:getCircles()) do
-                circleManager:create(
-                    circle.position.x,
-                    circle.position.y,
-                    circle.position.z,
-                    circle.radius,
-                    circle.polygons
-                )
+            local shops = private:getShops()
+            local cacheName = private:getPolygons()
+            for _, shop in ipairs(shops) do
+                cacheName = cacheName .. shop:getId()
             end
-            circleManager:booleanUnion()
-            local points = {}
-            for index, circle in ipairs(circleManager:getAll()) do
-                points[index] = {}
-                for _, point in ipairs(circle:getPoints()) do
-                    table.insert(points[index], private:getOmitPoint(point))
+            cacheName = _sh.helper:md5(cacheName)
+            local points = private.cache:get('points_'..cacheName)
+            if points == nil then
+                points = {}
+                local circleManager = _sh.dependencies.circleManager:new()
+                for _, circle in ipairs(private:getCircles(shops)) do
+                    circleManager:create(
+                        circle.position.x,
+                        circle.position.y,
+                        circle.position.z,
+                        circle.radius,
+                        circle.polygons
+                    )
                 end
+                circleManager:booleanUnion()
+                for index, circle in ipairs(circleManager:getAll()) do
+                    points[index] = {}
+                    for _, point in ipairs(circle:getPoints()) do
+                        table.insert(points[index], private:getOmitPoint(point))
+                    end
+                end
+                private.cache:add('points_'..cacheName, points, 60)
             end
             segments = public:getSegments(points)
             private.cache:add('segments', segments, 1)
         end
         private:drawSegments(segments)
-        if private.lowPoint ~= nil then
-            for _, shop in ipairs(_sh.shopManager:getAll()) do
-                if not shop:isCentral() then
-                    local distance = _sh.helper:distanceToPlayer2d(shop:getX(), shop:getY())
-                    if distance < 6 then
-                        private.lowPoint:setColor(private.colors.lowPoint.green)
-                        if distance < private.radius then
-                            private.lowPoint:setColor(private.colors.lowPoint.red)
-                        end
-                        private.lowPoint:render()
-                        break
-                    end
+        local shop = _sh.shopManager:getNearby()
+        if not shop:isCentral() then
+            local distance = _sh.helper:distanceToPlayer2d(shop:getX(), shop:getY())
+            if distance < 6 then
+                private.lowPoint:setColor(private:getColor('green'))
+                if distance <= private.radius then
+                    private.lowPoint:setColor(private:getColor('red'))
                 end
+                private.lowPoint:render()
             end
         end
     end
