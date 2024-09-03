@@ -1,64 +1,138 @@
 local class = {}
-function class:new()
+function class:new(_name, _defaultConfig)
     local public = {}
     local private = {
-        -- ['lowPoint'] = {
-        --     ['active'] = false,
-        --     ['distance'] = 6,
-        -- },
         ['radius'] = 5,
-        ['polygons'] = 32,
-        ['distance'] = 20,
-        -- ['intersections'] = false,
-        -- ['circles'] = {},
-        -- ['player'] = {
-        --     ['position'] = {
-        --         ['x'] = 0,
-        --         ['y'] = 0,
-        --         ['z'] = 0,
-        --     },
-        --     ['distance'] = nil,
-        -- },
-        ['color'] = {
-            ['circle'] = 'ffffff',
-            -- ['lowPoint'] = {
-            --     ['good'] = '00ff00',
-            --     ['bad'] = 'ff0000',
-            -- },
-            ['alpha'] = '0xff',
+        ['minmax'] = {
+            ['polygons'] = {
+                ['min'] = 24,
+                ['max'] = 48,
+            },
+            ['distance'] = {
+                ['min'] = 30,
+                ['max'] = 60,
+            },
         },
-        ['cache'] = _sh.dependencies.cache:new(1),
+        ['colors'] = {
+            ['lowPoint'] = {
+                ['green'] = '00ff00',
+                ['red'] = 'ff0000',
+            },
+        },
+        ['configManager'] = _sh.dependencies.configManager:new(_name, _sh.config),
+        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
+        ['cache'] = _sh.dependencies.cache:new(),
+        ['lowPoint'] = nil,
     }
 
-    function public:setRadius(radius)
-        private.radius = radius
+    -- ACTIVE
+
+    function private:isActive()
+        return private.configManager:getOption('active')
+    end
+
+    function public:toggleActive()
+        private.configManager:setOption('active', not private:isActive())
         return public
     end
 
-    function public:setPolygons(polygons)
-        private.polygons = polygons
+    -- MINMAX
+
+    function private:getMin(name)
+        return private.minmax[name].min
+    end
+
+    function private:getMax(name)
+        return private.minmax[name].max
+    end
+
+    -- POLYGONS
+
+    function private:getPolygons()
+        return private.configManager:getOption('polygons')
+    end
+
+    function private:setPolygons(polygons)
+        if polygons < private:getMin('polygons') then polygons = private:getMin('polygons') end
+        if polygons > private:getMax('polygons') then polygons = private:getMax('polygons') end
+        private.configManager:setOption('polygons', polygons)
         return public
     end
 
-    function public:setDistance(distance)
-        private.distance = distance
+    -- DISTANCE
+
+    function private:getDistance()
+        return private.configManager:getOption('distance')
+    end
+
+    function private:setDistance(distance)
+        if distance < private:getMin('distance') then distance = private:getMin('distance') end
+        if distance > private:getMax('distance') then distance = private:getMax('distance') end
+        private.configManager:setOption('distance', distance)
         return public
     end
+
+    -- COLOR
+
+    function private:getColor(name)
+        return private.configManager:getOption('colors')[name]
+    end
+
+    -- INITS
+
+    function private:init(defaultConfig)
+        for name, value in pairs(defaultConfig) do
+            if private.configManager:getOption(name) == nil then
+                private.configManager:setOption(name, value)
+            end
+        end
+        if _sh.dependencies.lowPoint ~= nil then
+            private.lowPoint = _sh.dependencies.lowPoint:new()
+        end
+        private:initThreads()
+        private:initCommands()
+    end
+
+    function private:initThreads()
+        lua_thread.create(function () while true do wait(0)
+            if private:isActive() then
+                private:work()
+            end
+        end end)
+    end
+
+    function private:initCommands()
+        private.commandManager:add('active', public.toggleActive)
+        private.commandManager:add('polygons', function (polygons)
+            polygons = _sh.helper:toInt(polygons)
+            if polygons ~= nil then
+                private:setPolygons(polygons)
+            end
+        end)
+        private.commandManager:add('distance', function (distance)
+            distance = _sh.helper:toInt(distance)
+            if distance ~= nil then
+                private:setDistance(distance)
+            end
+        end)
+    end
+
+    -- LOGICK
 
     function private:getCircles()
         local circles = {}
         for _, shop in ipairs(_sh.shopManager:getAll()) do
             if not shop:isCentral() then
                 local distance = _sh.helper:distanceToPlayer2d(shop:getX(), shop:getY())
-                if distance < private.distance then
+                if distance < private:getDistance() then
                     table.insert(circles, {
                         ['position'] = {
                             ['x'] = shop:getX(),
                             ['y'] = shop:getY(),
-                            ['z'] = shop:getZ(),
+                            ['z'] = shop:getZ() - 0.8,
                         },
                         ['radius'] = private.radius,
-                        ['polygons'] = private.polygons,
+                        ['polygons'] = private:getPolygons(),
                     })
                 end
             end
@@ -68,18 +142,13 @@ function class:new()
 
     function private:getOmitPoint(point)
         local newPoint = point
-        local trace = _sh.helper:trace(
-            point:getX(), point:getY(), point:getZ() + 1000,
-            point:getX(), point:getY(), point:getZ() - 1000
-        )
-        if trace.touch and trace.position ~= nil then
-            if math.abs(point:getZ() - trace.position.z) < 2 then
-                newPoint = _sh.dependencies.point:new(
-                    point:getX(),
-                    point:getY(),
-                    trace.position.z
-                )
-            end
+        local position = _sh.helper:omitPosition(point:getX(), point:getY(), point:getZ(), 5)
+        if math.abs(point:getZ() - position.z) < 2 then
+            newPoint = _sh.dependencies.point:new(
+                point:getX(),
+                point:getY(),
+                position.z
+            )
         end
         return newPoint
     end
@@ -89,7 +158,7 @@ function class:new()
         if circlesPoints ~= nil and #circlesPoints > 0 then
             for index, points in ipairs(circlesPoints) do
                 segments[index] = {}
-                local distancePoints = math.ceil(2 * private.radius * math.sin( math.rad( 360 / private.polygons / 2 ) ) * 100) / 100
+                local distancePoints = math.ceil(2 * private.radius * math.sin( math.rad( 360 / private:getPolygons() / 2 ) ) * 100) / 100
                 local previousPoint = nil
                 table.insert(points, points[1])
                 for _, point in ipairs(points) do
@@ -116,17 +185,27 @@ function class:new()
         for _, segments in ipairs(circleSegments) do
             if segments ~= nil and #segments > 0 then
                 for _, segment in ipairs(segments) do
-                    local _, aX, aY, aZ, _, _ = convert3DCoordsToScreenEx(segment[1]:getX(), segment[1]:getY(), segment[1]:getZ())
-                    local _, bX, bY, bZ, _, _ = convert3DCoordsToScreenEx(segment[2]:getX(), segment[2]:getY(), segment[2]:getZ())
+                    local pointA = segment[1]
+                    local pointB = segment[2]
+                    local distance = _sh.helper:distanceToPlayer3d(
+                        ( pointB:getX() + pointA:getX() ) / 2,
+                        ( pointB:getY() + pointA:getY() ) / 2,
+                        ( pointB:getZ() + pointA:getZ() ) / 2
+                    )
+                    local alpha = _sh.color:alpha( 1 - math.floor( distance * 100 / ( private:getDistance() - 10 ) ) / 100 )
+                    local _, aX, aY, aZ, _, _ = convert3DCoordsToScreenEx(pointA:getX(), pointA:getY(), pointA:getZ())
+                    local _, bX, bY, bZ, _, _ = convert3DCoordsToScreenEx(pointB:getX(), pointB:getY(), pointB:getZ())
                     if aZ > 0 and bZ > 0 then
-                        renderDrawLine(aX, aY, bX, bY, 1, _sh.color:alpha(100) .. private.color.circle)
+                        renderDrawLine(aX, aY, bX, bY, 1, alpha .. private:getColor('circle'))
                     end
                 end
             end
         end
     end
 
-    function public:work()
+    -- WORK
+
+    function private:work()
         local segments = private.cache:get('segments')
         if segments == nil then
             local circleManager = _sh.dependencies.circleManager:new()
@@ -151,8 +230,24 @@ function class:new()
             private.cache:add('segments', segments, 1)
         end
         private:drawSegments(segments)
+        if private.lowPoint ~= nil then
+            for _, shop in ipairs(_sh.shopManager:getAll()) do
+                if not shop:isCentral() then
+                    local distance = _sh.helper:distanceToPlayer2d(shop:getX(), shop:getY())
+                    if distance < 6 then
+                        private.lowPoint:setColor(private.colors.lowPoint.green)
+                        if distance < private.radius then
+                            private.lowPoint:setColor(private.colors.lowPoint.red)
+                        end
+                        private.lowPoint:render()
+                        break
+                    end
+                end
+            end
+        end
     end
 
+    private:init(_defaultConfig or {})
     return public
 end
 return class

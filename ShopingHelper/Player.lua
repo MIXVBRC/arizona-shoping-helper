@@ -2,30 +2,25 @@ local class = {}
 function class:new()
     local public = {}
     local private = {
-        ['cache'] = _sh.dependencies.cache:new(60),
+        ['cache'] = _sh.dependencies.cache:new(),
     }
 
     function public:getName()
         local name = private.cache:get('name')
         if name == nil then
             name = sampGetPlayerNickname(select(2, sampGetPlayerIdByCharHandle(playerPed)))
-            private.cache:add('name', name)
+            private.cache:add('name', name, 60)
         end
         return name
     end
 
     function public:getPosition()
-        local position = private.cache:get('position')
-        if position == nil then
-            local x, y, z = getCharCoordinates(playerPed)
-            position = {
-                ['x'] = x,
-                ['y'] = y,
-                ['z'] = z,
-            }
-            private.cache:add('position', position, 0.1)
-        end
-        return position
+        local x, y, z = getCharCoordinates(playerPed)
+        return {
+            ['x'] = x,
+            ['y'] = y,
+            ['z'] = z,
+        }
     end
 
     function public:getX()

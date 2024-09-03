@@ -65,14 +65,39 @@ function class:new()
             aX, aY, aZ,
             bX, bY, bZ
         )
-        return {
-            ['touch'] = touch,
-            ['position'] = {
+        local position = nil
+        if data ~= nil then
+            position = {
                 ['x'] = data.pos[1],
                 ['y'] = data.pos[2],
                 ['z'] = data.pos[3],
-            },
+            }
+        end
+        return {
+            ['touch'] = touch,
+            ['position'] = position,
         }
+    end
+
+    function public:omitPosition(_x, _y, _z, index)
+        index = index or 10
+        local position = {
+            ['x'] = _x,
+            ['y'] = _y,
+            ['z'] = _z,
+        }
+        local trace = public:trace(
+            position.x, position.y, position.z + index,
+            position.x, position.y, position.z - index
+        )
+        if trace.touch and trace.position ~= nil then
+            position = {
+                ['x'] = trace.position.x,
+                ['y'] = trace.position.y,
+                ['z'] = trace.position.z,
+            }
+        end
+        return position
     end
 
     function public:distanceToPlayer2d(_x, _y)
@@ -81,6 +106,25 @@ function class:new()
 
     function public:distanceToPlayer3d(_x, _y, _z)
         return getDistanceBetweenCoords3d(_sh.player:getX(), _sh.player:getY(), _sh.player:getZ(), _x, _y, _z)
+    end
+
+    function public:implode(separator, array)
+        local collect = ''
+        for _, value in ipairs(array) do
+            if collect == '' then
+                collect = value
+            else
+                collect = collect .. separator .. value
+            end
+        end
+        return collect
+    end
+
+    function public:toInt(string)
+        string = tostring(string);
+        string = string:match('%d+');
+        string = tonumber(string);
+        return string;
     end
 
     return public

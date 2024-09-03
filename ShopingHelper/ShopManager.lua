@@ -55,7 +55,7 @@ function class:new()
                     objectX, objectY, objectZ,
                     x, y, z
                 )
-                if distance < 2 then
+                if distance < 3 then
                     private.cache:add(cacheKeyShop, true)
                     return true
                 end

@@ -45,6 +45,18 @@ function class:new(_x, _y, _z, _radius, _polygons)
         return private.points
     end
 
+    function public:deletePoint(_point)
+        local new = {}
+        for _, point in ipairs(public:getPoints()) do
+            if _point:getId() ~= point:getId() then
+                table.insert(new, point)
+            end
+        end
+        private.points = new
+        private:sort()
+        return public
+    end
+
     function public:addPoint(x, y, z)
         table.insert(private.points, _sh.dependencies.point:new(
             x,

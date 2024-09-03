@@ -1,234 +1,267 @@
 local class = {}
-function class:new(_defaultConfig)
-
-    if _defaultConfig == nil then return nil end
-
+function class:new(_name, _defaultConfig)
     local public = {}
     local private = {
-        ['name'] = 'visit',
-        ['defaultConfig'] = _defaultConfig,
-        ['colors'] = {
-            ['white'] = 'ffffff',
-            ['black'] = '000000',
-            ['player'] = 'e06936',
-            ['sell'] = '36e03c',
-            ['buy'] = '3647e0',
-            ['sell_buy'] = '36e0e0',
-            ['edit'] = 'd2e036',
-            ['visit'] = 'e03636',
-            ['empty'] = 'cc36e0',
-        },
-        ['cache'] = _sh.dependencies.cache:new(1),
+        ['configManager'] = _sh.dependencies.configManager:new(_name, _sh.config),
+        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
+        ['cache'] = _sh.dependencies.cache:new(),
     }
 
-    function private:getName()
-        return private.name
-    end
-
-    function private:setOption(name, value)
-        _sh.config:set(private:getName(), name, value)
-    end
-
-    function private:getOption(name)
-        return _sh.config:get(private:getName(), name)
-    end
+    -- ACTIVE
 
     function private:isActive()
-        return private:getOption('active')
+        return private.configManager:getOption('active')
     end
 
     function public:toggleActive()
-        private:setOption('active', not private:isActive())
+        private.configManager:setOption('active', not private:isActive())
         return public
     end
 
-    function private:isEmpty()
-        return private:getOption('empty')
-    end
-
-    function public:toggleEmpty()
-        private:setOption('empty', not private:isEmpty())
-        return public
-    end
-
-    function private:isHiding()
-        return private:getOption('hiding')
-    end
-
-    function public:toggleHiding()
-        private:setOption('hiding', not public:isHiding())
-        return public
-    end
+    -- DISTANCE
 
     function private:getDistance()
-        return private:getOption('distance')
+        return private.configManager:getOption('distance')
     end
 
-    function public:setDistance(distance)
-        private:setOption('distance', distance)
+    function private:setDistance(distance)
+        private.configManager:setOption('distance', distance)
         return public
     end
+
+    -- TIME
 
     function private:getTime()
-        return private:getOption('time')
+        return private.configManager:getOption('time')
     end
 
-    function public:setTime(time)
-        private:setOption('time', time)
+    function private:setTime(time)
+        private.configManager:setOption('time', time)
         return public
     end
 
+    -- COLOR
+
     function private:getColor(name)
-        local color = private:getOption('color')
-        if color ~= nil then
-            return color[name]
-        end
-        return 'ffffff'
+        return private.configManager:getOption('colors')[name]
     end
 
-    function private:getVisited()
-        return private:getOption('visited') or {}
+    -- HIDINGS
+
+    function private:getHidings()
+        return private.configManager:getOption('hiding')
     end
 
-    function private:setVisited(visited)
-        return private:setOption('visited', visited)
+    function private:setHidings(hidings)
+        private.configManager:setOption('hiding', hidings)
+        return public
+    end
+
+    function private:getHiding(name)
+        return private:getHidings()[name]
+    end
+
+    function private:toggleHiding(name)
+        local hidings = private:getHidings()
+        hidings[name] = not hidings[name]
+        private:setHidings(hidings)
+        return public
+    end
+
+    -- VISITS
+
+    function private:getVisits()
+        return private.configManager:getOption('visits') or {}
+    end
+
+    function private:setVisits(visits)
+        return private.configManager:setOption('visits', visits)
+    end
+
+    function private:clearVisits()
+        return private:setVisits({})
     end
 
     function private:getVisit(id)
-        local visited = private:getVisited()
-        return private:getVisited()[id]
+        return private:getVisits()[id]
     end
 
     function private:addVisit(id, data)
-        local visited = private:getVisited()
-        visited[id] = data
-        private:setOption('visited', visited)
+        local visits = private:getVisits()
+        visits[id] = data
+        private:setVisits(visits)
         return public
     end
 
     function private:changeVisit(_id, _data)
-        local visited = private:getVisited()
-        for id, visit in pairs(private:getVisited()) do
+        local visits = private:getVisits()
+        for id, visit in pairs(private:getVisits()) do
             if _id == id then
                 for key, value in pairs(_data) do
                     visit[key] = value
                 end
             end
         end
-        private:setOption('visited', visited)
+        private:setVisits(visits)
         return public
     end
 
-    function private:init()
-        for name, value in pairs(private.defaultConfig) do
-            if private:getOption(name) == nil then
-                private:setOption(name, value)
+    -- INITS
+
+    function private:init(defaultConfig)
+        for name, value in pairs(defaultConfig) do
+            if private.configManager:getOption(name) == nil then
+                private.configManager:setOption(name, value)
             end
         end
         private:initThreads()
+        private:initCommands()
     end
 
     function private:initThreads()
-
         lua_thread.create(function () while true do wait(5000)
-            local visited = private:getVisited()
-            if visited ~= nil and #visited > 0 then
+            local visits = private:getVisits()
+            if visits ~= nil and #visits > 0 then
                 local time = os.time()
-                local newVisited = {}
-                for id, visit in pairs(visited) do
+                local new = {}
+                for id, visit in pairs(visits) do
                     if (time - visit.date) < 60 * 60 * 24 then
-                        newVisited[id] = visit
+                        new[id] = visit
                     end
                 end
-                private:setVisited(newVisited)
+                private:setVisited(new)
             end
         end end)
-
         lua_thread.create(function () while true do wait(0)
             if private:isActive() then
                 private:work()
             end
         end end)
-
     end
+
+    function private:initCommands()
+        private.commandManager:add('active', public.toggleActive)
+        private.commandManager:add('distance', function (distance)
+            distance = _sh.helper:toInt(distance)
+            if distance ~= nil then
+                private:setDistance(_sh.helper:toInt(distance))
+            end
+        end)
+        private.commandManager:add('time', function (time)
+            time = _sh.helper:toInt(time)
+            if time ~= nil then
+                private:setTime(_sh.helper:toInt(time))
+            end
+        end)
+        for hiding, _ in pairs(private:getHidings()) do
+            private.commandManager:add(_sh.helper:implode('-', {'hiding',hiding}), function ()
+                private:toggleHiding(hiding)
+            end)
+        end
+    end
+
+    -- WORK
 
     function private:work()
         local time = os.time()
         local shops = _sh.shopManager:getAll()
+        local colors = {
+            ['stick'] = private:getColor('stick'),
+            ['text'] = private:getColor('text'),
+        }
 
-        for _, shop in ipairs(shops) do
+        local renders = private.cache:get('renders')
+        if renders == nil then
+            renders = {}
+            for _, shop in ipairs(shops) do
 
-            local text = ''
-            local color = private:getColor('while')
-            local polygons = 4
-            local rotation = 0
+                local render = {
+                    ['text'] = '',
+                    ['color'] = private:getColor('while'),
+                    ['polygons'] = 4,
+                    ['rotation'] = 0,
+                    ['x'] = shop:getX(),
+                    ['y'] = shop:getY(),
+                    ['z'] = shop:getZ() + 0.16,
+                }
 
-            if _sh.player.name == shop:getPlayer() then
-                color = private:getColor('player')
-                polygons = 3
-                rotation = 180
-            else
-                if shop:getMod() == _sh.message:get('message_shop_sell') then -- visit_shop_mod_sell
-                    color = private:getColor('sell')
+                local shopTypes = {'player'}
+
+                if _sh.player:getName() == shop:getPlayer() then
+                    shopTypes = {'player'}
+                    render.color = private:getColor('player')
+                    render.polygons = 3
+                    render.rotation = 180
+                elseif shop:getMod() == _sh.message:get('message_shop_sell') then -- visit_shop_mod_sell
+                    shopTypes = {'sell'}
+                    render.color = private:getColor('sell')
                 elseif shop:getMod() == _sh.message:get('message_shop_buy') then
-                    color = private:getColor('buy')
+                    shopTypes = {'buy'}
+                    render.color = private:getColor('buy')
                 elseif shop:getMod() == _sh.message:get('message_shop_sell_buy') then
-                    color = private:getColor('sell_buy')
+                    shopTypes = {'sell','buy'}
+                    render.color = private:getColor('sell_buy')
                 elseif shop:getMod() == _sh.message:get('message_shop_edit') then
-                    color = private:getColor('edit')
+                    shopTypes = {'edit'}
+                    render.color = private:getColor('edit')
                 elseif shop:getMod() == _sh.message:get('message_shop_empty') then
-                    if private:isEmpty() then
-                        color = private:getColor('empty')
+                    shopTypes = {'empty'}
+                    render.color = private:getColor('empty')
+                end
+
+                local visit = private:getVisit(shop:getId())
+
+                if visit ~= nil and visit.time ~= nil then
+                    if time <= visit.time and (visit.mod == shop:getMod() or visit.mod == _sh.message:get('message_shop_edit')) then
+                        render.color = private:getColor('visit')
+                        shopTypes = {'visit'}
                     else
-                        goto continue
+                        visit.time = nil
+                        private:changeVisit(shop:getId(), {
+                            ['time'] = visit.time,
+                            ['mod'] = shop:getMod(),
+                        })
+                    end
+                    if visit.select then
+                        render.color = private:getColor('while')
+                        render.polygons = 3
+                        render.rotation = 180
+                        render.text = visit.text
+                    end
+                end
+
+                local show = false
+
+                for _, shopType in ipairs(shopTypes) do
+                    if private:getHiding(shopType) then
+                        show = true
+                    end
+                end
+
+                if show then
+                    table.insert(renders, render)
+                end
+            end
+            private.cache:add('renders', renders, 1)
+        end
+
+        if #renders > 0 then
+            for _, render in ipairs(renders) do
+                local distance = _sh.helper:distanceToPlayer3d(render.x, render.y, render.z)
+                local alpha = _sh.color:alpha(1 - math.floor(distance * 100 / private:getDistance()) / 100)
+                if isPointOnScreen(render.x, render.y, render.z, 0) and distance < private:getDistance() then
+                    local sceenX, sceenY = convert3DCoordsToScreen(render.x, render.y, render.z - 1)
+                    renderDrawLine(sceenX, sceenY, sceenX, sceenY - 90, 1, alpha .. colors.stick)
+                    renderDrawPolygon(sceenX, sceenY - 100, 20, 20, render.polygons, render.rotation, alpha .. render.color)
+                    if render.text ~= '' then
+                        renderFontDrawText(_sh.font:get('Arial', 12, 4), render.text, sceenX + 15, sceenY - 110, alpha .. colors.text)
                     end
                 end
             end
-
-            local visitShop = private:getVisit(shop:getId())
-
-            if visitShop ~= nil and visitShop.time ~= nil then
-
-                if time <= visitShop.time and (visitShop.mod == shop:getMod() or visitShop.mod == _sh.message:get('message_shop_edit')) then
-                    color = private:getColor('visit')
-                    if private:isHiding() then
-                        goto continue
-                    end
-                else
-                    visitShop.time = nil
-                    private:changeVisit(shop:getId(), {
-                        ['time'] = visitShop.time,
-                        ['mod'] = shop:getMod(),
-                    })
-                end
-
-                if visitShop.select then
-                    color = private:getColor('while')
-                    polygons = 3
-                    rotation = 180
-                end
-
-                if visitShop.select then
-                    text = visitShop.text
-                elseif visitShop.time ~= nil then
-                    text = math.ceil((visitShop.time - time) / 60) .. ' min'
-                end
-
-            end
-
-            local distance = _sh.helper:distanceToPlayer3d(shop:getX(), shop:getY(), shop:getZ())
-            local alpha = _sh.color:alpha(1 - math.floor(distance * 100 / private:getDistance()) / 100)
-
-            if isPointOnScreen(shop:getX(), shop:getY(), shop:getZ(), 0) and distance < private:getDistance() then
-                local sceenX, sceenY = convert3DCoordsToScreen(shop:getX(), shop:getY(), shop:getZ() - 1)
-                renderDrawLine(sceenX, sceenY, sceenX, sceenY - 90, 1, alpha .. 'ffffff')
-                renderDrawPolygon(sceenX, sceenY - 100, 20, 20, polygons, rotation, alpha .. color)
-                renderFontDrawText(_sh.font:get('Arial', 12, 4), text, sceenX + 15, sceenY - 100, alpha .. 'ffffff', alpha .. '000000')
-            end
-
-            ::continue::
         end
     end
+
+    -- EVENTS
 
     _sh.customEvents:add('onVisitShop', function (shop, mod, textdrawId)
         local time = os.time() + 60 * private:getTime()
@@ -248,13 +281,14 @@ function class:new(_defaultConfig)
                     ['date'] = os.time(),
                     ['time'] = time,
                     ['mod'] = shop:getMod(),
+                    ['select'] = false,
+                    ['text'] = '',
                 }
             )
         end
     end)
 
-    private:init()
-
+    private:init(_defaultConfig or {})
     return public
 end
 return class

@@ -47,7 +47,7 @@ function class:new()
                             point:getX(), point:getY(),
                             intersectingCircle:getX(), intersectingCircle:getY()
                         )
-                        if distance - intersectingCircle:getRadius() < -0.0001 then
+                        if distance - intersectingCircle:getRadius() < -0.01 then
                             circle:deletePoint(point)
                         end
                     end

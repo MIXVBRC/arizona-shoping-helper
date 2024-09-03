@@ -1,8 +1,8 @@
 local class = {}
-function class:new(_time)
+function class:new()
     local public = {}
     local private = {
-        ['time'] = _time or (60 * 60 * 24),
+        ['time'] = (60 * 60 * 24),
         ['cache'] = {},
     }
 
