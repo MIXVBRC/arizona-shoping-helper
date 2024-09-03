@@ -2,7 +2,7 @@ local class = {}
 function class:new(_x, _y, _z, _radius, _polygons)
     local public = {}
     local private = {
-        ['id'] = 'x' .. (_x or 0) .. 'y' .. (_y or 0) .. 'z' .. (_z or 0),
+        ['id'] = _sh.helper:md5((_x or 0)..(_y or 0)..(_z or 0)..(_radius or 5)..(_polygons or 32)),
         ['position'] = {
             ['x'] = _x or 0,
             ['y'] = _y or 0,
@@ -10,11 +10,7 @@ function class:new(_x, _y, _z, _radius, _polygons)
         },
         ['radius'] = _radius or 5,
         ['polygons'] = _polygons or 32,
-        ['intersections'] = {},
         ['points'] = {},
-        ['segments'] = {},
-        ['recalculate'] = true,
-        ['distance'] = nil,
     }
 
     function public:getId()
@@ -43,15 +39,6 @@ function class:new(_x, _y, _z, _radius, _polygons)
 
     function public:getPolygons()
         return private.polygons
-    end
-
-    function public:setRecalculate(bool)
-        private.recalculate = bool
-        return public
-    end
-
-    function public:isRecalculate()
-        return private.recalculate
     end
 
     function public:getPoints()

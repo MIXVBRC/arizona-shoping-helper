@@ -36,6 +36,15 @@ function class:new()
         return public:getByNum(r) .. public:getByNum(g) .. public:getByNum(b);
     end;
 
+    function public:alpha(num)
+        if num > 100 then
+            num = 100
+        elseif num < 0 then
+            num = 0
+        end
+        return '0x' .. _sh.color:getByNum(num)
+    end
+
     return public
 end
 return class

@@ -3,7 +3,6 @@ function class:new()
     local public = {}
     local private = {
         ['circles'] = {},
-        ['cache'] = _sh.dependencies.cache:new(),
     }
 
     function public:getAll()
@@ -17,7 +16,6 @@ function class:new()
 
     function public:create(x, y, z, radius, polygons)
         table.insert(private.circles, _sh.dependencies.circle:new(x, y, z, radius, polygons))
-        private.cache:clear()
         return public
     end
 
@@ -49,7 +47,7 @@ function class:new()
                             point:getX(), point:getY(),
                             intersectingCircle:getX(), intersectingCircle:getY()
                         )
-                        if distance - intersectingCircle:getRadius() < -0.1 then -- maybee need -0.0001
+                        if distance - intersectingCircle:getRadius() < -0.0001 then
                             circle:deletePoint(point)
                         end
                     end

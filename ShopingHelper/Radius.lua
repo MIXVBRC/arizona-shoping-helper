@@ -21,10 +21,10 @@ function class:new()
         -- },
         ['color'] = {
             ['circle'] = 'ffffff',
-            ['lowPoint'] = {
-                ['good'] = '00ff00',
-                ['bad'] = 'ff0000',
-            },
+            -- ['lowPoint'] = {
+            --     ['good'] = '00ff00',
+            --     ['bad'] = 'ff0000',
+            -- },
             ['alpha'] = '0xff',
         },
         ['cache'] = _sh.dependencies.cache:new(1),
@@ -49,10 +49,7 @@ function class:new()
         local circles = {}
         for _, shop in ipairs(_sh.shopManager:getAll()) do
             if not shop:isCentral() then
-                local distance = getDistanceBetweenCoords2d(
-                    _sh.player:getX(), _sh.player:getY(),
-                    shop:getX(), shop:getY()
-                )
+                local distance = _sh.helper:distanceToPlayer2d(shop:getX(), shop:getY())
                 if distance < private.distance then
                     table.insert(circles, {
                         ['position'] = {
@@ -122,7 +119,7 @@ function class:new()
                     local _, aX, aY, aZ, _, _ = convert3DCoordsToScreenEx(segment[1]:getX(), segment[1]:getY(), segment[1]:getZ())
                     local _, bX, bY, bZ, _, _ = convert3DCoordsToScreenEx(segment[2]:getX(), segment[2]:getY(), segment[2]:getZ())
                     if aZ > 0 and bZ > 0 then
-                        renderDrawLine(aX, aY, bX, bY, 1, private.color.alpha .. private.color.circle)
+                        renderDrawLine(aX, aY, bX, bY, 1, _sh.color:alpha(100) .. private.color.circle)
                     end
                 end
             end

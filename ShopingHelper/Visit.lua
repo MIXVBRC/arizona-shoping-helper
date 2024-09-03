@@ -1,17 +1,21 @@
 local class = {}
-function class:new()
+function class:new(_defaultConfig)
+
+    if _defaultConfig == nil then return nil end
+
     local public = {}
     local private = {
         ['name'] = 'visit',
+        ['defaultConfig'] = _defaultConfig,
         ['colors'] = {
             ['white'] = 'ffffff',
-            ['black'] = 'ffffff',
+            ['black'] = '000000',
             ['player'] = 'e06936',
             ['sell'] = '36e03c',
             ['buy'] = '3647e0',
             ['sell_buy'] = '36e0e0',
             ['edit'] = 'd2e036',
-            ['visit'] = 'cc36e0',
+            ['visit'] = 'e03636',
             ['empty'] = 'cc36e0',
         },
         ['cache'] = _sh.dependencies.cache:new(1),
@@ -19,10 +23,6 @@ function class:new()
 
     function private:getName()
         return private.name
-    end
-
-    function private:getColor(name)
-        return private.colors[name]
     end
 
     function private:setOption(name, value)
@@ -78,32 +78,54 @@ function class:new()
         return public
     end
 
+    function private:getColor(name)
+        local color = private:getOption('color')
+        if color ~= nil then
+            return color[name]
+        end
+        return 'ffffff'
+    end
+
     function private:getVisited()
-        return private:getOption('visited')
+        return private:getOption('visited') or {}
     end
 
     function private:setVisited(visited)
         return private:setOption('visited', visited)
     end
 
-    function private:getVisitByCode(code)
-        return private:getVisited()[code]
+    function private:getVisit(id)
+        local visited = private:getVisited()
+        return private:getVisited()[id]
     end
 
-    function private:addVisit(code, data)
+    function private:addVisit(id, data)
         local visited = private:getVisited()
-        visited[code] = data
+        visited[id] = data
         private:setOption('visited', visited)
         return public
     end
 
-    function private:changeVisit(code, data)
-        local visit = private:getVisitByCode(code)
-        for key, value in pairs(data) do
-            visit[code][key] = value
+    function private:changeVisit(_id, _data)
+        local visited = private:getVisited()
+        for id, visit in pairs(private:getVisited()) do
+            if _id == id then
+                for key, value in pairs(_data) do
+                    visit[key] = value
+                end
+            end
         end
-        private:setOption('visited', visit)
+        private:setOption('visited', visited)
         return public
+    end
+
+    function private:init()
+        for name, value in pairs(private.defaultConfig) do
+            if private:getOption(name) == nil then
+                private:setOption(name, value)
+            end
+        end
+        private:initThreads()
     end
 
     function private:initThreads()
@@ -113,9 +135,9 @@ function class:new()
             if visited ~= nil and #visited > 0 then
                 local time = os.time()
                 local newVisited = {}
-                for code, shop in pairs(visited) do
-                    if (time - shop.date) < 60 * 60 * 24 then
-                        newVisited[code] = shop
+                for id, visit in pairs(visited) do
+                    if (time - visit.date) < 60 * 60 * 24 then
+                        newVisited[id] = visit
                     end
                 end
                 private:setVisited(newVisited)
@@ -130,165 +152,31 @@ function class:new()
 
     end
 
-    -- function private:getTiketsAndShops()
-    --     local result = private.cache:get('tikets_shops')
-    --     if result == nil then
-    --         for textId = 0, 2048 do
-    --             if sampIs3dTextDefined(textId) then
-    --                 local text, _, posX, posY, posZ, _, _, _, _ = sampGet3dTextInfoById(textId)
-    --                 if text == _sh.message:get('message_shop') then
-    --                     table.insert(result.tikets, {
-    --                         ['text'] = text,
-    --                         ['position'] = {
-    --                             ['x'] = posX,
-    --                             ['y'] = posY,
-    --                             ['z'] = posZ,
-    --                         },
-    --                     })
-    --                 elseif text:find('^%a+_%a+%s{......}.+{......}.+$') then
-    --                     table.insert(result.shops, {
-    --                         ['text'] = text,
-    --                         ['position'] = {
-    --                             ['x'] = posX,
-    --                             ['y'] = posY,
-    --                             ['z'] = posZ,
-    --                         },
-    --                     })
-    --                 end
-    --             end
-    --         end
-    --         private.cache:add('tikets_shops', result)
-    --     end
-    --     return result
-    -- end
-
-    -- function private:getNearby()
-    --     local nearby = {}
-    --     local result = private:getTiketsAndShops()
-    --     local distance = nil
-    --     local playerX, playerY, playerZ = getCharCoordinates(playerPed)
-
-    --     for _, tiket in ipairs(result.tikets) do
-    --         local newDistance = getDistanceBetweenCoords3d(
-    --             playerX, playerY, playerZ,
-    --             tiket.position.x, tiket.position.y, tiket.position.z
-    --         )
-    --         if distance == nil or newDistance < distance then
-    --             distance = newDistance
-    --             nearby = {
-    --                 ['position'] = {
-    --                     ['x'] = tiket.position.x,
-    --                     ['y'] = tiket.position.y,
-    --                     ['z'] = tiket.position.z,
-    --                 },
-    --             }
-    --         end
-    --     end
-
-    --     distance = nil
-    --     local shopInfo = {}
-    --     for _, cacheShop in ipairs(result.shop) do
-    --         local newDistance = getDistanceBetweenCoords3d(
-    --             result.position.x, result.position.y, result.position.z,
-    --             cacheShop.position.x, cacheShop.position.y, cacheShop.position.z
-    --         )
-    --         if newDistance < 3 and (distance == nil or newDistance < distance) then
-    --             distance = newDistance
-    --             shopInfo = cacheShop
-    --         end
-    --     end
-
-    --     if shopInfo.text ~= nil then
-    --         nearby = {
-    --             ['text'] = shopInfo.text,
-    --             ['player'] = shopInfo.text:match('^(.+)%s{......}.+{......}.+$'),
-    --             ['mod'] = shopInfo.text:match('^.+{......}(.+){......}.+$'),
-    --             ['position'] = shopInfo.position,
-    --         }
-    --     else
-    --         nearby = {
-    --             ['text'] = 'none',
-    --             ['player'] = 'none',
-    --             ['mod'] = _sh.message:get('message_shop_empty'),
-    --             ['position'] = nearby.position,
-    --         }
-    --     end
-
-    --     nearby.position = _sh.helper:normalizePosition(nearby.position.x, nearby.position.y, nearby.position.z)
-    --     nearby.code = _sh.helper:md5(nearby.player .. nearby.position.x .. nearby.position.y .. nearby.position.z)
-
-    --     return nearby
-    -- end
-
     function private:work()
         local time = os.time()
-        local data = _sh.shop:getTiketsAndShops()
+        local shops = _sh.shopManager:getAll()
 
-        for _, tiket in ipairs(data.tikets) do
+        for _, shop in ipairs(shops) do
 
             local text = ''
             local color = private:getColor('while')
             local polygons = 4
             local rotation = 0
-            local distance = getDistanceBetweenCoords3d(
-                _sh.player:getX(), _sh.player:getY(), _sh.player:getZ(),
-                tiket.position.x, tiket.position.y, tiket.position.z
-            )
-            local x, y = convert3DCoordsToScreen(tiket.position.x, tiket.position.y, tiket.position.z - 1)
-            local alpha = '0x' .. _sh.color:getByNum(1 - math.floor(distance * 100 / private.distance) / 100)
 
-            local shopInfo = {}
-            local shopDistance = nil
-
-            for _, shop in ipairs(data.shops) do
-                local newDistance = getDistanceBetweenCoords3d(
-                    tiket.position.x, tiket.position.y, tiket.position.z,
-                    shop.position.x, shop.position.y, shop.position.z
-                )
-                if newDistance < 3 and (shopDistance == nil or newDistance < shopDistance) then
-                    shopDistance = newDistance
-                    shopInfo = shop
-                end
-            end
-
-            if shopInfo.text ~= nil then
-                shopInfo = {
-                    ['text'] = shopInfo.text,
-                    ['player'] = shopInfo.text:match('^(.+)%s{......}.+{......}.+$'),
-                    ['mod'] = shopInfo.text:match('^.+{......}(.+){......}.+$'),
-                    ['position'] = {
-                        ['x'] = shopInfo.position.x,
-                        ['y'] = shopInfo.position.y,
-                        ['z'] = shopInfo.position.z,
-                    },
-                }
-            else
-                shopInfo = {
-                    ['text'] = 'none',
-                    ['player'] = 'none',
-                    ['mod'] = _sh.message:get('message_shop_empty'),
-                    ['position'] = {
-                        ['x'] = tiket.position.x,
-                        ['y'] = tiket.position.y,
-                        ['z'] = tiket.position.z,
-                    },
-                }
-            end
-
-            if _sh.player.name == shopInfo.player then
+            if _sh.player.name == shop:getPlayer() then
                 color = private:getColor('player')
                 polygons = 3
                 rotation = 180
             else
-                if shopInfo.mod == _sh.message:get('message_shop_sell') then
+                if shop:getMod() == _sh.message:get('message_shop_sell') then -- visit_shop_mod_sell
                     color = private:getColor('sell')
-                elseif shopInfo.mod == _sh.message:get('message_shop_buy') then
+                elseif shop:getMod() == _sh.message:get('message_shop_buy') then
                     color = private:getColor('buy')
-                elseif shopInfo.mod == _sh.message:get('message_shop_sell_buy') then
+                elseif shop:getMod() == _sh.message:get('message_shop_sell_buy') then
                     color = private:getColor('sell_buy')
-                elseif shopInfo.mod == _sh.message:get('message_shop_edit') then
+                elseif shop:getMod() == _sh.message:get('message_shop_edit') then
                     color = private:getColor('edit')
-                elseif shopInfo.mod == _sh.message:get('message_shop_empty') then
+                elseif shop:getMod() == _sh.message:get('message_shop_empty') then
                     if private:isEmpty() then
                         color = private:getColor('empty')
                     else
@@ -297,22 +185,20 @@ function class:new()
                 end
             end
 
-            shopInfo.position = _sh.helper:normalizePosition(shopInfo.position.x, shopInfo.position.y, shopInfo.position.z)
-            local shopCode = _sh.helper:md5(shopInfo.player .. shopInfo.position.x .. shopInfo.position.y .. shopInfo.position.z)
-            local visitShop = private:getVisitByCode(shopCode)
+            local visitShop = private:getVisit(shop:getId())
 
             if visitShop ~= nil and visitShop.time ~= nil then
 
-                if time <= visitShop.time and (visitShop.mod == shopInfo.mod or visitShop.mod == _sh.message:get('message_shop_edit')) then
+                if time <= visitShop.time and (visitShop.mod == shop:getMod() or visitShop.mod == _sh.message:get('message_shop_edit')) then
                     color = private:getColor('visit')
-                    if private:isHiding() and not visitShop.select then
+                    if private:isHiding() then
                         goto continue
                     end
                 else
                     visitShop.time = nil
-                    private:changeVisit(shopCode, {
+                    private:changeVisit(shop:getId(), {
                         ['time'] = visitShop.time,
-                        ['mod'] = shopInfo.mod,
+                        ['mod'] = shop:getMod(),
                     })
                 end
 
@@ -330,39 +216,45 @@ function class:new()
 
             end
 
-            if isPointOnScreen(tiket.position.x, tiket.position.y, tiket.position.z, 0) and distance < private:getDistance() and not shopInfo.status then
-                renderDrawLine(x, y, x, y - 90, 1, alpha .. 'ffffff')
-                renderDrawPolygon(x, y - 100, 20, 20, polygons, rotation, alpha .. color)
-                renderFontDrawText(fonts.time, text, x + 15, y - 100, alpha .. 'ffffff', alpha .. '000000')
+            local distance = _sh.helper:distanceToPlayer3d(shop:getX(), shop:getY(), shop:getZ())
+            local alpha = _sh.color:alpha(1 - math.floor(distance * 100 / private:getDistance()) / 100)
+
+            if isPointOnScreen(shop:getX(), shop:getY(), shop:getZ(), 0) and distance < private:getDistance() then
+                local sceenX, sceenY = convert3DCoordsToScreen(shop:getX(), shop:getY(), shop:getZ() - 1)
+                renderDrawLine(sceenX, sceenY, sceenX, sceenY - 90, 1, alpha .. 'ffffff')
+                renderDrawPolygon(sceenX, sceenY - 100, 20, 20, polygons, rotation, alpha .. color)
+                renderFontDrawText(_sh.font:get('Arial', 12, 4), text, sceenX + 15, sceenY - 100, alpha .. 'ffffff', alpha .. '000000')
             end
 
             ::continue::
-
         end
     end
 
-    function _sh.events.onTextDrawSetString(textdrawId, text)
-        local shop = private:getNearbyShop()
-
+    _sh.customEvents:add('onVisitShop', function (shop, mod, textdrawId)
         local time = os.time() + 60 * private:getTime()
-
-        if private:getVisitByCode(shop.code) ~= nil then
-            private:changeVisit(shop.code, {
-                ['time'] = time,
-            })
+        if private:getVisit(shop:getId()) ~= nil then
+            private:changeVisit(
+                shop:getId(),
+                {
+                    ['date'] = os.time(),
+                    ['time'] = time,
+                    ['mod'] = shop:getMod(),
+                }
+            )
         else
-            private:addVisit({
-                ['code'] = shop.code,
-                ['time'] = time,
-                ['select'] = false,
-                ['mod'] = shop.mod,
-                ['text'] = '',
-                ['date'] = os.time()
-            })
+            private:addVisit(
+                shop:getId(),
+                {
+                    ['date'] = os.time(),
+                    ['time'] = time,
+                    ['mod'] = shop:getMod(),
+                }
+            )
         end
-    end
+    end)
 
-    private:initThreads()
+    private:init()
+
     return public
 end
 return class

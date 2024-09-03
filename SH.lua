@@ -1,6 +1,9 @@
 _sh = {
     ['dependencies'] = {},
 }
+function message(mess)
+    sampAddChatMessage(mess, -1)
+end
 local this = {}
 local dependencies = {
     {
@@ -76,6 +79,12 @@ local dependencies = {
         ['args'] = {},
     },
     {
+        ['name'] = 'font',
+        ['entity'] = 'ShopingHelper.Font',
+        ['init'] = true,
+        ['args'] = {},
+    },
+    {
         ['name'] = 'helper',
         ['entity'] = 'ShopingHelper.Helper',
         ['init'] = true,
@@ -86,7 +95,7 @@ local dependencies = {
         ['entity'] = 'ShopingHelper.Config',
         ['init'] = true,
         ['args'] = {
-            'ShopingHelper',
+            'ShopingHelper_base',
             {},
         },
     },
@@ -113,6 +122,29 @@ local dependencies = {
         ['entity'] = 'ShopingHelper.Radius',
         ['init'] = true,
         ['args'] = {},
+    },
+    {
+        ['name'] = 'visit',
+        ['entity'] = 'ShopingHelper.Visit',
+        ['init'] = true,
+        ['args'] = {
+            {
+                ['active'] = true,
+                ['empty'] = true,
+                ['hiding'] = false,
+                ['distance'] = 50,
+                ['time'] = 200,
+                ['colors'] = {
+                    ['player'] = 'e06936',
+                    ['sell'] = '36e03c',
+                    ['buy'] = '3647e0',
+                    ['sell_buy'] = '36e0e0',
+                    ['edit'] = 'd2e036',
+                    ['visit'] = 'e03636',
+                    ['empty'] = 'cc36e0',
+                },
+            }
+        },
     },
 }
 

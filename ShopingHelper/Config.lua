@@ -42,33 +42,31 @@ function class:new(_name, _default)
         end
     end
 
-    function private:disassemble(data)
-        private.data = {}
-        for title, values in pairs(data) do
+    function private:disassemble()
+        for title, values in pairs(private.data) do
             if title ~= 'json' then
-                private[title] = {}
+                private.data[title] = {}
                 for name, value in pairs(values) do
-                    private[title][name] = value
+                    private.data[title][name] = value
                     if value == 'json' then
-                        private[title][name] = _sh.json.encode(data.json[private:getJsonName(title, name)])
+                        private.data[title][name] = _sh.json.decode(private.data.json[private:getJsonName(title, name)])
                     end
                 end
             end
         end
-        private.data = data
     end
 
     function private:load()
         private:collect()
-        local data = _sh.ini.load(private.data, private:getName())
-        private:disassemble(data)
+        private.data = _sh.ini.load(private.data, private:getName())
+        private:disassemble()
         return public
     end
 
     function private:save()
         private:collect()
         _sh.ini.save(private.data, private:getName())
-        private:disassemble(private.data)
+        private:disassemble()
         return public
     end
 

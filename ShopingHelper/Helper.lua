@@ -1,7 +1,6 @@
 local class = {}
 function class:new()
     local public = {}
-    local private = {}
 
     function public:normalize(num, index)
         index = index or 1000
@@ -74,6 +73,14 @@ function class:new()
                 ['z'] = data.pos[3],
             },
         }
+    end
+
+    function public:distanceToPlayer2d(_x, _y)
+        return getDistanceBetweenCoords2d(_sh.player:getX(), _sh.player:getY(), _x, _y)
+    end
+
+    function public:distanceToPlayer3d(_x, _y, _z)
+        return getDistanceBetweenCoords3d(_sh.player:getX(), _sh.player:getY(), _sh.player:getZ(), _x, _y, _z)
     end
 
     return public

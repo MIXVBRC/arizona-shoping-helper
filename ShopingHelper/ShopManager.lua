@@ -3,7 +3,6 @@ function class:new()
     local public = {}
     local private = {
         ['shops'] = {},
-        ['visit'] = nil,
         ['mods'] = {
             [_sh.message:get('sale_mod_sale')] = 'sale',
             [_sh.message:get('sale_mod_buy')] = 'buy',
@@ -31,24 +30,12 @@ function class:new()
         return private.shops
     end
 
-    function public:getVisit()
-        return public:getById(private.visit)
-    end
-
-    function private:setVisit(id)
-        private.visit = id
-        return public
-    end
-
     function public:getNearby()
         local result = nil
         local minDistance = nil
         if private.shops ~= nil then
             for _, shop in ipairs(private.shops) do
-                local distance = getDistanceBetweenCoords3d(
-                    shop.position.x, shop.position.y, shop.position.z,
-                    _sh.player:getX(), _sh.player:getY(), _sh.player:getZ()
-                )
+                local distance = _sh.helper:distanceToPlayer3d(shop:getX(), shop:getY(), shop:getZ())
                 if minDistance == nil or distance < minDistance then
                     minDistance = distance
                     result = shop
@@ -132,10 +119,10 @@ function class:new()
                     end
                     shop.position = _sh.helper:normalizePosition(shop.position.x, shop.position.y, shop.position.z)
                     shop.central = private:isCentral(shop.position.x, shop.position.y, shop.position.z)
-                    shop.id = _sh.helper:md5(shop.player .. shop.position.x .. shop.position.y .. shop.position.z)
                     table.insert(private.shops, _sh.dependencies.shop:new(
-                        shop.id,
-                        shop.position,
+                        shop.position.x,
+                        shop.position.y,
+                        shop.position.z,
                         shop.player,
                         shop.mod,
                         shop.empty,
@@ -150,9 +137,10 @@ function class:new()
     function _sh.events.onTextDrawSetString(textdrawId, text)
         local mod = private.mods[text]
         if mod ~= nil then
-            local shop = private:getNearby()
-            private:setVisit(shop.id)
-            _sh.customEvents:trigger('onVisitShop', shop, mod, textdrawId)
+            local shop = public:getNearby()
+            if shop ~= nil then
+                _sh.customEvents:trigger('onVisitShop', shop, mod, textdrawId)
+            end
         end
     end
 
