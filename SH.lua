@@ -127,6 +127,13 @@ local this = {
             ['args'] = {},
         },
         {
+            ['name'] = 'textdraw',
+            ['entity'] = 'dependencies.Textdraw',
+            ['dependencies'] = {},
+            ['init'] = false,
+            ['args'] = {},
+        },
+        {
             ['name'] = 'textdrawManager',
             ['entity'] = 'dependencies.TextdrawManager',
             ['dependencies'] = {},

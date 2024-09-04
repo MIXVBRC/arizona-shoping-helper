@@ -1,26 +1,52 @@
 local class = {}
-function class:new(_name, _defaultConfig)
+function class:new(_id, _model, _text, _color, _position)
     local public = {}
     local private = {
-        ['configManager'] = _sh.dependencies.configManager:new(_name, _sh.config),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
+        ['id'] = _id,
+        ['model'] = _model,
+        ['text'] = _text,
+        ['color'] = _color,
+        ['position'] = _position,
+        ['time'] = os.clock(),
     }
 
-    function private:init(defaultConfig)
-        for name, value in pairs(defaultConfig) do
-            if private.configManager:getOption(name) == nil then
-                private.configManager:setOption(name, value)
-            end
-        end
-
-        private:initCommands()
+    function public:getId()
+        return private.id
     end
 
-    function private:initCommands()
-        
+    function public:getModel()
+        return private.model
     end
 
-    private:init(_defaultConfig or {})
+    function public:getText()
+        return private.text
+    end
+
+    function public:getColor()
+        return private.color
+    end
+
+    function public:getPosition()
+        return private.position
+    end
+
+    function public:getX()
+        return public:getPosition().x
+    end
+
+    function public:getY()
+        return public:getPosition().y
+    end
+
+    function public:getTime()
+        return private.time
+    end
+
+    function public:setText(text)
+        private.text = text
+        return public
+    end
+
     return public
 end
 return class

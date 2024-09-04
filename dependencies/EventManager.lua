@@ -22,6 +22,9 @@ function class:new()
     end
 
     function private:init()
+        function _sh.dependencies.events.onShowTextDraw(...)
+            public:trigger('onShowTextDraw', ...)
+        end
         function _sh.dependencies.events.onTextDrawSetString(...)
             public:trigger('onTextDrawSetString', ...)
         end

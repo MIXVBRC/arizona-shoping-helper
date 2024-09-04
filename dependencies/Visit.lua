@@ -335,13 +335,11 @@ function class:new(_name, _defaultConfig)
     function private:initEvents()
         _sh.eventManager:add('onVisitShop', function (shop)
             private:setLastVisitId(shop:getId())
-            local date = os.time()
-            local time = date + ( private:getTime() * 60 )
+            local time = os.time() + ( private:getTime() * 60 )
             if private:getVisit(shop:getId()) ~= nil then
                 private:changeVisit(
                     shop:getId(),
                     {
-                        ['date'] = date,
                         ['time'] = time,
                         ['mod'] = shop:getMod(),
                     }
@@ -350,7 +348,6 @@ function class:new(_name, _defaultConfig)
                 private:addVisit(
                     shop:getId(),
                     {
-                        ['date'] = date,
                         ['time'] = time,
                         ['mod'] = shop:getMod(),
                         ['select'] = false,
