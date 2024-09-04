@@ -93,6 +93,14 @@ local this = {
             ['args'] = {},
         },
         {
+            ['name'] = 'minMax',
+            ['entity'] = 'dependencies.MinMax',
+            ['dependencies'] = {},
+            ['init'] = false,
+            ['base'] = false,
+            ['args'] = {},
+        },
+        {
             ['name'] = 'configManager',
             ['entity'] = 'dependencies.ConfigManager',
             ['dependencies'] = {},

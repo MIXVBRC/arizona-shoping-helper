@@ -2,10 +2,20 @@ local class = {}
 function class:new(_name, _defaultConfig)
     local public = {}
     local private = {
+        ['lastShopId'] = nil,
+        ['minmax'] = _sh.minMax:new({
+            ['distance'] = {
+                ['min'] = 30,
+                ['max'] = 60,
+            },
+            ['time'] = {
+                ['min'] = 1,
+                ['max'] = 1440,
+            },
+        }),
         ['configManager'] = _sh.dependencies.configManager:new(_name, _sh.config),
         ['commandManager'] = _sh.dependencies.commandManager:new(_name),
         ['cache'] = _sh.dependencies.cache:new(),
-        ['lastShopId'] = nil,
     }
 
     -- ACTIVE
@@ -26,7 +36,7 @@ function class:new(_name, _defaultConfig)
     end
 
     function private:setDistance(distance)
-        private.configManager:setOption('distance', distance)
+        private.configManager:setOption('distance', private.minmax:get(distance, 'distance'))
         return public
     end
 
@@ -37,7 +47,7 @@ function class:new(_name, _defaultConfig)
     end
 
     function private:setTime(time)
-        private.configManager:setOption('time', time)
+        private.configManager:setOption('time', private.minmax:get(time, 'time'))
         return public
     end
 

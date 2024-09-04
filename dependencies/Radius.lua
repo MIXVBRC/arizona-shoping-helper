@@ -3,7 +3,7 @@ function class:new(_name, _defaultConfig)
     local public = {}
     local private = {
         ['radius'] = 5,
-        ['minmax'] = {
+        ['minmax'] = _sh.minMax:new({
             ['polygons'] = {
                 ['min'] = 24,
                 ['max'] = 48,
@@ -12,7 +12,7 @@ function class:new(_name, _defaultConfig)
                 ['min'] = 30,
                 ['max'] = 60,
             },
-        },
+        }),
         ['configManager'] = _sh.dependencies.configManager:new(_name, _sh.config),
         ['commandManager'] = _sh.dependencies.commandManager:new(_name),
         ['cache'] = _sh.dependencies.cache:new(),
@@ -30,16 +30,6 @@ function class:new(_name, _defaultConfig)
         return public
     end
 
-    -- MINMAX
-
-    function private:getMin(name)
-        return private.minmax[name].min
-    end
-
-    function private:getMax(name)
-        return private.minmax[name].max
-    end
-
     -- POLYGONS
 
     function private:getPolygons()
@@ -47,9 +37,7 @@ function class:new(_name, _defaultConfig)
     end
 
     function private:setPolygons(polygons)
-        if polygons < private:getMin('polygons') then polygons = private:getMin('polygons') end
-        if polygons > private:getMax('polygons') then polygons = private:getMax('polygons') end
-        private.configManager:setOption('polygons', polygons)
+        private.configManager:setOption('polygons', private.minmax:get(polygons, 'polygons'))
         return public
     end
 
@@ -60,9 +48,7 @@ function class:new(_name, _defaultConfig)
     end
 
     function private:setDistance(distance)
-        if distance < private:getMin('distance') then distance = private:getMin('distance') end
-        if distance > private:getMax('distance') then distance = private:getMax('distance') end
-        private.configManager:setOption('distance', distance)
+        private.configManager:setOption('distance', private.minmax:get(distance, 'distance'))
         return public
     end
 
