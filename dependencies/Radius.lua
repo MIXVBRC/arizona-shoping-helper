@@ -71,11 +71,16 @@ function class:new(_name, _defaultConfig)
     end
 
     function private:initThreads()
-        lua_thread.create(function () while true do wait(0)
-            if private:isActive() then
-                private:work()
+        _sh.threadManager:add(
+            nil,
+            function ()
+                while true do wait(0)
+                    if private:isActive() then
+                        private:work()
+                    end
+                end
             end
-        end end)
+        )
     end
 
     function private:initCommands()

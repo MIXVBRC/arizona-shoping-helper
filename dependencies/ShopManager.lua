@@ -66,86 +66,97 @@ function class:new()
         return false
     end
 
-    function private:initThreads()
-        lua_thread.create(function () while true do wait(0)
-            private.shops = private.cache:get('shops')
-            if private.shops == nil then
-                private.shops = {}
-                local shops = {}
-                local titles = {}
-                for _, textId in ipairs(_sh.helper:getTextIds()) do
-                    local text, _, x, y, z, _, _, _, _ = sampGet3dTextInfoById(textId)
-                    if text == _sh.message:get('message_shop') then
-                        table.insert(shops, {
-                            ['position'] = {
-                                ['x'] = x,
-                                ['y'] = y,
-                                ['z'] = z,
-                            },
-                        })
-                    elseif text:find('^%a+_%a+%s{......}.+{......}.+$') then
-                        table.insert(titles, {
-                            ['text'] = text,
-                            ['position'] = {
-                                ['x'] = x,
-                                ['y'] = y,
-                                ['z'] = z,
-                            },
-                        })
-                    end
-                end
-                for _, shop in ipairs(shops) do
-                    local minDistance = nil
-                    for titleIndex, title in ipairs(titles) do
-                        local distance = getDistanceBetweenCoords3d(
-                            shop.position.x, shop.position.y, shop.position.z,
-                            title.position.x, title.position.y, title.position.z
-                        )
-                        if distance < 3 and (minDistance == nil or distance < minDistance) then
-                            minDistance = distance
-                            shop.title = title
-                            table.remove(titles, titleIndex)
-                            break
-                        end
-                    end
-                    if shop.title ~= nil then
-                        shop.empty = false
-                        shop.player = shop.title.text:match('^(.+)%s{......}.+{......}.+$')
-                        shop.mod = shop.title.text:match('^.+{......}(.+){......}.+$')
-                    else
-                        shop.empty = true
-                        shop.player = 'none'
-                        shop.mod = _sh.message:get('message_shop_empty')
-                    end
-                    shop.position = _sh.helper:normalizePosition(shop.position.x, shop.position.y, shop.position.z)
-                    shop.central = private:isCentral(shop.position.x, shop.position.y, shop.position.z)
-                    table.insert(private.shops, _sh.dependencies.shop:new(
-                        shop.position.x,
-                        shop.position.y,
-                        shop.position.z,
-                        shop.player,
-                        shop.mod,
-                        shop.empty,
-                        shop.central
-                    ))
-                end
-                private.cache:add('shops', private.shops, 2)
-            end
-        end end)
+    function private:init()
+        private:initThreads()
+        private:initEvents()
     end
 
-    _sh.eventManager:add('onTextDrawSetString', function (textdrawId, text)
-        _sh.chat:push('2str' .. textdrawId .. ': ' .. text)
-        local mod = private.mods[text]
-        if mod ~= nil then
-            local shop = public:getNearby()
-            if shop ~= nil then
-                _sh.eventManager:trigger('onVisitShop', shop, mod, textdrawId)
+    function private:initThreads()
+        _sh.threadManager:add(
+            nil,
+            function ()
+                while true do wait(0)
+                    private.shops = private.cache:get('shops')
+                    if private.shops == nil then
+                        private.shops = {}
+                        local shops = {}
+                        local titles = {}
+                        for _, textId in ipairs(_sh.helper:getTextIds()) do
+                            local text, _, x, y, z, _, _, _, _ = sampGet3dTextInfoById(textId)
+                            if text == _sh.message:get('message_shop') then
+                                table.insert(shops, {
+                                    ['position'] = {
+                                        ['x'] = x,
+                                        ['y'] = y,
+                                        ['z'] = z,
+                                    },
+                                })
+                            elseif text:find('^%a+_%a+%s{......}.+{......}.+$') then
+                                table.insert(titles, {
+                                    ['text'] = text,
+                                    ['position'] = {
+                                        ['x'] = x,
+                                        ['y'] = y,
+                                        ['z'] = z,
+                                    },
+                                })
+                            end
+                        end
+                        for _, shop in ipairs(shops) do
+                            local minDistance = nil
+                            for titleIndex, title in ipairs(titles) do
+                                local distance = getDistanceBetweenCoords3d(
+                                    shop.position.x, shop.position.y, shop.position.z,
+                                    title.position.x, title.position.y, title.position.z
+                                )
+                                if distance < 3 and (minDistance == nil or distance < minDistance) then
+                                    minDistance = distance
+                                    shop.title = title
+                                    table.remove(titles, titleIndex)
+                                    break
+                                end
+                            end
+                            if shop.title ~= nil then
+                                shop.empty = false
+                                shop.player = shop.title.text:match('^(.+)%s{......}.+{......}.+$')
+                                shop.mod = shop.title.text:match('^.+{......}(.+){......}.+$')
+                            else
+                                shop.empty = true
+                                shop.player = 'none'
+                                shop.mod = _sh.message:get('message_shop_empty')
+                            end
+                            shop.position = _sh.helper:normalizePosition(shop.position.x, shop.position.y, shop.position.z)
+                            shop.central = private:isCentral(shop.position.x, shop.position.y, shop.position.z)
+                            table.insert(private.shops, _sh.dependencies.shop:new(
+                                shop.position.x,
+                                shop.position.y,
+                                shop.position.z,
+                                shop.player,
+                                shop.mod,
+                                shop.empty,
+                                shop.central
+                            ))
+                        end
+                        private.cache:add('shops', private.shops, 2)
+                    end
+                end
             end
-        end
-    end)
+        )
+    end
 
-    private:initThreads()
+    function private:initEvents()
+        _sh.eventManager:add('onTextDrawSetString', function (textdrawId, text)
+            local mod = private.mods[text]
+            if mod ~= nil then
+                local shop = public:getNearby()
+                if shop ~= nil then
+                    _sh.eventManager:trigger('onVisitShop', shop, mod, textdrawId)
+                end
+            end
+        end)
+    end
+
+    private:init()
     return public
 end
 return class

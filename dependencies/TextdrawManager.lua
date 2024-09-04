@@ -4,19 +4,17 @@ function class:new()
     local private = {}
 
     function private:init()
+        private:initEvents()
     end
 
-    _sh.eventManager:add('onTextDrawSetString', function (textdrawId, text)
-        _sh.chat:push('1str' .. textdrawId .. ': ' .. text)
-    end)
-
-    -- function _sh.events.onShowTextDraw(textdrawId, textdraw)
-    --     _sh.chat:push('one' .. textdrawId .. ': ' .. textdraw.text)
-    -- end
-
-    -- function _sh.events.onTextDrawSetString(textdrawId, text)
-    --     _sh.chat:push('1str' .. textdrawId .. ': ' .. text)
-    -- end
+    function private:initEvents()
+        _sh.eventManager:add('onShowTextDraw', function (textdrawId, text)
+            _sh.chat:push('1str' .. textdrawId .. ': ' .. text)
+        end)
+        _sh.eventManager:add('onTextDrawSetString', function (textdrawId, text)
+            _sh.chat:push('1str' .. textdrawId .. ': ' .. text)
+        end)
+    end
 
     private:init()
     return public

@@ -134,6 +134,13 @@ local this = {
             ['args'] = {},
         },
         {
+            ['name'] = 'threadManager',
+            ['entity'] = 'dependencies.ThreadManager',
+            ['dependencies'] = {},
+            ['init'] = true,
+            ['args'] = {},
+        },
+        {
             ['name'] = 'exception',
             ['entity'] = 'dependencies.Exception',
             ['dependencies'] = {},

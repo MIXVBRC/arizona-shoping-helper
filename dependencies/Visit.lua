@@ -128,91 +128,6 @@ function class:new(_name, _defaultConfig)
         return public
     end
 
-    -- INITS
-
-    function private:init(defaultConfig)
-        for name, value in pairs(defaultConfig) do
-            if private.configManager:getOption(name) == nil then
-                private.configManager:setOption(name, value)
-            end
-        end
-        private:initThreads()
-        private:initCommands()
-    end
-
-    function private:initThreads()
-        lua_thread.create(function () while true do wait(1000 * 60)
-            local visits = private:getVisits()
-            if visits ~= nil then
-                local time = os.time()
-                local flag = false
-                local new = {}
-                for id, visit in pairs(visits) do
-                    if visit.time ~= nil and time < visit.time then
-                        new[id] = visit
-                    else
-                        flag = true
-                    end
-                end
-                if flag then
-                    private:setVisits(new)
-                end
-            end
-        end end)
-        lua_thread.create(function () while true do wait(0)
-            if private:isActive() then
-                private:work()
-            end
-        end end)
-    end
-
-    function private:initCommands()
-        private.commandManager:add('active', public.toggleActive)
-        private.commandManager:add('distance', function (distance)
-            distance = _sh.helper:toInt(distance)
-            if distance ~= nil then
-                private:setDistance(_sh.helper:toInt(distance))
-            end
-        end)
-        private.commandManager:add('time', function (time)
-            time = _sh.helper:toInt(time)
-            if time ~= nil then
-                local differenceTime = private:getTime() - time
-                local visits = private:getVisits()
-                for _, visit in pairs(visits) do
-                    if visit.time == nil then
-                        visit.time = time
-                    end
-                    visit.time = visit.time - differenceTime * 60
-                end
-                private:setVisits(visits)
-                private:setTime(_sh.helper:toInt(time))
-            end
-        end)
-        private.commandManager:add('select', function (text)
-            local lastVisitId = private:getLastVisitId()
-            if lastVisitId ~= nil then
-                local visit = private:getVisit(lastVisitId)
-                if visit.select then
-                    private:changeVisit(lastVisitId, {
-                        ['select'] = false,
-                        ['text'] = '',
-                    })
-                else
-                    private:changeVisit(lastVisitId, {
-                        ['select'] = true,
-                        ['text'] = text,
-                    })
-                end
-            end
-        end)
-        for hiding, _ in pairs(private:getHidings()) do
-            private.commandManager:add(_sh.helper:implode('-', {'active', hiding}), function ()
-                private:toggleHiding(hiding)
-            end)
-        end
-    end
-
     -- WORK
 
     function private:work()
@@ -321,34 +236,130 @@ function class:new(_name, _defaultConfig)
         end
     end
 
-    -- EVENTS
+    -- INITS
 
-    _sh.eventManager:add('onVisitShop', function (shop, mod, textdrawId)
-        private:setLastVisitId(shop:getId())
-        local date = os.time()
-        local time = date + ( private:getTime() * 60 )
-        if private:getVisit(shop:getId()) ~= nil then
-            private:changeVisit(
-                shop:getId(),
-                {
-                    ['date'] = date,
-                    ['time'] = time,
-                    ['mod'] = shop:getMod(),
-                }
-            )
-        else
-            private:addVisit(
-                shop:getId(),
-                {
-                    ['date'] = date,
-                    ['time'] = time,
-                    ['mod'] = shop:getMod(),
-                    ['select'] = false,
-                    ['text'] = '',
-                }
-            )
+    function private:init(defaultConfig)
+        for name, value in pairs(defaultConfig) do
+            if private.configManager:getOption(name) == nil then
+                private.configManager:setOption(name, value)
+            end
         end
-    end)
+        private:initThreads()
+        private:initCommands()
+        private:initEvents()
+    end
+
+    function private:initThreads()
+        _sh.threadManager:add(
+            nil,
+            function ()
+                while true do wait(0)
+                    if private:isActive() then
+                        private:work()
+                    end
+                end
+            end
+        )
+        _sh.threadManager:add(
+            nil,
+            function ()
+                while true do wait(1000 * 60)
+                    local visits = private:getVisits()
+                    if visits ~= nil then
+                        local time = os.time()
+                        local flag = false
+                        local new = {}
+                        for id, visit in pairs(visits) do
+                            if visit.time ~= nil and time < visit.time then
+                                new[id] = visit
+                            else
+                                flag = true
+                            end
+                        end
+                        if flag then
+                            private:setVisits(new)
+                        end
+                    end
+                end
+            end
+        )
+    end
+
+    function private:initCommands()
+        private.commandManager:add('active', public.toggleActive)
+        private.commandManager:add('distance', function (distance)
+            distance = _sh.helper:toInt(distance)
+            if distance ~= nil then
+                private:setDistance(_sh.helper:toInt(distance))
+            end
+        end)
+        private.commandManager:add('time', function (time)
+            time = _sh.helper:toInt(time)
+            if time ~= nil then
+                local differenceTime = private:getTime() - time
+                local visits = private:getVisits()
+                for _, visit in pairs(visits) do
+                    if visit.time == nil then
+                        visit.time = time
+                    end
+                    visit.time = visit.time - differenceTime * 60
+                end
+                private:setVisits(visits)
+                private:setTime(_sh.helper:toInt(time))
+            end
+        end)
+        private.commandManager:add('select', function (text)
+            local lastVisitId = private:getLastVisitId()
+            if lastVisitId ~= nil then
+                local visit = private:getVisit(lastVisitId)
+                if visit.select then
+                    private:changeVisit(lastVisitId, {
+                        ['select'] = false,
+                        ['text'] = '',
+                    })
+                else
+                    private:changeVisit(lastVisitId, {
+                        ['select'] = true,
+                        ['text'] = text,
+                    })
+                end
+            end
+        end)
+        for hiding, _ in pairs(private:getHidings()) do
+            private.commandManager:add(_sh.helper:implode('-', {'active', hiding}), function ()
+                private:toggleHiding(hiding)
+            end)
+        end
+    end
+
+    function private:initEvents()
+        _sh.eventManager:add('onVisitShop', function (shop)
+            private:setLastVisitId(shop:getId())
+            local date = os.time()
+            local time = date + ( private:getTime() * 60 )
+            if private:getVisit(shop:getId()) ~= nil then
+                private:changeVisit(
+                    shop:getId(),
+                    {
+                        ['date'] = date,
+                        ['time'] = time,
+                        ['mod'] = shop:getMod(),
+                    }
+                )
+            else
+                private:addVisit(
+                    shop:getId(),
+                    {
+                        ['date'] = date,
+                        ['time'] = time,
+                        ['mod'] = shop:getMod(),
+                        ['select'] = false,
+                        ['text'] = '',
+                    }
+                )
+            end
+        end)
+    end
 
     private:init(_defaultConfig or {})
     return public
