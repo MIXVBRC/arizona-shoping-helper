@@ -15,8 +15,8 @@ function class:new(_name, _defaultConfig)
         }),
         ['configManager'] = _sh.dependencies.configManager:new(_name, _sh.config),
         ['commandManager'] = _sh.dependencies.commandManager:new(_name),
-        ['cache'] = _sh.dependencies.cache:new(),
         ['lowPoint'] = _sh.dependencies.lowPoint:new(),
+        ['cache'] = _sh.dependencies.cache:new(),
     }
 
     -- ACTIVE

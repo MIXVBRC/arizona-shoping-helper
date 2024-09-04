@@ -127,6 +127,13 @@ local this = {
             ['args'] = {},
         },
         {
+            ['name'] = 'threadManager',
+            ['entity'] = 'dependencies.ThreadManager',
+            ['dependencies'] = {},
+            ['init'] = true,
+            ['args'] = {},
+        },
+        {
             ['name'] = 'textdraw',
             ['entity'] = 'dependencies.Textdraw',
             ['dependencies'] = {},
@@ -136,13 +143,6 @@ local this = {
         {
             ['name'] = 'textdrawManager',
             ['entity'] = 'dependencies.TextdrawManager',
-            ['dependencies'] = {},
-            ['init'] = true,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'threadManager',
-            ['entity'] = 'dependencies.ThreadManager',
             ['dependencies'] = {},
             ['init'] = true,
             ['args'] = {},

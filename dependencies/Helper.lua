@@ -146,6 +146,29 @@ function class:new()
         return string
     end
 
+    function public:isPrice(text)
+        text = text:gsub('%s+', ''):gsub(',', '')
+        if text:find('^.*$%d+$') then
+            return true
+        end
+        return false
+    end
+
+    function public:isVCPrice(text)
+        text = text:gsub('%s+', ''):gsub(',', '')
+        if text:find('^VC%$%d+$') then
+            return true
+        end
+        return false
+    end
+
+    function public:isNumber(text)
+        if text:find('^%d+$') then
+            return true
+        end
+        return false
+    end
+
     return public
 end
 return class
