@@ -58,14 +58,14 @@ function class:new(_name, _default)
 
     function private:load()
         private:collect()
-        private.data = _sh.ini.load(private.data, private:getName())
+        private.data = _sh.helper:iniLoad(private.data, private:getName())
         private:disassemble()
         return public
     end
 
     function private:save()
         private:collect()
-        _sh.ini.save(private.data, private:getName())
+        _sh.helper:iniSave(private.data, private:getName())
         private:disassemble()
         return public
     end

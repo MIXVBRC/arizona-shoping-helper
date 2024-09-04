@@ -134,15 +134,16 @@ function class:new()
         end end)
     end
 
-    function _sh.events.onTextDrawSetString(textdrawId, text)
+    _sh.eventManager:add('onTextDrawSetString', function (textdrawId, text)
+        _sh.chat:push('2str' .. textdrawId .. ': ' .. text)
         local mod = private.mods[text]
         if mod ~= nil then
             local shop = public:getNearby()
             if shop ~= nil then
-                _sh.customEvents:trigger('onVisitShop', shop, mod, textdrawId)
+                _sh.eventManager:trigger('onVisitShop', shop, mod, textdrawId)
             end
         end
-    end
+    end)
 
     private:initThreads()
     return public

@@ -17,20 +17,29 @@ function class:new()
     end
 
     function public:md5(string)
-        return _sh.md5.sumhexa(string)
+        return _sh.dependencies.md5.sumhexa(string)
     end
 
     function public:utf8(string)
-        _sh.encoding.default = 'CP1251'
-        return _sh.encoding.UTF8:decode(string)
+        _sh.dependencies.encoding.default = 'CP1251'
+        return _sh.dependencies.encoding.UTF8:decode(string)
     end
 
     function public:jsonDecode(json)
-        return _sh.json.decode(json)
+        return _sh.dependencies.json.decode(json)
     end
 
     function public:jsonEncode(array)
-        return _sh.json.encode(array)
+        return _sh.dependencies.json.encode(array)
+    end
+
+    function public:iniLoad(default, name)
+        return _sh.dependencies.ini.load(default, name)
+    end
+
+    function public:iniSave(data, name)
+        _sh.dependencies.ini.save(data, name)
+        return public
     end
 
     function public:getObjectsByIds(ids)

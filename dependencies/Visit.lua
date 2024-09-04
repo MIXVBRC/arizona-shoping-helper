@@ -323,7 +323,7 @@ function class:new(_name, _defaultConfig)
 
     -- EVENTS
 
-    _sh.customEvents:add('onVisitShop', function (shop, mod, textdrawId)
+    _sh.eventManager:add('onVisitShop', function (shop, mod, textdrawId)
         private:setLastVisitId(shop:getId())
         local date = os.time()
         local time = date + ( private:getTime() * 60 )

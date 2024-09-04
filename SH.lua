@@ -17,7 +17,6 @@ local this = {
             ['entity'] = 'md5',
             ['dependencies'] = {},
             ['init'] = false,
-            ['base'] = true,
             ['args'] = {},
         },
         {
@@ -25,7 +24,6 @@ local this = {
             ['entity'] = 'encoding',
             ['dependencies'] = {},
             ['init'] = false,
-            ['base'] = true,
             ['args'] = {},
         },
         {
@@ -33,7 +31,6 @@ local this = {
             ['entity'] = 'inicfg',
             ['dependencies'] = {},
             ['init'] = false,
-            ['base'] = true,
             ['args'] = {},
         },
         {
@@ -41,7 +38,6 @@ local this = {
             ['entity'] = 'dkjson',
             ['dependencies'] = {},
             ['init'] = false,
-            ['base'] = true,
             ['args'] = {},
         },
         {
@@ -49,7 +45,6 @@ local this = {
             ['entity'] = 'lib.samp.events',
             ['dependencies'] = {},
             ['init'] = false,
-            ['base'] = true,
             ['args'] = {},
         },
         {
@@ -57,7 +52,6 @@ local this = {
             ['entity'] = 'dependencies.Cache',
             ['dependencies'] = {},
             ['init'] = false,
-            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -65,7 +59,6 @@ local this = {
             ['entity'] = 'dependencies.Point',
             ['dependencies'] = {},
             ['init'] = false,
-            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -73,7 +66,6 @@ local this = {
             ['entity'] = 'dependencies.Circle',
             ['dependencies'] = {},
             ['init'] = false,
-            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -81,7 +73,6 @@ local this = {
             ['entity'] = 'dependencies.CircleManager',
             ['dependencies'] = {},
             ['init'] = false,
-            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -89,7 +80,6 @@ local this = {
             ['entity'] = 'dependencies.Shop',
             ['dependencies'] = {},
             ['init'] = false,
-            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -97,7 +87,6 @@ local this = {
             ['entity'] = 'dependencies.MinMax',
             ['dependencies'] = {},
             ['init'] = false,
-            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -105,7 +94,6 @@ local this = {
             ['entity'] = 'dependencies.ConfigManager',
             ['dependencies'] = {},
             ['init'] = false,
-            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -113,7 +101,6 @@ local this = {
             ['entity'] = 'dependencies.CommandManager',
             ['dependencies'] = {},
             ['init'] = true,
-            ['base'] = false,
             ['args'] = {
                 'active',
             },
@@ -123,15 +110,13 @@ local this = {
             ['entity'] = 'dependencies.LowPoint',
             ['dependencies'] = {},
             ['init'] = false,
-            ['base'] = false,
             ['args'] = {},
         },
         {
-            ['name'] = 'customEvents',
-            ['entity'] = 'dependencies.CustomEvents',
+            ['name'] = 'eventManager',
+            ['entity'] = 'dependencies.EventManager',
             ['dependencies'] = {},
             ['init'] = true,
-            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -139,7 +124,13 @@ local this = {
             ['entity'] = 'dependencies.Chat',
             ['dependencies'] = {},
             ['init'] = true,
-            ['base'] = false,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'textdrawManager',
+            ['entity'] = 'dependencies.TextdrawManager',
+            ['dependencies'] = {},
+            ['init'] = true,
             ['args'] = {},
         },
         {
@@ -147,7 +138,6 @@ local this = {
             ['entity'] = 'dependencies.Exception',
             ['dependencies'] = {},
             ['init'] = false,
-            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -155,15 +145,6 @@ local this = {
             ['entity'] = 'dependencies.Error',
             ['dependencies'] = {},
             ['init'] = false,
-            ['base'] = false,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'color',
-            ['entity'] = 'dependencies.Color',
-            ['dependencies'] = {},
-            ['init'] = true,
-            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -171,7 +152,13 @@ local this = {
             ['entity'] = 'dependencies.Font',
             ['dependencies'] = {},
             ['init'] = true,
-            ['base'] = false,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'color',
+            ['entity'] = 'dependencies.Color',
+            ['dependencies'] = {},
+            ['init'] = true,
             ['args'] = {},
         },
         {
@@ -179,7 +166,6 @@ local this = {
             ['entity'] = 'dependencies.Helper',
             ['dependencies'] = {},
             ['init'] = true,
-            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -187,7 +173,6 @@ local this = {
             ['entity'] = 'dependencies.Config',
             ['dependencies'] = {},
             ['init'] = true,
-            ['base'] = false,
             ['args'] = {
                 'ShopingHelper_base',
                 {},
@@ -198,7 +183,6 @@ local this = {
             ['entity'] = 'dependencies.Message',
             ['dependencies'] = {},
             ['init'] = true,
-            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -206,7 +190,6 @@ local this = {
             ['entity'] = 'dependencies.Player',
             ['dependencies'] = {},
             ['init'] = true,
-            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -214,7 +197,6 @@ local this = {
             ['entity'] = 'dependencies.ShopManager',
             ['dependencies'] = {},
             ['init'] = true,
-            ['base'] = false,
             ['args'] = {},
         },
         {
@@ -230,13 +212,12 @@ local this = {
                 'commandManager',
             },
             ['init'] = true,
-            ['base'] = false,
             ['args'] = {
                 'radius',
                 {
                     ['active'] = true,
-                    ['polygons'] = 32,
-                    ['distance'] = 20,
+                    ['polygons'] = 24,
+                    ['distance'] = 30,
                     ['colors'] = {
                         ['circle'] = 'ffffff',
                         ['green'] = '00ff00',
@@ -250,7 +231,6 @@ local this = {
             ['entity'] = 'dependencies.Visit',
             ['dependencies'] = {},
             ['init'] = true,
-            ['base'] = false,
             ['args'] = {
                 'visit',
                 {
@@ -291,8 +271,6 @@ function this:initDependencies()
             if _sh.dependencies[dependency.name] ~= nil then
                 if dependency.init then
                     _sh[dependency.name] = _sh.dependencies[dependency.name]:new(table.unpack(dependency.args))
-                elseif dependency.base then
-                    _sh[dependency.name] = _sh.dependencies[dependency.name]
                 end
             end
         end
