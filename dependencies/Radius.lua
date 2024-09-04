@@ -3,7 +3,7 @@ function class:new(_name, _defaultConfig)
     local public = {}
     local private = {
         ['radius'] = 5,
-        ['minmax'] = _sh.minMax:new({
+        ['minmax'] = _sh.dependencies.minMax:new({
             ['polygons'] = {
                 ['min'] = 24,
                 ['max'] = 48,

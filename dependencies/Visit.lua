@@ -2,11 +2,11 @@ local class = {}
 function class:new(_name, _defaultConfig)
     local public = {}
     local private = {
-        ['lastShopId'] = nil,
-        ['minmax'] = _sh.minMax:new({
+        ['lastVisitId'] = nil,
+        ['minmax'] = _sh.dependencies.minMax:new({
             ['distance'] = {
                 ['min'] = 30,
-                ['max'] = 60,
+                ['max'] = 200,
             },
             ['time'] = {
                 ['min'] = 1,
@@ -59,12 +59,12 @@ function class:new(_name, _defaultConfig)
 
     -- LAST
 
-    function private:getLastShopId()
-        return private.lastShopId
+    function private:getLastVisitId()
+        return private.lastVisitId
     end
 
-    function private:setLastShopId(id)
-        private.lastShopId = id
+    function private:setLastVisitId(id)
+        private.lastVisitId = id
         return public
     end
 
@@ -141,17 +141,22 @@ function class:new(_name, _defaultConfig)
     end
 
     function private:initThreads()
-        lua_thread.create(function () while true do wait(5000)
+        lua_thread.create(function () while true do wait(1000 * 60)
             local visits = private:getVisits()
-            if visits ~= nil and #visits > 0 then
+            if visits ~= nil then
                 local time = os.time()
+                local flag = false
                 local new = {}
                 for id, visit in pairs(visits) do
-                    if (time - visit.date) < 60 * 60 * 24 then
+                    if visit.time ~= nil and time < visit.time then
                         new[id] = visit
+                    else
+                        flag = true
                     end
                 end
-                private:setVisited(new)
+                if flag then
+                    private:setVisits(new)
+                end
             end
         end end)
         lua_thread.create(function () while true do wait(0)
@@ -172,19 +177,29 @@ function class:new(_name, _defaultConfig)
         private.commandManager:add('time', function (time)
             time = _sh.helper:toInt(time)
             if time ~= nil then
+                local differenceTime = private:getTime() - time
+                local visits = private:getVisits()
+                for _, visit in pairs(visits) do
+                    if visit.time == nil then
+                        visit.time = time
+                    end
+                    visit.time = visit.time - differenceTime * 60
+                end
+                private:setVisits(visits)
                 private:setTime(_sh.helper:toInt(time))
             end
         end)
         private.commandManager:add('select', function (text)
-            if private.lastShopId ~= nil then
-                local visit = private:getVisit(private.lastShopId)
+            local lastVisitId = private:getLastVisitId()
+            if lastVisitId ~= nil then
+                local visit = private:getVisit(lastVisitId)
                 if visit.select then
-                    private:changeVisit(private.lastShopId, {
+                    private:changeVisit(lastVisitId, {
                         ['select'] = false,
                         ['text'] = '',
                     })
                 else
-                    private:changeVisit(private.lastShopId, {
+                    private:changeVisit(lastVisitId, {
                         ['select'] = true,
                         ['text'] = text,
                     })
@@ -192,7 +207,7 @@ function class:new(_name, _defaultConfig)
             end
         end)
         for hiding, _ in pairs(private:getHidings()) do
-            private.commandManager:add(_sh.helper:implode('-', {'active',hiding}), function ()
+            private.commandManager:add(_sh.helper:implode('-', {'active', hiding}), function ()
                 private:toggleHiding(hiding)
             end)
         end
@@ -254,7 +269,9 @@ function class:new(_name, _defaultConfig)
                     if time <= visit.time and (visit.mod == shop:getMod() or visit.mod == _sh.message:get('message_shop_edit')) then
                         shopTypes = {'visit'}
                         render.color = private:getColor('visit')
-                        render.text = math.ceil((visit.time - timeNow) / 60) .. ' min';
+                        if private:getHiding('time') then
+                            render.text = math.ceil((visit.time - timeNow) / 60) .. ' min'
+                        end
                     else
                         visit.time = nil
                         private:changeVisit(shop:getId(), {
@@ -307,13 +324,14 @@ function class:new(_name, _defaultConfig)
     -- EVENTS
 
     _sh.customEvents:add('onVisitShop', function (shop, mod, textdrawId)
-        private:setLastShopId(shop:getId())
-        local time = os.time() + 60 * private:getTime()
+        private:setLastVisitId(shop:getId())
+        local date = os.time()
+        local time = date + ( private:getTime() * 60 )
         if private:getVisit(shop:getId()) ~= nil then
             private:changeVisit(
                 shop:getId(),
                 {
-                    ['date'] = os.time(),
+                    ['date'] = date,
                     ['time'] = time,
                     ['mod'] = shop:getMod(),
                 }
@@ -322,7 +340,7 @@ function class:new(_name, _defaultConfig)
             private:addVisit(
                 shop:getId(),
                 {
-                    ['date'] = os.time(),
+                    ['date'] = date,
                     ['time'] = time,
                     ['mod'] = shop:getMod(),
                     ['select'] = false,

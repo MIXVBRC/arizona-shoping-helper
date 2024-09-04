@@ -35,7 +35,7 @@ function class:new(_name, _default)
             for name, value in pairs(values) do
                 if type(value) == 'table' then
                     private.data.json = private.data.json or {}
-                    private.data.json[private:getJsonName(title, name)] = _sh.json.encode(value)
+                    private.data.json[private:getJsonName(title, name)] = _sh.helper:jsonEncode(value)
                     private.data[title][name] = 'json'
                 end
             end
@@ -49,7 +49,7 @@ function class:new(_name, _default)
                 for name, value in pairs(values) do
                     private.data[title][name] = value
                     if value == 'json' then
-                        private.data[title][name] = _sh.json.decode(private.data.json[private:getJsonName(title, name)])
+                        private.data[title][name] = _sh.helper:jsonDecode(private.data.json[private:getJsonName(title, name)])
                     end
                 end
             end

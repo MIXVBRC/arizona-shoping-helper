@@ -2,7 +2,7 @@ local class = {}
 function class:new()
     local public = {}
     local private = {
-        ['time'] = (60 * 60 * 24),
+        ['time'] = 86400,
         ['cache'] = {},
     }
 

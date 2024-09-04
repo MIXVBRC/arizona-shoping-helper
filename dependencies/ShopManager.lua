@@ -46,7 +46,7 @@ function class:new()
     end
 
     function private:isCentral(x, y, z)
-        local cacheKeyShop = _sh.json.encode({x, y, z})
+        local cacheKeyShop = _sh.helper:md5(x..y..z)
         if private.cache:get(cacheKeyShop) == nil then
             local objects = _sh.helper:getObjectsByIds(private.centralModelIds)
             for _, object in ipairs(objects) do

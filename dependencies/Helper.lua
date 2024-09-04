@@ -25,6 +25,14 @@ function class:new()
         return _sh.encoding.UTF8:decode(string)
     end
 
+    function public:jsonDecode(json)
+        return _sh.json.decode(json)
+    end
+
+    function public:jsonEncode(array)
+        return _sh.json.encode(array)
+    end
+
     function public:getObjectsByIds(ids)
         local objects = {}
         for _, object in ipairs(getAllObjects()) do
