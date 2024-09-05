@@ -9,21 +9,16 @@ function class:new()
     -- TEXTDRAW
 
     function public:getTextdraws()
-        return private.textdraws
+        return private.textdraws or {}
     end
 
     function private:setTextdraws(textdraws)
-        private.textdraws = textdraws
+        private.textdraws = textdraws or {}
         return public
     end
 
     function private:addTextdraw(textdraw)
         table.insert(private.textdraws, textdraw)
-        return public
-    end
-
-    function private:clearTextdraws()
-        private.textdraws = {}
         return public
     end
 
@@ -37,71 +32,87 @@ function class:new()
     function private:initEvents()
         _sh.eventManager:add(
             'onShowTextDraw',
-            function (textdrawId, textdraw)
+            function (id, data)
                 local newTextdraw = _sh.dependencies.textdraw:new(
-                    textdrawId,
-                    textdraw.modelId,
-                    textdraw.text,
-                    textdraw.backgroundColor,
-                    textdraw.selectable,
-                    textdraw.position.x,
-                    textdraw.position.y,
-                    textdraw.lineWidth,
-                    textdraw.lineHeight
+                    id,
+                    data.modelId,
+                    data.text,
+                    data.backgroundColor,
+                    data.selectable,
+                    data.position.x,
+                    data.position.y,
+                    data.lineWidth,
+                    data.lineHeight
                 )
-                local oldTextdraws = public:getTextdraws()
+                local textdraws = {}
+                for _, textdraw in ipairs(public:getTextdraws()) do
+                    if sampTextdrawIsExists(textdraw:getId()) and id ~= textdraw:getId() then
+                        table.insert(textdraws, textdraw)
+                    end
+                end
                 if newTextdraw:isSelectable() then
                     local newTextdraws = {}
-                    for _, oldTextdraw in ipairs(oldTextdraws) do
-                        if oldTextdraw:getX() ~= newTextdraw:getX() or oldTextdraw:getY() ~= newTextdraw:getY() then
-                            table.insert(newTextdraws, oldTextdraw)
+                    for _, textdraw in ipairs(textdraws) do
+                        if textdraw:getX() ~= newTextdraw:getX() or textdraw:getY() ~= newTextdraw:getY() then
+                            table.insert(newTextdraws, textdraw)
                         end
                     end
                     table.insert(newTextdraws, newTextdraw)
-                    private:setTextdraws(newTextdraws)
+                    textdraws = newTextdraws
                 else
-                    for _, oldTextdraw in ipairs(oldTextdraws) do
-                        if oldTextdraw:getX() < newTextdraw:getX()
-                        and oldTextdraw:getY() < newTextdraw:getY()
-                        and oldTextdraw:getX() + oldTextdraw:getWidth() > newTextdraw:getX()
-                        and oldTextdraw:getY() + oldTextdraw:getHeight() > newTextdraw:getY()
+                    for _, textdraw in ipairs(textdraws) do
+                        if textdraw:getX() < newTextdraw:getX()
+                        and textdraw:getY() < newTextdraw:getY()
+                        and textdraw:getX() + textdraw:getWidth() > newTextdraw:getX()
+                        and textdraw:getY() + textdraw:getHeight() > newTextdraw:getY()
                         then
-                            oldTextdraw:addChild(newTextdraw)
+                            textdraw:addChild(newTextdraw)
                         end
                     end
                 end
+                private:setTextdraws(textdraws)
                 _sh.eventManager:trigger('onCreateTextdraw', newTextdraw)
             end
         )
         _sh.eventManager:add(
             'onTextDrawSetString',
             function (textdrawId, text)
-                local textdraws = public:getTextdraws()
-                if #textdraws > 0 then
-                    for _, textdraw in ipairs(textdraws) do
-                        if textdrawId ~= textdraw:getId() then
-                            for _, childTextdraw in ipairs(textdraw:getChilds()) do
-                                if textdrawId == childTextdraw:getId() then
-                                    childTextdraw:setData({
-                                        ['text'] = text,
-                                    })
-                                    goto breakAll
-                                end
+                for _, textdraw in ipairs(public:getTextdraws()) do
+                    if textdrawId ~= textdraw:getId() then
+                        for _, childTextdraw in ipairs(textdraw:getChilds()) do
+                            if textdrawId == childTextdraw:getId() then
+                                childTextdraw:setData({
+                                    ['text'] = text,
+                                })
+                                return
                             end
-                        else
-                            textdraw:setData({
-                                ['text'] = text,
-                            })
-                            goto breakAll
                         end
+                    else
+                        textdraw:setData({
+                            ['text'] = text,
+                        })
+                        return
                     end
-                    ::breakAll::
                 end
             end
         )
     end
 
     function private:initThreads()
+        _sh.threadManager:add(
+            nil,
+            function ()
+                while true do wait(0)
+                    local textdraws = {}
+                    for _, textdraw in ipairs(public:getTextdraws()) do
+                        if sampTextdrawIsExists(textdraw:getId()) then
+                            table.insert(textdraws, textdraw)
+                        end
+                    end
+                    private:setTextdraws(textdraws)
+                end
+            end
+        )
         -- _sh.threadManager:add(
         --     nil,
         --     function ()
@@ -117,7 +128,7 @@ function class:new()
         --                         '0x00ffffff',
         --                         1,
         --                         '0xffffffff'
-        --                     );
+        --                     )
         --                     for _, childTextdraw in ipairs(textdraw:getChilds()) do
         --                         renderDrawBoxWithBorder(
         --                             childTextdraw:getX(),
@@ -127,7 +138,7 @@ function class:new()
         --                             '0x00ffffff',
         --                             1,
         --                             '0xff0000ff'
-        --                         );
+        --                         )
         --                     end
         --                 end
         --             end

@@ -3,7 +3,6 @@ function class:new(_prefix)
     local public = {}
     local private = {
         ['prefix'] = _prefix,
-        -- ['commands'] = {},
     }
 
     function public:getCommandName(_name)

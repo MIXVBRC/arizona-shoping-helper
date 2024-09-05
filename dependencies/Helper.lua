@@ -139,7 +139,7 @@ function class:new()
         return collect
     end
 
-    function public:toInt(string)
+    function public:toNumber(string)
         string = tostring(string)
         string = string:match('%d+')
         string = tonumber(string)

@@ -33,7 +33,7 @@ function class:new(_command, _defaultConfig)
     -- POLYGONS
 
     function private:getPolygons()
-        return private.configManager:getOption('polygons')
+        return private.configManager:getOption('polygons') or private.minmax:getMin('polygons')
     end
 
     function private:setPolygons(polygons)
@@ -54,8 +54,12 @@ function class:new(_command, _defaultConfig)
 
     -- COLOR
 
+    function private:getColors()
+        return private.configManager:getOption('colors') or {}
+    end
+
     function private:getColor(name)
-        return private.configManager:getOption('colors')[name]
+        return private:getColors()[name]
     end
 
     -- LOGICK
@@ -230,13 +234,13 @@ function class:new(_command, _defaultConfig)
     function private:initCommands()
         private.commandManager:add('active', public.toggleActive)
         private.commandManager:add('polygons', function (polygons)
-            polygons = _sh.helper:toInt(polygons)
+            polygons = _sh.helper:toNumber(polygons)
             if polygons ~= nil then
                 private:setPolygons(polygons)
             end
         end)
         private.commandManager:add('distance', function (distance)
-            distance = _sh.helper:toInt(distance)
+            distance = _sh.helper:toNumber(distance)
             if distance ~= nil then
                 private:setDistance(distance)
             end

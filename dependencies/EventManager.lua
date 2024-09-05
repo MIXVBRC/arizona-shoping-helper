@@ -15,7 +15,7 @@ function class:new()
         if _functions ~= nil then
             for _, _function in ipairs(_functions) do
                 if type(_function) == 'function' then
-                    _function(...)
+                    return _function(...)
                 end
             end
         end
@@ -23,10 +23,16 @@ function class:new()
 
     function private:init()
         function _sh.dependencies.events.onShowTextDraw(...)
-            public:trigger('onShowTextDraw', ...)
+            return public:trigger('onShowTextDraw', ...)
         end
         function _sh.dependencies.events.onTextDrawSetString(...)
-            public:trigger('onTextDrawSetString', ...)
+            return public:trigger('onTextDrawSetString', ...)
+        end
+        function _sh.dependencies.events.onSendClickTextDraw(...)
+            return public:trigger('onSendClickTextDraw', ...)
+        end
+        function _sh.dependencies.events.onShowDialog(...)
+            return public:trigger('onShowDialog', ...)
         end
     end
 

@@ -2,6 +2,7 @@ local class = {}
 function class:new()
     local public = {}
     local private = {
+        ['inShop'] = false,
         ['cache'] = _sh.dependencies.cache:new(),
     }
 
@@ -35,6 +36,36 @@ function class:new()
         return public:getPosition().z
     end
 
+    function public:inShop()
+        return private.inShop
+    end
+
+    function private:setInShop(inShop)
+        private.inShop = inShop
+        return public
+    end
+
+    function private:init()
+        private:initEvents()
+    end
+
+    function private:initEvents()
+        _sh.eventManager:add(
+            'onVisitShop',
+            function (shop, mod, textdraw)
+                private:setInShop(true)
+                _sh.threadManager:add(
+                    nil,
+                    function ()
+                        while sampTextdrawIsExists(textdraw:getId()) do wait(0) end
+                        private:setInShop(false)
+                    end
+                )
+            end
+        )
+    end
+
+    private:init()
     return public
 end
 

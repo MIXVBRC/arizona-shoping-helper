@@ -6,7 +6,7 @@ function class:new()
     }
 
     function public:add(name, _function)
-        if name ~= nil then
+        if name ~= nil and name ~= '' then
             table.insert(private.threads, {
                 ['name'] = name,
                 ['thread'] = lua_thread.create_suspended(_function)
@@ -18,15 +18,17 @@ function class:new()
     end
 
     function public:run(name)
-        for _, thread in ipairs(private.threads) do
-            if name == thread.name then
-                thread.thread:run()
+        if name ~= nil then
+            for _, thread in ipairs(private.threads) do
+                if name == thread.name then
+                    thread.thread:run()
+                end
             end
         end
         return public
     end
 
-    function public:terminate(name)
+    function public:stop(name)
         for _, thread in ipairs(private.threads) do
             if name == thread.name then
                 thread.thread:terminate()

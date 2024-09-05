@@ -282,7 +282,13 @@ local this = {
             ['init'] = true,
             ['args'] = {
                 'select',
-                {},
+                {
+                    ['active'] = false,
+                    ['add'] = true,
+                    ['border'] = 2,
+                    ['color'] = '0000ff',
+                    ['alpha'] = 100,
+                },
             },
         },
         {

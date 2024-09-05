@@ -288,13 +288,13 @@ function class:new(_command, _defaultConfig)
     function private:initCommands()
         private.commandManager:add('active', public.toggleActive)
         private.commandManager:add('distance', function (distance)
-            distance = _sh.helper:toInt(distance)
+            distance = _sh.helper:toNumber(distance)
             if distance ~= nil then
-                private:setDistance(_sh.helper:toInt(distance))
+                private:setDistance(_sh.helper:toNumber(distance))
             end
         end)
         private.commandManager:add('time', function (time)
-            time = _sh.helper:toInt(time)
+            time = _sh.helper:toNumber(time)
             if time ~= nil then
                 local differenceTime = private:getTime() - time
                 local shops = private:getShops()
@@ -305,7 +305,7 @@ function class:new(_command, _defaultConfig)
                     shop.time = shop.time - differenceTime * 60
                 end
                 private:setShops(shops)
-                private:setTime(_sh.helper:toInt(time))
+                private:setTime(_sh.helper:toNumber(time))
             end
         end)
         private.commandManager:add('select', function (text)
