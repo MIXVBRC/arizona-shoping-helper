@@ -113,6 +113,22 @@ local this = {
             ['args'] = {},
         },
         {
+            ['name'] = 'dialogManager',
+            ['entity'] = 'dependencies.DialogManager',
+            ['dependencies'] = {},
+            ['init'] = true,
+            ['args'] = {
+                777,
+            },
+        },
+        {
+            ['name'] = 'dialog',
+            ['entity'] = 'dependencies.Dialog',
+            ['dependencies'] = {},
+            ['init'] = false,
+            ['args'] = {},
+        },
+        {
             ['name'] = 'eventManager',
             ['entity'] = 'dependencies.EventManager',
             ['dependencies'] = {},
@@ -301,6 +317,19 @@ local this = {
                 {
                     ['active'] = false,
                     ['mod'] = 'buy',
+                },
+            },
+        },
+        {
+            ['name'] = 'trade',
+            ['entity'] = 'dependencies.Trade',
+            ['dependencies'] = {},
+            ['init'] = true,
+            ['args'] = {
+                'trade',
+                {
+                    ['active'] = false,
+                    ['last'] = false,
                 },
             },
         },

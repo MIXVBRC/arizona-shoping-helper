@@ -157,6 +157,12 @@ function class:new()
                 end
             end
         )
+        -- _sh.eventManager:add(
+        --     'onCreateTextdraw',
+        --     function (textdraw)
+        --         _sh.chat:push(_sh.helper:textDecode(textdraw:getText()))
+        --     end
+        -- )
     end
 
     private:init()

@@ -1,5 +1,5 @@
 local class = {}
-function class:new(_command, _defaultConfig)
+function class:new(_command, _default)
     local public = {}
     local private = {
         ['radius'] = 5,
@@ -13,7 +13,7 @@ function class:new(_command, _defaultConfig)
                 ['max'] = 60,
             },
         }),
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _sh.config),
+        ['configManager'] = _sh.dependencies.configManager:new(_command, _sh.config, _default),
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
         ['lowPoint'] = _sh.dependencies.lowPoint:new(),
         ['cache'] = _sh.dependencies.cache:new(),
@@ -25,7 +25,7 @@ function class:new(_command, _defaultConfig)
         return private.configManager:getOption('active')
     end
 
-    function public:toggleActive()
+    function private:toggleActive()
         private.configManager:setOption('active', not private:isActive())
         return public
     end
@@ -106,7 +106,7 @@ function class:new(_command, _defaultConfig)
         return newPoint
     end
 
-    function public:getSegments(circlesPoints)
+    function private:getSegments(circlesPoints)
         local segments = {}
         if circlesPoints ~= nil and #circlesPoints > 0 then
             for index, points in ipairs(circlesPoints) do
@@ -189,7 +189,7 @@ function class:new(_command, _defaultConfig)
                 end
                 private.cache:add('points_'..cacheName, points, 60)
             end
-            segments = public:getSegments(points)
+            segments = private:getSegments(points)
             private.cache:add('segments', segments, 1)
         end
         private:drawSegments(segments)
@@ -208,12 +208,7 @@ function class:new(_command, _defaultConfig)
 
     -- INITS
 
-    function private:init(defaultConfig)
-        for name, value in pairs(defaultConfig) do
-            if private.configManager:getOption(name) == nil then
-                private.configManager:setOption(name, value)
-            end
-        end
+    function private:init()
         private:initThreads()
         private:initCommands()
     end
@@ -232,22 +227,22 @@ function class:new(_command, _defaultConfig)
     end
 
     function private:initCommands()
-        private.commandManager:add('active', public.toggleActive)
+        private.commandManager:add('active', private.toggleActive)
         private.commandManager:add('polygons', function (polygons)
-            polygons = _sh.helper:toNumber(polygons)
+            polygons = _sh.helper:getNumber(polygons)
             if polygons ~= nil then
                 private:setPolygons(polygons)
             end
         end)
         private.commandManager:add('distance', function (distance)
-            distance = _sh.helper:toNumber(distance)
+            distance = _sh.helper:getNumber(distance)
             if distance ~= nil then
                 private:setDistance(distance)
             end
         end)
     end
 
-    private:init(_defaultConfig or {})
+    private:init()
     return public
 end
 return class

@@ -3,22 +3,27 @@ function class:new()
     local public = {}
     local private = {
         ['textdraws'] = {},
+        ['idLinks'] = {},
         ['cache'] = _sh.dependencies.cache:new(),
     }
 
-    -- TEXTDRAW
+    -- TEXTDRAWS
 
     function public:getTextdraws()
         return private.textdraws or {}
     end
 
-    function private:setTextdraws(textdraws)
-        private.textdraws = textdraws or {}
-        return public
+    function public:getTextdrawById(id)
+        return private.idLinks[id]
     end
 
-    function private:addTextdraw(textdraw)
-        table.insert(private.textdraws, textdraw)
+    function private:setTextdraws(textdraws)
+        textdraws = textdraws or {}
+        private.idLinks = {}
+        for _, textdraw in ipairs(textdraws) do
+            private.idLinks[textdraw:getId()] = textdraw
+        end
+        private.textdraws = textdraws
         return public
     end
 

@@ -1,5 +1,5 @@
 local class = {}
-function class:new(_command, _defaultConfig)
+function class:new(_command, _default)
     local public = {}
     local private = {
         ['lastShopId'] = nil,
@@ -13,7 +13,7 @@ function class:new(_command, _defaultConfig)
                 ['max'] = 1440,
             },
         }),
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _sh.config),
+        ['configManager'] = _sh.dependencies.configManager:new(_command, _sh.config, _default),
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
         ['cache'] = _sh.dependencies.cache:new(),
     }
@@ -24,7 +24,7 @@ function class:new(_command, _defaultConfig)
         return private.configManager:getOption('active')
     end
 
-    function public:toggleActive()
+    function private:toggleActive()
         private.configManager:setOption('active', not private:isActive())
         return public
     end
@@ -238,12 +238,7 @@ function class:new(_command, _defaultConfig)
 
     -- INITS
 
-    function private:init(defaultConfig)
-        for name, value in pairs(defaultConfig) do
-            if private.configManager:getOption(name) == nil then
-                private.configManager:setOption(name, value)
-            end
-        end
+    function private:init()
         private:initThreads()
         private:initCommands()
         private:initEvents()
@@ -286,15 +281,15 @@ function class:new(_command, _defaultConfig)
     end
 
     function private:initCommands()
-        private.commandManager:add('active', public.toggleActive)
+        private.commandManager:add('active', private.toggleActive)
         private.commandManager:add('distance', function (distance)
-            distance = _sh.helper:toNumber(distance)
+            distance = _sh.helper:getNumber(distance)
             if distance ~= nil then
-                private:setDistance(_sh.helper:toNumber(distance))
+                private:setDistance(_sh.helper:getNumber(distance))
             end
         end)
         private.commandManager:add('time', function (time)
-            time = _sh.helper:toNumber(time)
+            time = _sh.helper:getNumber(time)
             if time ~= nil then
                 local differenceTime = private:getTime() - time
                 local shops = private:getShops()
@@ -305,7 +300,7 @@ function class:new(_command, _defaultConfig)
                     shop.time = shop.time - differenceTime * 60
                 end
                 private:setShops(shops)
-                private:setTime(_sh.helper:toNumber(time))
+                private:setTime(_sh.helper:getNumber(time))
             end
         end)
         private.commandManager:add('select', function (text)
@@ -361,7 +356,7 @@ function class:new(_command, _defaultConfig)
         )
     end
 
-    private:init(_defaultConfig or {})
+    private:init()
     return public
 end
 return class

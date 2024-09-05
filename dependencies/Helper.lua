@@ -1,6 +1,145 @@
 local class = {}
 function class:new()
     local public = {}
+    local private = {
+        ['symbols'] = {
+            ['decode'] = {
+                ['_'] = ' ',
+                ['a'] = '‡',
+                ['A'] = '¿',
+                ['ó'] = '·',
+                ['Ä'] = '¡',
+                ['¢'] = '‚',
+                ['ã'] = '¬',
+                ['ô'] = '„',
+                ['Ç'] = '√',
+                ['ö'] = '‰',
+                ['É'] = 'ƒ',
+                ['e'] = 'Â',
+                ['E'] = '≈',
+                ['õ'] = 'Ê',
+                ['Ñ'] = '∆',
+                ['ü'] = 'Á',
+                ['à'] = '«',
+                ['ú'] = 'Ë',
+                ['Ö'] = '»',
+                ['ù'] = 'È',
+                ['k'] = 'Í',
+                ['K'] = ' ',
+                ['û'] = 'Î',
+                ['á'] = 'À',
+                ['Ø'] = 'Ï',
+                ['M'] = 'Ã',
+                ['Æ'] = 'Ì',
+                ['H'] = 'Õ',
+                ['o'] = 'Ó',
+                ['O'] = 'Œ',
+                ['£'] = 'Ô',
+                ['å'] = 'œ',
+                ['p'] = '',
+                ['P'] = '–',
+                ['c'] = 'Ò',
+                ['C'] = '—',
+                ['¶'] = 'Ú',
+                ['è'] = '“',
+                ['y'] = 'Û',
+                ['Y'] = '”',
+                ['?'] = 'Ù',
+                ['Å'] = '‘',
+                ['x'] = 'ı',
+                ['X'] = '’',
+                ['$'] = 'ˆ',
+                ['â'] = '÷',
+                ['§'] = '˜',
+                ['ç'] = '◊',
+                ['•'] = '¯',
+                ['é'] = 'ÿ',
+                ['°'] = '˘',
+                ['ä'] = 'Ÿ',
+                ['©'] = '¸',
+                ['í'] = '‹',
+                ['ê'] = '˙',
+                ['ß'] = '⁄',
+                ['®'] = '˚',
+                ['ë'] = '€',
+                ['™'] = '˝',
+                ['ì'] = '›',
+                ['´'] = '˛',
+                ['î'] = 'ﬁ',
+                ['¨'] = 'ˇ',
+                ['ï'] = 'ﬂ',
+            },
+            ['encode'] = {
+                [' '] = '_',
+                ['‡'] = 'a',
+                ['¿'] = 'A',
+                ['·'] = 'ó',
+                ['¡'] = 'Ä',
+                ['‚'] = '¢',
+                ['¬'] = 'ã',
+                ['„'] = 'ô',
+                ['√'] = 'Ç',
+                ['‰'] = 'ö',
+                ['ƒ'] = 'É',
+                ['Â'] = 'e',
+                ['≈'] = 'E',
+                ['∏'] = 'e',
+                ['®'] = 'E',
+                ['Ê'] = 'õ',
+                ['∆'] = 'Ñ',
+                ['Á'] = 'ü',
+                ['«'] = 'à',
+                ['Ë'] = 'ú',
+                ['»'] = 'Ö',
+                ['È'] = 'ù',
+                ['…'] = 'Ö',
+                ['Í'] = 'k',
+                [' '] = 'K',
+                ['Î'] = 'û',
+                ['À'] = 'á',
+                ['Ï'] = 'Ø',
+                ['Ã'] = 'M',
+                ['Ì'] = 'Æ',
+                ['Õ'] = 'H',
+                ['Ó'] = 'o',
+                ['Œ'] = 'O',
+                ['Ô'] = '£',
+                ['œ'] = 'å',
+                [''] = 'p',
+                ['–'] = 'P',
+                ['Ò'] = 'c',
+                ['—'] = 'C',
+                ['Ú'] = '¶',
+                ['“'] = 'è',
+                ['Û'] = 'y',
+                ['”'] = 'Y',
+                ['Ù'] = '?',
+                ['‘'] = 'Å',
+                ['ı'] = 'x',
+                ['’'] = 'X',
+                ['ˆ'] = '$',
+                ['÷'] = 'â',
+                ['˜'] = '§',
+                ['◊'] = 'ç',
+                ['¯'] = '•',
+                ['ÿ'] = 'é',
+                ['˘'] = '°',
+                ['Ÿ'] = 'ä',
+                ['¸'] = '©',
+                ['‹'] = 'í',
+                ['˙'] = 'ê',
+                ['⁄'] = 'ß',
+                ['˚'] = '®',
+                ['€'] = 'ë',
+                ['˝'] = '™',
+                ['›'] = 'ì',
+                ['˛'] = '´',
+                ['ﬁ'] = 'î',
+                ['ˇ'] = '¨',
+                ['ﬂ'] = 'ï',
+            },
+        },
+    }
 
     function public:normalize(num, index)
         index = index or 1000
@@ -40,6 +179,28 @@ function class:new()
     function public:iniSave(data, name)
         _sh.dependencies.ini.save(data, name)
         return public
+    end
+
+    function public:textDecode(text)
+        local result = {}
+        text:gsub(
+            '.',
+            function(symbol)
+                table.insert(result, private.symbols.decode[symbol] or symbol)
+            end
+        )
+        return table.concat(result)
+    end
+
+    function public:textEncode(text)
+        local result = {}
+        text:gsub(
+            '.',
+            function(symbol)
+                table.insert(result, private.symbols.encode[symbol] or symbol)
+            end
+        )
+        return table.concat(result)
     end
 
     function public:getObjectsByIds(ids)
@@ -139,7 +300,7 @@ function class:new()
         return collect
     end
 
-    function public:toNumber(string)
+    function public:getNumber(string)
         string = tostring(string)
         string = string:match('%d+')
         string = tonumber(string)

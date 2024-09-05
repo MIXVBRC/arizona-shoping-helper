@@ -37,6 +37,10 @@ function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _hei
         return private.color
     end
 
+    function public:getCode()
+        return private.code
+    end
+
     function public:isSelectable()
         return private.selectable
     end
@@ -109,15 +113,6 @@ function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _hei
         private:setY(textdraw:getY() + 1)
         private:setWidth(textdraw:getWidth() - 2)
         private:setHeight(textdraw:getHeight() - 2)
-        return public
-    end
-
-    function public:getCode()
-        return private.code
-    end
-
-    function private:setCode(code)
-        private.code = code
         return public
     end
 

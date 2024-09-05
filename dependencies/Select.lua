@@ -1,5 +1,5 @@
 local class = {}
-function class:new(_command, _defaultConfig)
+function class:new(_command, _default)
     local public = {}
     local private = {
         ['minmax'] = _sh.dependencies.minMax:new({
@@ -12,7 +12,7 @@ function class:new(_command, _defaultConfig)
                 ['max'] = 100,
             },
         }),
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _sh.config),
+        ['configManager'] = _sh.dependencies.configManager:new(_command, _sh.config, _default),
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
         ['cache'] = _sh.dependencies.cache:new(),
     }
@@ -118,15 +118,20 @@ function class:new(_command, _defaultConfig)
             for _, code in ipairs(private:getTextdrawCodes()) do
                 for _, textdraw in ipairs(_sh.textdrawManager:getTextdraws()) do
                     if code == textdraw:getCode() then
-                        renderDrawBoxWithBorder(
-                            textdraw:getX(),
-                            textdraw:getY(),
-                            textdraw:getWidth(),
-                            textdraw:getHeight(),
-                            '0x00ffffff',
-                            private:getBorder(),
-                            _sh.color:alpha(private:getAlpha()) .. private:getColor()
-                        )
+                        for _, childTextdraw in ipairs(textdraw:getChilds()) do
+                            if _sh.helper:isPrice(childTextdraw:getText()) then
+                                renderDrawBoxWithBorder(
+                                    textdraw:getX(),
+                                    textdraw:getY(),
+                                    textdraw:getWidth(),
+                                    textdraw:getHeight(),
+                                    '0x00ffffff',
+                                    private:getBorder(),
+                                    _sh.color:alpha(private:getAlpha()) .. private:getColor()
+                                )
+                                break
+                            end
+                        end
                     end
                 end
             end
@@ -135,12 +140,7 @@ function class:new(_command, _defaultConfig)
 
     -- INITS
 
-    function private:init(defaultConfig)
-        for name, value in pairs(defaultConfig) do
-            if private.configManager:getOption(name) == nil then
-                private.configManager:setOption(name, value)
-            end
-        end
+    function private:init()
         private:initCommands()
         private:initThreads()
         private:initEvents()
@@ -150,7 +150,7 @@ function class:new(_command, _defaultConfig)
         private.commandManager:add('active', private.toggleActive)
         private.commandManager:add('add', private.toggleAdd)
         private.commandManager:add('border', function (border)
-            private:setBorder(_sh.helper:toNumber(border))
+            private:setBorder(_sh.helper:getNumber(border))
         end)
         private.commandManager:add('color', function (color)
             if color:find('^......$') then
@@ -158,7 +158,7 @@ function class:new(_command, _defaultConfig)
             end
         end)
         private.commandManager:add('alpha', function (border)
-            private:setAlpha(_sh.helper:toNumber(border))
+            private:setAlpha(_sh.helper:getNumber(border))
         end)
     end
 
@@ -180,13 +180,12 @@ function class:new(_command, _defaultConfig)
             'onSendClickTextDraw',
             function (textdrawId)
                 if _sh.player:inShop() and private:isActive() and private:isAdd() then
-                    for _, textdraw in ipairs(_sh.textdrawManager:getTextdraws()) do
-                        if textdrawId == textdraw:getId() then
-                            for _, childTextdraw in ipairs(textdraw:getChilds()) do
-                                if _sh.helper:isPrice(childTextdraw:getText()) then
-                                    private:toggleTextdrawCode(textdraw:getCode())
-                                    return
-                                end
+                    local textdraw = _sh.textdrawManager:getTextdrawById(textdrawId)
+                    if textdraw ~= nil then
+                        for _, childTextdraw in ipairs(textdraw:getChilds()) do
+                            if _sh.helper:isPrice(childTextdraw:getText()) then
+                                private:toggleTextdrawCode(textdraw:getCode())
+                                return
                             end
                         end
                     end
@@ -197,7 +196,6 @@ function class:new(_command, _defaultConfig)
             'onShowDialog',
             function (dialogId)
                 if _sh.player:inShop() and private:isActive() and private:isAdd() then
-                    _sh.chat:push(dialogId)
                     sampSendDialogResponse(dialogId, 0, 0)
                     return false
                 end
@@ -205,7 +203,7 @@ function class:new(_command, _defaultConfig)
         )
     end
 
-    private:init(_defaultConfig or {})
+    private:init()
     return public
 end
 return class

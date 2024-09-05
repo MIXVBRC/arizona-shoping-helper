@@ -1,12 +1,12 @@
 local class = {}
-function class:new(_command, _defaultConfig)
+function class:new(_command, _default)
     local public = {}
     local private = {
         ['mods'] = {
             'buy',
             'sell',
         },
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _sh.config),
+        ['configManager'] = _sh.dependencies.configManager:new(_command, _sh.config, _default),
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
     }
 
@@ -16,7 +16,7 @@ function class:new(_command, _defaultConfig)
         return private.configManager:getOption('active')
     end
 
-    function public:toggleActive()
+    function private:toggleActive()
         private.configManager:setOption('active', not private:isActive())
         return public
     end
@@ -27,7 +27,7 @@ function class:new(_command, _defaultConfig)
         return private.configManager:getOption('mod')
     end
 
-    function public:switchMod()
+    function private:switchMod()
         for _, mod in ipairs(private.mods) do
             if private:getMod() ~= mod then
                 private.configManager:setOption('mod', not private:isActive())
@@ -39,19 +39,14 @@ function class:new(_command, _defaultConfig)
 
     -- INITS
 
-    function private:init(defaultConfig)
-        for name, value in pairs(defaultConfig) do
-            if private.configManager:getOption(name) == nil then
-                private.configManager:setOption(name, value)
-            end
-        end
+    function private:init()
         private:initCommands()
         private:initEvents()
     end
 
     function private:initCommands()
-        private.commandManager:add('active', public.toggleActive)
-        private.commandManager:add('mod', public.switchMod)
+        private.commandManager:add('active', private.toggleActive)
+        private.commandManager:add('mod', private.switchMod)
     end
 
     function private:initEvents()
@@ -68,7 +63,7 @@ function class:new(_command, _defaultConfig)
         )
     end
 
-    private:init(_defaultConfig or {})
+    private:init()
     return public
 end
 return class

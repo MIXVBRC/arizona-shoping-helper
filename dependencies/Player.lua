@@ -3,6 +3,7 @@ function class:new()
     local public = {}
     local private = {
         ['inShop'] = false,
+        ['editProductList'] = false,
         ['cache'] = _sh.dependencies.cache:new(),
     }
 
@@ -40,8 +41,17 @@ function class:new()
         return private.inShop
     end
 
-    function private:setInShop(inShop)
+    function private:setShop(inShop)
         private.inShop = inShop
+        return public
+    end
+
+    function public:editProducts()
+        return private.editProductList
+    end
+
+    function private:setEditProducts(editProductList)
+        private.editProductList = editProductList
         return public
     end
 
@@ -51,16 +61,28 @@ function class:new()
 
     function private:initEvents()
         _sh.eventManager:add(
-            'onVisitShop',
-            function (shop, mod, textdraw)
-                private:setInShop(true)
-                _sh.threadManager:add(
-                    nil,
-                    function ()
-                        while sampTextdrawIsExists(textdraw:getId()) do wait(0) end
-                        private:setInShop(false)
-                    end
-                )
+            'onCreateTextdraw',
+            function (textdraw)
+                if not public:inShop() and _sh.message:get('message_shop_textdraw') == _sh.helper:textDecode(textdraw:getText()) then
+                    private:setShop(true)
+                    _sh.threadManager:add(
+                        nil,
+                        function () wait(0) while sampTextdrawIsExists(textdraw:getId()) do wait(0) end
+                            private:setShop(false)
+                            _sh.chat:push('shop')
+                        end
+                    )
+                end
+                if not public:editProducts() and _sh.message:get('message_trade_textdraw') == _sh.helper:textDecode(textdraw:getText()) then
+                    private:setEditProducts(true)
+                    _sh.threadManager:add(
+                        nil,
+                        function () wait(0) while sampTextdrawIsExists(textdraw:getId()) do wait(0) end
+                            private:setEditProducts(false)
+                            _sh.chat:push('trade')
+                        end
+                    )
+                end
             end
         )
     end

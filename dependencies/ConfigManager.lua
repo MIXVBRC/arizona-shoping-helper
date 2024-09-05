@@ -1,5 +1,5 @@
 local class = {}
-function class:new(_name, _config)
+function class:new(_name, _config, _default)
     local public = {}
     local private = {
         ['name'] = _name,
@@ -24,6 +24,16 @@ function class:new(_name, _config)
         return public
     end
 
+    function public:init(default)
+        for name, value in pairs(default or {}) do
+            if public:getOption(name) == nil then
+                public:setOption(name, value)
+            end
+        end
+        return public
+    end
+
+    public:init(_default)
     return public
 end
 
