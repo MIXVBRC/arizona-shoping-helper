@@ -20,12 +20,12 @@ function class:new()
     end
 
     function public:getByNum(num)
-        if num > 1 then
-            num = 1
+        if num > 255 then
+            num = 255
         elseif num < 0 then
             num = 0
         end
-        local result = string.format("%x", num * 255)
+        local result = string.format("%x", num)
         if result:len() < 2 then
             result = '0' .. result
         end
@@ -33,8 +33,8 @@ function class:new()
     end
 
     function public:getRGB(r, g, b)
-        return public:getByNum(r) .. public:getByNum(g) .. public:getByNum(b);
-    end;
+        return public:getByNum(r) .. public:getByNum(g) .. public:getByNum(b)
+    end
 
     function public:alpha(num)
         if num > 100 then
@@ -42,7 +42,7 @@ function class:new()
         elseif num < 0 then
             num = 0
         end
-        return '0x' .. _sh.color:getByNum(num / 100)
+        return '0x' .. _sh.color:getByNum(255 / 100 * num)
     end
 
     return public

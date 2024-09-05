@@ -25,14 +25,11 @@ function class:new()
     end
 
     function public:render()
-        local _, x, y, z, _, _ = convert3DCoordsToScreenEx(_sh.player:getX(), _sh.player:getY(), _sh.player:getZ() - 1);
+        local _, x, y, z, _, _ = convert3DCoordsToScreenEx(_sh.player:getX(), _sh.player:getY(), _sh.player:getZ() - 1)
         if z > 0 then
-            renderDrawLine(x, y, x, y - 50, 3,
-            private:getAlpha() ..
-            private:getColor()
-        );
-            renderDrawPolygon(x, y - 10, 20, 20, 3, 180, private:getAlpha() .. private:getColor());
-        end;
+            renderDrawLine(x, y, x, y - 50, 3, private:getAlpha() .. private:getColor())
+            renderDrawPolygon(x, y - 10, 20, 20, 3, 180, private:getAlpha() .. private:getColor())
+        end
     end
 
     return public

@@ -326,6 +326,6 @@ function this:init()
 end
 
 function main()
-    while not isSampAvailable() do wait(0) end;
+    while not isSampAvailable() do wait(0) end
     this:init()
 end

@@ -57,7 +57,7 @@ function class:new(_command, _defaultConfig)
     end
 
     function private:setColor(color)
-        return private.configManager:setOption('color', color)
+        return private.configManager:setOption('color', color or '0000ff')
     end
 
     -- ALPHA
@@ -114,9 +114,8 @@ function class:new(_command, _defaultConfig)
     -- WORK
 
     function private:work()
-        local textdraws = private.cache:get('items')
-        if textdraws ~= nil then
-            for _, code in ipairs(textdraws) do
+        if _sh.player:inShop() then
+            for _, code in ipairs(private:getTextdrawCodes()) do
                 for _, textdraw in ipairs(_sh.textdrawManager:getTextdraws()) do
                     if code == textdraw:getCode() then
                         renderDrawBoxWithBorder(
@@ -126,7 +125,7 @@ function class:new(_command, _defaultConfig)
                             textdraw:getHeight(),
                             '0x00ffffff',
                             private:getBorder(),
-                            _sh.color:getAlpha(private:getAlpha()) .. private:getColor()
+                            _sh.color:alpha(private:getAlpha()) .. private:getColor()
                         )
                     end
                 end
@@ -142,8 +141,6 @@ function class:new(_command, _defaultConfig)
                 private.configManager:setOption(name, value)
             end
         end
-        private.cache:add('items', private:getTextdrawCodes())
-        private.cache:add('border', private:getBorder())
         private:initCommands()
         private:initThreads()
         private:initEvents()
@@ -153,17 +150,15 @@ function class:new(_command, _defaultConfig)
         private.commandManager:add('active', private.toggleActive)
         private.commandManager:add('add', private.toggleAdd)
         private.commandManager:add('border', function (border)
-            private.setBorder(_sh.helper:toNumber(border))
+            private:setBorder(_sh.helper:toNumber(border))
         end)
         private.commandManager:add('color', function (color)
-            local r, g, b = color:match('^(%d+)%s+(%d+)%s+(%d+)$')
-            r = _sh.color:toNumber(r) or 0
-            g = _sh.color:toNumber(g) or 0
-            b = _sh.color:toNumber(b) or 0
-            private.setBorder(_sh.color:getRGB(r, g, b))
+            if color:find('^......$') then
+                private:setColor(color)
+            end
         end)
         private.commandManager:add('alpha', function (border)
-            private.setBorder(_sh.helper:toNumber(border))
+            private:setAlpha(_sh.helper:toNumber(border))
         end)
     end
 
@@ -201,7 +196,7 @@ function class:new(_command, _defaultConfig)
         _sh.eventManager:add(
             'onShowDialog',
             function (dialogId)
-                if private:isActive() and private:isAdd() then
+                if _sh.player:inShop() and private:isActive() and private:isAdd() then
                     _sh.chat:push(dialogId)
                     sampSendDialogResponse(dialogId, 0, 0)
                     return false

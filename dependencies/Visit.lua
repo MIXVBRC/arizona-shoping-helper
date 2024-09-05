@@ -221,7 +221,7 @@ function class:new(_command, _defaultConfig)
         if #renders > 0 then
             for _, render in ipairs(renders) do
                 local distance = _sh.helper:distanceToPlayer3d(render.x, render.y, render.z)
-                local alpha = _sh.color:alpha(1 - math.floor(distance * 100 / private:getDistance()) / 100)
+                local alpha = _sh.color:alpha(100 - math.floor(distance * 100 / private:getDistance()))
                 if isPointOnScreen(render.x, render.y, render.z, 0) and distance < private:getDistance() then
                     local sceenX, sceenY = convert3DCoordsToScreen(render.x, render.y, render.z - 1)
                     renderDrawLine(sceenX, sceenY, sceenX, sceenY - 90, 1, alpha .. colors.stick)

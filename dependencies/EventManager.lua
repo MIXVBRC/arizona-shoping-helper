@@ -11,11 +11,15 @@ function class:new()
     end
 
     function public:trigger(_name, ...)
+        local result = nil
         local _functions = private.events[_name]
         if _functions ~= nil then
             for _, _function in ipairs(_functions) do
                 if type(_function) == 'function' then
-                    return _function(...)
+                    result = _function(...)
+                    if result ~= nil then
+                        return result
+                    end
                 end
             end
         end
