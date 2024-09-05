@@ -16,7 +16,7 @@ function class:new(_command, _defaultConfig)
     end
 
     function private:initCommands()
-        -- private.commandManager:add('active', public.toggleActive)
+        private.commandManager:add('active', public.toggleActive)
     end
 
     private:init(_defaultConfig or {})

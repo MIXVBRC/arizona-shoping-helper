@@ -30,6 +30,24 @@ function class:new(_name, _default)
         return public
     end
 
+    function public:delete(_title, _name)
+        if _title ~= 'json' then
+            local data = {}
+            local jsonName = private:getJsonName(_title, _name)
+            for title, values in pairs(private.data) do
+                for name, value in pairs(values) do
+                    if (title == 'json' and jsonName ~= name) or (title ~= 'json' and _name ~= name) then
+                        data[title] = data[title] or {}
+                        data[title][name] = value
+                    end
+                end
+            end
+            private.data = data
+            private:save()
+        end
+        return public
+    end
+
     function private:collect()
         for title, values in pairs(private.data) do
             for name, value in pairs(values) do
@@ -49,7 +67,7 @@ function class:new(_name, _default)
                 for name, value in pairs(values) do
                     private.data[title][name] = value
                     if value == 'json' then
-                        private.data[title][name] = _sh.helper:jsonDecode(private.data.json[private:getJsonName(title, name)])
+                        private.data[title][name] = _sh.helper:jsonDecode(private.data.json[private:getJsonName(title, name)] or '[]')
                     end
                 end
             end

@@ -1,5 +1,5 @@
 local class = {}
-function class:new(_name, _defaultConfig)
+function class:new(_command, _defaultConfig)
     local public = {}
     local private = {
         ['radius'] = 5,
@@ -13,8 +13,8 @@ function class:new(_name, _defaultConfig)
                 ['max'] = 60,
             },
         }),
-        ['configManager'] = _sh.dependencies.configManager:new(_name, _sh.config),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
+        ['configManager'] = _sh.dependencies.configManager:new(_command, _sh.config),
+        ['commandManager'] = _sh.dependencies.commandManager:new(_command),
         ['lowPoint'] = _sh.dependencies.lowPoint:new(),
         ['cache'] = _sh.dependencies.cache:new(),
     }
@@ -56,47 +56,6 @@ function class:new(_name, _defaultConfig)
 
     function private:getColor(name)
         return private.configManager:getOption('colors')[name]
-    end
-
-    -- INITS
-
-    function private:init(defaultConfig)
-        for name, value in pairs(defaultConfig) do
-            if private.configManager:getOption(name) == nil then
-                private.configManager:setOption(name, value)
-            end
-        end
-        private:initThreads()
-        private:initCommands()
-    end
-
-    function private:initThreads()
-        _sh.threadManager:add(
-            nil,
-            function ()
-                while true do wait(0)
-                    if private:isActive() then
-                        private:work()
-                    end
-                end
-            end
-        )
-    end
-
-    function private:initCommands()
-        private.commandManager:add('active', public.toggleActive)
-        private.commandManager:add('polygons', function (polygons)
-            polygons = _sh.helper:toInt(polygons)
-            if polygons ~= nil then
-                private:setPolygons(polygons)
-            end
-        end)
-        private.commandManager:add('distance', function (distance)
-            distance = _sh.helper:toInt(distance)
-            if distance ~= nil then
-                private:setDistance(distance)
-            end
-        end)
     end
 
     -- LOGICK
@@ -241,6 +200,47 @@ function class:new(_name, _defaultConfig)
                 private.lowPoint:render()
             end
         end
+    end
+
+    -- INITS
+
+    function private:init(defaultConfig)
+        for name, value in pairs(defaultConfig) do
+            if private.configManager:getOption(name) == nil then
+                private.configManager:setOption(name, value)
+            end
+        end
+        private:initThreads()
+        private:initCommands()
+    end
+
+    function private:initThreads()
+        _sh.threadManager:add(
+            nil,
+            function ()
+                while true do wait(0)
+                    if private:isActive() then
+                        private:work()
+                    end
+                end
+            end
+        )
+    end
+
+    function private:initCommands()
+        private.commandManager:add('active', public.toggleActive)
+        private.commandManager:add('polygons', function (polygons)
+            polygons = _sh.helper:toInt(polygons)
+            if polygons ~= nil then
+                private:setPolygons(polygons)
+            end
+        end)
+        private.commandManager:add('distance', function (distance)
+            distance = _sh.helper:toInt(distance)
+            if distance ~= nil then
+                private:setDistance(distance)
+            end
+        end)
     end
 
     private:init(_defaultConfig or {})

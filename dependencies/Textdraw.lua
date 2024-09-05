@@ -1,5 +1,5 @@
 local class = {}
-function class:new(_id, _model, _text, _color, _selectable, _position, _size)
+function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _height)
     local public = {}
     local private = {
         ['id'] = _id,
@@ -7,12 +7,18 @@ function class:new(_id, _model, _text, _color, _selectable, _position, _size)
         ['text'] = _text,
         ['color'] = _color,
         ['selectable'] = _selectable,
-        ['position'] = _position,
-        ['size'] = _size,
+        ['position'] = {
+            ['x'] = _x,
+            ['y'] = _y,
+        },
+        ['size'] = {
+            ['width'] = _width,
+            ['height'] = _height,
+        },
         ['childs'] = {},
         ['parent'] = nil,
         ['time'] = os.clock(),
-        ['code'] = nil,
+        ['code'] = _sh.helper:md5(_model .. _text .. _color),
     }
 
     function public:getId()
@@ -119,11 +125,6 @@ function class:new(_id, _model, _text, _color, _selectable, _position, _size)
         private.position.x, private.position.y = convertGameScreenCoordsToWindowScreenCoords(public:getX(), public:getY())
         private.size.width, private.size.height = convertGameScreenCoordsToWindowScreenCoords(public:getWidth(), public:getHeight())
         if private.selectable == 1 then private.selectable = true else private.selectable = false end
-        private:initCode()
-    end
-
-    function private:initCode()
-        private:setCode(_sh.helper:md5(public:getModel()..public:getColor()..public:getText()))
     end
 
     private:init()

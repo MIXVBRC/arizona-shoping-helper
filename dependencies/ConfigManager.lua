@@ -12,10 +12,16 @@ function class:new(_name, _config)
 
     function public:setOption(name, value)
         private.config:set(private:getName(), name, value)
+        return public
     end
 
     function public:getOption(name)
         return private.config:get(private:getName(), name)
+    end
+
+    function public:deleteOption(name)
+        private.config:delete(private:getName(), name)
+        return public
     end
 
     return public

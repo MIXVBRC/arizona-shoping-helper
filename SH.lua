@@ -275,6 +275,26 @@ local this = {
                 },
             },
         },
+        {
+            ['name'] = 'select',
+            ['entity'] = 'dependencies.Select',
+            ['dependencies'] = {},
+            ['init'] = true,
+            ['args'] = {
+                'select',
+                {},
+            },
+        },
+        {
+            ['name'] = 'swipe',
+            ['entity'] = 'dependencies.Swipe',
+            ['dependencies'] = {},
+            ['init'] = true,
+            ['args'] = {
+                'swipe',
+                {},
+            },
+        },
     },
 }
 
