@@ -292,7 +292,10 @@ local this = {
             ['init'] = true,
             ['args'] = {
                 'swipe',
-                {},
+                {
+                    ['active'] = false,
+                    ['mod'] = 'buy',
+                },
             },
         },
     },

@@ -145,15 +145,18 @@ function class:new()
     end
 
     function private:initEvents()
-        _sh.eventManager:add('onTextDrawSetString', function (textdrawId, text)
-            local mod = private.mods[text]
-            if mod ~= nil then
-                local shop = public:getNearby()
-                if shop ~= nil then
-                    _sh.eventManager:trigger('onVisitShop', shop, mod, textdrawId)
+        _sh.eventManager:add(
+            'onAfterChangeTextdraw',
+            function (textdraw)
+                local mod = private.mods[textdraw:getText()]
+                if mod ~= nil then
+                    local shop = public:getNearby()
+                    if shop ~= nil then
+                        _sh.eventManager:trigger('onVisitShop', shop, mod, textdraw)
+                    end
                 end
             end
-        end)
+        )
     end
 
     private:init()

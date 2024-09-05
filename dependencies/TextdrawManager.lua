@@ -3,7 +3,6 @@ function class:new()
     local public = {}
     local private = {
         ['textdraws'] = {},
-        ['queueTextdraws'] = {},
         ['cache'] = _sh.dependencies.cache:new(),
     }
 
@@ -28,22 +27,6 @@ function class:new()
         return public
     end
 
-    -- TEXTDRAW QUEUE
-
-    function private:getQueueTextdraws()
-        return private.queueTextdraws
-    end
-
-    function private:setQueueTextdraws(textdraws)
-        private.queueTextdraws = textdraws
-        return public
-    end
-
-    function private:addQueueTextdraws(textdraw)
-        table.insert(private.queueTextdraws, textdraw)
-        return public
-    end
-
     -- INITS
 
     function private:init()
@@ -52,102 +35,105 @@ function class:new()
     end
 
     function private:initEvents()
-        _sh.eventManager:add('onShowTextDraw', function (textdrawId, textdraw)
-            private:addQueueTextdraws(_sh.dependencies.textdraw:new(
-                textdrawId,
-                textdraw.modelId,
-                textdraw.text,
-                textdraw.backgroundColor,
-                textdraw.selectable,
-                textdraw.position,
-                {
-                    ['width'] = textdraw.lineWidth,
-                    ['height'] = textdraw.lineHeight,
-                }
-            ))
-        end)
+        _sh.eventManager:add(
+            'onShowTextDraw',
+            function (textdrawId, textdraw)
+                local newTextdraw = _sh.dependencies.textdraw:new(
+                    textdrawId,
+                    textdraw.modelId,
+                    textdraw.text,
+                    textdraw.backgroundColor,
+                    textdraw.selectable,
+                    textdraw.position.x,
+                    textdraw.position.y,
+                    textdraw.lineWidth,
+                    textdraw.lineHeight
+                )
+                local oldTextdraws = public:getTextdraws()
+                if newTextdraw:isSelectable() then
+                    local newTextdraws = {}
+                    for _, oldTextdraw in ipairs(oldTextdraws) do
+                        if oldTextdraw:getX() ~= newTextdraw:getX() or oldTextdraw:getY() ~= newTextdraw:getY() then
+                            table.insert(newTextdraws, oldTextdraw)
+                        end
+                    end
+                    table.insert(newTextdraws, newTextdraw)
+                    private:setTextdraws(newTextdraws)
+                else
+                    for _, oldTextdraw in ipairs(oldTextdraws) do
+                        if oldTextdraw:getX() < newTextdraw:getX()
+                        and oldTextdraw:getY() < newTextdraw:getY()
+                        and oldTextdraw:getX() + oldTextdraw:getWidth() > newTextdraw:getX()
+                        and oldTextdraw:getY() + oldTextdraw:getHeight() > newTextdraw:getY()
+                        then
+                            oldTextdraw:addChild(newTextdraw)
+                        end
+                    end
+                end
+                _sh.eventManager:trigger('onCreateTextdraw', newTextdraw)
+            end
+        )
+        _sh.eventManager:add(
+            'onTextDrawSetString',
+            function (textdrawId, text)
+                local textdraws = public:getTextdraws()
+                if #textdraws > 0 then
+                    for _, textdraw in ipairs(textdraws) do
+                        if textdrawId ~= textdraw:getId() then
+                            for _, childTextdraw in ipairs(textdraw:getChilds()) do
+                                if textdrawId == childTextdraw:getId() then
+                                    childTextdraw:setData({
+                                        ['text'] = text,
+                                    })
+                                    goto breakAll
+                                end
+                            end
+                        else
+                            textdraw:setData({
+                                ['text'] = text,
+                            })
+                            goto breakAll
+                        end
+                    end
+                    ::breakAll::
+                end
+            end
+        )
     end
 
     function private:initThreads()
-        _sh.threadManager:add(
-            nil,
-            function ()
-                while true do wait(0)
-                    local queueTextdraws = private:getQueueTextdraws()
-                    if #queueTextdraws > 0 then
-                        local textdraws = {}
-                        local newTextdraws = {}
-                        local clildTextdraws = {}
-                        for _, textdraw in ipairs(queueTextdraws) do
-                            if textdraw:isSelectable() then
-                                table.insert(newTextdraws, textdraw)
-                            else
-                                table.insert(clildTextdraws, textdraw)
-                            end
-                        end
-                        for _, newTextdraw in ipairs(newTextdraws) do
-                            for _, clildTextdraw in ipairs(clildTextdraws) do
-                                if newTextdraw:getX() < clildTextdraw:getX()
-                                and newTextdraw:getY() < clildTextdraw:getY()
-                                and newTextdraw:getX() + newTextdraw:getWidth() > clildTextdraw:getX()
-                                and newTextdraw:getY() + newTextdraw:getHeight() > clildTextdraw:getY()
-                                then
-                                    newTextdraw:addChild(clildTextdraw)
-                                end
-                            end
-                            table.insert(textdraws, newTextdraw)
-                        end
-                        for _, oldTextdraw in ipairs(public:getTextdraws()) do
-                            for _, newTextdraw in ipairs(newTextdraws) do
-                                if oldTextdraw:getX() == newTextdraw:getX() and oldTextdraw:getY() == newTextdraw:getY() then
-                                    goto continue
-                                end
-                            end
-                            table.insert(textdraws, oldTextdraw)
-                            ::continue::
-                        end
-                        private:setTextdraws(textdraws)
-                        private:setQueueTextdraws({})
-                    end
-                end
-            end
-        )
-        _sh.threadManager:add(
-            nil,
-            function ()
-                while true do wait(0)
-                    local textdraws = public:getTextdraws()
-                    if #textdraws > 0 then
-                        -- for _, textdraw in ipairs(textdraws) do
-                            -- local color = '0xffffffff'
-                            -- if textdraw:getType() == 'product' then
-                            --     color = '0xffff0000'
-                            -- end
-                            -- renderDrawBoxWithBorder(
-                            --     textdraw:getX(),
-                            --     textdraw:getY(),
-                            --     textdraw:getWidth(),
-                            --     textdraw:getHeight(),
-                            --     '0x00ffffff',
-                            --     1,
-                            --     color
-                            -- );
-                            -- for _, childTextdraw in ipairs(textdraw:getChilds()) do
-                            --     renderDrawBoxWithBorder(
-                            --         childTextdraw:getX(),
-                            --         childTextdraw:getY(),
-                            --         childTextdraw:getWidth(),
-                            --         childTextdraw:getHeight(),
-                            --         '0x00ffffff',
-                            --         1,
-                            --         '0xff0000ff'
-                            --     );
-                            -- end
-                        -- end
-                    end
-                end
-            end
-        )
+        -- _sh.threadManager:add(
+        --     nil,
+        --     function ()
+        --         while true do wait(0)
+        --             local textdraws = public:getTextdraws()
+        --             if #textdraws > 0 then
+        --                 for _, textdraw in ipairs(textdraws) do
+        --                     renderDrawBoxWithBorder(
+        --                         textdraw:getX(),
+        --                         textdraw:getY(),
+        --                         textdraw:getWidth(),
+        --                         textdraw:getHeight(),
+        --                         '0x00ffffff',
+        --                         1,
+        --                         '0xffffffff'
+        --                     );
+        --                     for _, childTextdraw in ipairs(textdraw:getChilds()) do
+        --                         renderDrawBoxWithBorder(
+        --                             childTextdraw:getX(),
+        --                             childTextdraw:getY(),
+        --                             childTextdraw:getWidth(),
+        --                             childTextdraw:getHeight(),
+        --                             '0x00ffffff',
+        --                             1,
+        --                             '0xff0000ff'
+        --                         );
+        --                     end
+        --                 end
+        --             end
+        --         end
+        --     end
+        -- )
     end
 
     private:init()

@@ -333,29 +333,32 @@ function class:new(_command, _defaultConfig)
     end
 
     function private:initEvents()
-        _sh.eventManager:add('onVisitShop', function (shop)
-            private:setLastShopId(shop:getId())
-            local time = os.time() + ( private:getTime() * 60 )
-            if private:getShop(shop:getId()) ~= nil then
-                private:changeShop(
-                    shop:getId(),
-                    {
-                        ['time'] = time,
-                        ['mod'] = shop:getMod(),
-                    }
-                )
-            else
-                private:addShop(
-                    shop:getId(),
-                    {
-                        ['time'] = time,
-                        ['mod'] = shop:getMod(),
-                        ['select'] = false,
-                        ['text'] = '',
-                    }
-                )
+        _sh.eventManager:add(
+            'onVisitShop',
+            function (shop)
+                private:setLastShopId(shop:getId())
+                local time = os.time() + ( private:getTime() * 60 )
+                if private:getShop(shop:getId()) ~= nil then
+                    private:changeShop(
+                        shop:getId(),
+                        {
+                            ['time'] = time,
+                            ['mod'] = shop:getMod(),
+                        }
+                    )
+                else
+                    private:addShop(
+                        shop:getId(),
+                        {
+                            ['time'] = time,
+                            ['mod'] = shop:getMod(),
+                            ['select'] = false,
+                            ['text'] = '',
+                        }
+                    )
+                end
             end
-        end)
+        )
     end
 
     private:init(_defaultConfig or {})

@@ -6,6 +6,19 @@ function class:new(_command, _defaultConfig)
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
     }
 
+    -- ACTIVE
+
+    function private:isActive()
+        return private.configManager:getOption('active')
+    end
+
+    function public:toggleActive()
+        private.configManager:setOption('active', not private:isActive())
+        return public
+    end
+
+    -- INITS
+
     function private:init(defaultConfig)
         for name, value in pairs(defaultConfig) do
             if private.configManager:getOption(name) == nil then
@@ -16,7 +29,7 @@ function class:new(_command, _defaultConfig)
     end
 
     function private:initCommands()
-        -- private.commandManager:add('active', public.toggleActive)
+        private.commandManager:add('active', public.toggleActive)
     end
 
     private:init(_defaultConfig or {})

@@ -6,6 +6,7 @@ function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _hei
         ['model'] = _model,
         ['text'] = _text,
         ['color'] = _color,
+        ['code'] = _sh.helper:md5(_model .. _text .. _color),
         ['selectable'] = _selectable,
         ['position'] = {
             ['x'] = _x,
@@ -18,7 +19,6 @@ function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _hei
         ['childs'] = {},
         ['parent'] = nil,
         ['time'] = os.clock(),
-        ['code'] = _sh.helper:md5(_model .. _text .. _color),
     }
 
     function public:getId()
@@ -103,6 +103,15 @@ function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _hei
         return private.parent
     end
 
+    function public:setParent(textdraw)
+        private.parent = textdraw
+        private:setX(textdraw:getX() + 1)
+        private:setY(textdraw:getY() + 1)
+        private:setWidth(textdraw:getWidth() - 2)
+        private:setHeight(textdraw:getHeight() - 2)
+        return public
+    end
+
     function public:getCode()
         return private.code
     end
@@ -112,12 +121,14 @@ function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _hei
         return public
     end
 
-    function public:setParent(textdraw)
-        private.parent = textdraw
-        private:setX(textdraw:getX() + 1)
-        private:setY(textdraw:getY() + 1)
-        private:setWidth(textdraw:getWidth() - 2)
-        private:setHeight(textdraw:getHeight() - 2)
+    function public:setData(data)
+        if data ~= nil then
+            _sh.eventManager:trigger('onBeforeChangeTextdraw', public, data)
+            for name, value in pairs(data) do
+                private[name] = value
+            end
+            _sh.eventManager:trigger('onAfterChangeTextdraw', public, data)
+        end
         return public
     end
 
