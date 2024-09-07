@@ -108,13 +108,19 @@ function class:new()
             nil,
             function ()
                 while true do wait(0)
+                    local flag = false
                     local textdraws = {}
                     for _, textdraw in ipairs(public:getTextdraws()) do
                         if sampTextdrawIsExists(textdraw:getId()) then
                             table.insert(textdraws, textdraw)
+                        else
+                            _sh.eventManager:trigger('onDeleteTextdraw', textdraw)
+                            flag = true
                         end
                     end
-                    private:setTextdraws(textdraws)
+                    if flag then
+                        private:setTextdraws(textdraws)
+                    end
                 end
             end
         )

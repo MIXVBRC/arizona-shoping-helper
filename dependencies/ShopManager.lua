@@ -27,7 +27,7 @@ function class:new()
     end
 
     function public:getAll()
-        return private.shops
+        return private.shops or {}
     end
 
     function public:getNearby()
@@ -160,7 +160,24 @@ function class:new()
         -- _sh.eventManager:add(
         --     'onCreateTextdraw',
         --     function (textdraw)
-        --         _sh.chat:push(_sh.helper:textDecode(textdraw:getText()))
+        --         if not public:inShop() and _sh.message:get('message_shop_textdraw') == _sh.helper:textDecode(textdraw:getText()) then
+        --             private:setShop(true)
+        --             _sh.threadManager:add(
+        --                 nil,
+        --                 function () wait(0) while sampTextdrawIsExists(textdraw:getId()) do wait(0) end
+        --                     private:setShop(false)
+        --                 end
+        --             )
+        --         end
+        --         if not public:editProducts() and _sh.message:get('message_trade_textdraw') == _sh.helper:textDecode(textdraw:getText()) then
+        --             private:setEditProducts(true)
+        --             _sh.threadManager:add(
+        --                 nil,
+        --                 function () wait(0) while sampTextdrawIsExists(textdraw:getId()) do wait(0) end
+        --                     private:setEditProducts(false)
+        --                 end
+        --             )
+        --         end
         --     end
         -- )
     end

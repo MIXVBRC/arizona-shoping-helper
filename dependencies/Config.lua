@@ -4,13 +4,18 @@ function class:new(_name, _default)
     local private = {
         ['name'] = (_name or 'config') .. '.ini',
         ['data'] = _default or {},
+        ['arrayName'] = 'json',
     }
 
     function private:getName()
         return private.name
     end
 
-    function private:getJsonName(title, name)
+    function private:getArrayName()
+        return private.arrayName
+    end
+
+    function private:getArrayDataName(title, name)
         return title .. '-' .. name
     end
 
@@ -22,7 +27,7 @@ function class:new(_name, _default)
     end
 
     function public:set(title, name, data)
-        if title ~= 'json' and data ~= 'json' then
+        if title ~= private:getArrayName() and data ~= private:getArrayName() then
             private.data[title] = private.data[title] or {}
             private.data[title][name] = data
             private:save()
@@ -31,12 +36,12 @@ function class:new(_name, _default)
     end
 
     function public:delete(_title, _name)
-        if _title ~= 'json' then
+        if _title ~= private:getArrayName() then
             local data = {}
-            local jsonName = private:getJsonName(_title, _name)
+            local jsonName = private:getArrayDataName(_title, _name)
             for title, values in pairs(private.data) do
                 for name, value in pairs(values) do
-                    if (title == 'json' and jsonName ~= name) or (title ~= 'json' and _name ~= name) then
+                    if (title == private:getArrayName() and jsonName ~= name) or (title ~= private:getArrayName() and _name ~= name) then
                         data[title] = data[title] or {}
                         data[title][name] = value
                     end
@@ -53,8 +58,8 @@ function class:new(_name, _default)
             for name, value in pairs(values) do
                 if type(value) == 'table' then
                     private.data.json = private.data.json or {}
-                    private.data.json[private:getJsonName(title, name)] = _sh.helper:jsonEncode(value)
-                    private.data[title][name] = 'json'
+                    private.data.json[private:getArrayDataName(title, name)] = _sh.helper:jsonEncode(value)
+                    private.data[title][name] = private:getArrayName()
                 end
             end
         end
@@ -62,12 +67,12 @@ function class:new(_name, _default)
 
     function private:disassemble()
         for title, values in pairs(private.data) do
-            if title ~= 'json' then
+            if title ~= private:getArrayName() then
                 private.data[title] = {}
                 for name, value in pairs(values) do
                     private.data[title][name] = value
-                    if value == 'json' then
-                        private.data[title][name] = _sh.helper:jsonDecode(private.data.json[private:getJsonName(title, name)] or '[]')
+                    if value == private:getArrayName() then
+                        private.data[title][name] = _sh.helper:jsonDecode(private.data.json[private:getArrayDataName(title, name)] or '[]')
                     end
                 end
             end

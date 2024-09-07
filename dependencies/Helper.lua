@@ -183,8 +183,7 @@ function class:new()
 
     function public:textDecode(text)
         local result = {}
-        text:gsub(
-            '.',
+        text:gsub('.',
             function(symbol)
                 table.insert(result, private.symbols.decode[symbol] or symbol)
             end
@@ -194,8 +193,7 @@ function class:new()
 
     function public:textEncode(text)
         local result = {}
-        text:gsub(
-            '.',
+        text:gsub('.',
             function(symbol)
                 table.insert(result, private.symbols.encode[symbol] or symbol)
             end
@@ -286,25 +284,32 @@ function class:new()
         return getDistanceBetweenCoords3d(_sh.player:getX(), _sh.player:getY(), _sh.player:getZ(), _x, _y, _z)
     end
 
-    function public:implode(separator, array)
-        local collect = ''
-        for _, value in ipairs(array) do
-            if value ~= nil and value ~= '' then
-                if collect == '' then
-                    collect = value
-                else
-                    collect = collect .. separator .. value
-                end
-            end
+    function public:explode(separator, text)
+        separator = separator or '.'
+        local result = {}
+        for part in string.gmatch(text, "([^"..separator.."]+)") do
+            table.insert(result, part)
         end
-        return collect
+        return result
     end
 
-    function public:getNumber(string)
-        string = tostring(string)
-        string = string:match('%d+')
-        string = tonumber(string)
-        return string
+    function public:trim(text)
+        text = tostring(text)
+        return text:gsub('^%s+', ''):gsub('%s+$', '')
+    end
+
+    function public:isNumber(text)
+        if text:find('^%d+$') then
+            return true
+        end
+        return false
+    end
+
+    function public:getNumber(text)
+        text = tostring(text)
+        text = text:match('%d+')
+        text = tonumber(text)
+        return text or ''
     end
 
     function public:isPrice(text)
@@ -323,11 +328,20 @@ function class:new()
         return false
     end
 
-    function public:isNumber(text)
-        if text:find('^%d+$') then
-            return true
+    function public:formatPrice(price)
+        price = public:getNumber(price)
+        price = tostring(price)
+        return '$'..price:reverse():gsub('(%d%d%d)','%1.'):gsub('(%d%d%d).$','%1'):reverse()
+    end
+
+    function public:extractPrice(price)
+        if public:isVCPrice(price) then
+            price = price:gsub('%s+', ''):gsub('^VC%$',''):gsub(',',''):gsub('%s', '')
+        else
+            price = price:gsub('%s+', ''):gsub('^%$',''):gsub(',',''):gsub('%s', '')
         end
-        return false
+        price = public:getNumber(price)
+        return price
     end
 
     return public

@@ -133,17 +133,11 @@ function class:new(_command, _default)
     function private:work()
         local time = os.time()
         local shops = _sh.shopManager:getAll()
-        local colors = {
-            ['stick'] = private:getColor('stick'),
-            ['text'] = private:getColor('text'),
-        }
-
         local renders = private.cache:get('renders')
         if renders == nil then
             renders = {}
             local timeNow = os.time()
             for _, shop in ipairs(shops) do
-
                 local render = {
                     ['text'] = '',
                     ['color'] = private:getColor('while'),
@@ -154,7 +148,6 @@ function class:new(_command, _default)
                     ['z'] = shop:getZ() + 0.16,
                 }
                 local shopTypes = {'player'}
-
                 if _sh.player:getName() == shop:getPlayer() then
                     shopTypes = {'player'}
                     render.color = private:getColor('player')
@@ -176,10 +169,8 @@ function class:new(_command, _default)
                     shopTypes = {'empty'}
                     render.color = private:getColor('empty')
                 end
-
                 local visitShop = private:getShop(shop:getId())
                 local show = false
-
                 if visitShop ~= nil and visitShop.time ~= nil then
                     if time <= visitShop.time and (visitShop.mod == shop:getMod() or visitShop.mod == _sh.message:get('message_shop_edit')) then
                         shopTypes = {'visit'}
@@ -202,7 +193,6 @@ function class:new(_command, _default)
                         show = true
                     end
                 end
-
                 if not show then
                     for _, shopType in ipairs(shopTypes) do
                         if private:getHiding(shopType) then
@@ -210,26 +200,28 @@ function class:new(_command, _default)
                         end
                     end
                 end
-
                 if show then
                     table.insert(renders, render)
                 end
             end
             private.cache:add('renders', renders, 1)
         end
+        private:render(renders)
+    end
 
+    function private:render(renders)
         if #renders > 0 then
             for _, render in ipairs(renders) do
                 local distance = _sh.helper:distanceToPlayer3d(render.x, render.y, render.z)
                 local alpha = _sh.color:alpha(100 - math.floor(distance * 100 / private:getDistance()))
                 if isPointOnScreen(render.x, render.y, render.z, 0) and distance < private:getDistance() then
                     local sceenX, sceenY = convert3DCoordsToScreen(render.x, render.y, render.z - 1)
-                    renderDrawLine(sceenX, sceenY, sceenX, sceenY - 90, 1, alpha .. colors.stick)
+                    renderDrawLine(sceenX, sceenY, sceenX, sceenY - 90, 1, alpha .. private:getColor('stick'))
                     renderDrawPolygon(sceenX, sceenY - 100, 20, 20, render.polygons, render.rotation, alpha .. render.color)
                     if render.text ~= nil or render.text ~= '' then
-                        renderFontDrawText(_sh.font:get('Arial', 12, 4), render.text, sceenX + 15, sceenY - 110, alpha .. colors.text)
+                        renderFontDrawText(_sh.font:get('Arial', 12, 4), render.text, sceenX + 15, sceenY - 110, alpha .. private:getColor('text'))
                     else
-                        renderFontDrawText(_sh.font:get('Arial', 12, 4), render.text, sceenX + 15, sceenY - 110, alpha .. colors.text)
+                        renderFontDrawText(_sh.font:get('Arial', 12, 4), render.text, sceenX + 15, sceenY - 110, alpha .. private:getColor('text'))
                     end
                 end
             end
@@ -260,20 +252,18 @@ function class:new(_command, _default)
             function ()
                 while true do wait(1000 * 60)
                     local shops = private:getShops()
-                    if #shops > 0 then
-                        local time = os.time()
-                        local flag = false
-                        local new = {}
-                        for id, shop in pairs(shops) do
-                            if shop.time ~= nil and time < shop.time then
-                                new[id] = shop
-                            else
-                                flag = true
-                            end
+                    local time = os.time()
+                    local flag = false
+                    local new = {}
+                    for id, shop in pairs(shops) do
+                        if shop.time ~= nil and time < shop.time then
+                            new[id] = shop
+                        else
+                            flag = true
                         end
-                        if flag then
-                            private:setShops(new)
-                        end
+                    end
+                    if flag then
+                        private:setShops(new)
                     end
                 end
             end
@@ -282,6 +272,7 @@ function class:new(_command, _default)
 
     function private:initCommands()
         private.commandManager:add('active', private.toggleActive)
+        private.commandManager:add('clear', private.clearShops)
         private.commandManager:add('distance', function (distance)
             distance = _sh.helper:getNumber(distance)
             if distance ~= nil then
@@ -321,7 +312,7 @@ function class:new(_command, _default)
             end
         end)
         for hiding, _ in pairs(private:getHidings()) do
-            private.commandManager:add(_sh.helper:implode('-', {'active', hiding}), function ()
+            private.commandManager:add(table.concat({'active', hiding}, '-'), function ()
                 private:toggleHiding(hiding)
             end)
         end

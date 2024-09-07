@@ -6,7 +6,7 @@ function class:new(_prefix)
     }
 
     function public:getCommandName(_name)
-        return _sh.helper:implode('-', {_sh.script.command, private.prefix, _name})
+        return table.concat({_sh.script.command, private.prefix, _name}, '-')
     end
 
     function public:add(_name, _function)

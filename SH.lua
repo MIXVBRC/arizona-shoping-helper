@@ -13,6 +13,13 @@ _sh = {
 local this = {
     ['dependencies'] = {
         {
+            ['name'] = 'moonloader',
+            ['entity'] = 'moonloader',
+            ['dependencies'] = {},
+            ['init'] = false,
+            ['args'] = {},
+        },
+        {
             ['name'] = 'md5',
             ['entity'] = 'md5',
             ['dependencies'] = {},
@@ -154,6 +161,20 @@ local this = {
             ['entity'] = 'dependencies.Textdraw',
             ['dependencies'] = {},
             ['init'] = false,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'product',
+            ['entity'] = 'dependencies.Product',
+            ['dependencies'] = {},
+            ['init'] = false,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'productManager',
+            ['entity'] = 'dependencies.ProductManager',
+            ['dependencies'] = {},
+            ['init'] = true,
             ['args'] = {},
         },
         {
@@ -329,7 +350,6 @@ local this = {
                 'trade',
                 {
                     ['active'] = false,
-                    ['last'] = false,
                 },
             },
         },

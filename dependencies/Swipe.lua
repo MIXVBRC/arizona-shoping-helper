@@ -53,7 +53,7 @@ function class:new(_command, _default)
         _sh.eventManager:add(
             'onVisitShop',
             function (shop, mod, textdraw)
-                if mod ~= private:getMod() then
+                if private:isActive() and mod ~= private:getMod() then
                     local parent = textdraw:getParent()
                     if parent ~= nil then
                         sampSendClickTextdraw(parent:getId())

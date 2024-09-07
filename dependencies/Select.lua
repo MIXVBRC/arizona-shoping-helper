@@ -194,7 +194,7 @@ function class:new(_command, _default)
         )
         _sh.eventManager:add(
             'onShowDialog',
-            function (dialogId)
+            function (dialogId, _, _, _, _, text)
                 if _sh.player:inShop() and private:isActive() and private:isAdd() then
                     sampSendDialogResponse(dialogId, 0, 0)
                     return false

@@ -69,7 +69,6 @@ function class:new()
                         nil,
                         function () wait(0) while sampTextdrawIsExists(textdraw:getId()) do wait(0) end
                             private:setShop(false)
-                            _sh.chat:push('shop')
                         end
                     )
                 end
@@ -79,7 +78,6 @@ function class:new()
                         nil,
                         function () wait(0) while sampTextdrawIsExists(textdraw:getId()) do wait(0) end
                             private:setEditProducts(false)
-                            _sh.chat:push('trade')
                         end
                     )
                 end
