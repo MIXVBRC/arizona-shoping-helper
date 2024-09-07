@@ -5,10 +5,10 @@ function class:new(_name, _code, _price, _mod, _textdraw)
         ['name'] = _name,
         ['code'] = _code,
         ['price'] = _price,
-        ['color'] = 'ffffff',
         ['mod'] = _mod,
         ['textdraw'] = _textdraw,
-        ['scaning'] = false,
+        ['scanning'] = false,
+        ['scanned'] = false,
         ['dialogIds'] = {
             3082,
             26541,
@@ -17,6 +17,8 @@ function class:new(_name, _code, _price, _mod, _textdraw)
             'Скин: ',
         },
     }
+
+    -- PARAMS
 
     function public:getName()
         return private.name
@@ -39,12 +41,22 @@ function class:new(_name, _code, _price, _mod, _textdraw)
         return private.textdraw
     end
 
-    function public:isScaning()
-        return private.scaning
+    function private:isScanning()
+        return private.scanning
     end
 
-    function public:setScaning(bool)
-        private.scaning = bool
+    function private:setScanning(bool)
+        private.scanning = bool
+        return public
+    end
+
+    function public:isScanned()
+        return private.scanned
+    end
+
+    function private:setScanned(bool)
+        private.scanned = bool
+        return public
     end
 
     function private:getDialogIds()
@@ -55,80 +67,62 @@ function class:new(_name, _code, _price, _mod, _textdraw)
         return private.prefixes
     end
 
+    -- LOGICK
+
     function public:scan()
-        if (public:getName() == nil or public:getName() == '') and sampTextdrawIsExists(public:getTextdraw():getId()) then
-            _sh.chat:push(1)
-            public:setScaning(true)
+        if not public:isScanned() and sampTextdrawIsExists(public:getTextdraw():getId()) then
+            private:setScanning(true)
             sampSendClickTextdraw(public:getTextdraw():getId())
-            _sh.chat:push(2)
         end
         return public
     end
 
+    function private:extractProductName(text)
+        local prefix = ''
+        local result = nil
+        local exploded = _sh.helper:explode('\n', text:gsub('{......}', ''))[1]
+        for _, _prefix in ipairs(private:getPrefixes()) do
+            if exploded:find(_prefix) then
+                prefix = _prefix
+                break
+            end
+        end
+        local array = _sh.helper:explode(':', exploded)
+        result = table.concat(array, ':', 2, #array)
+        if result == nil or result == '' then
+            array = _sh.helper:explode(' ', exploded)
+            result = table.concat(array, ' ', 4, #array)
+        end
+        return prefix .. _sh.helper:trim(result)
+    end
+
+    -- INITS
+
     function private:init()
         private:initEvents()
-        private:initThreads()
     end
 
     function private:initEvents()
         _sh.eventManager:add(
             'onShowDialog',
-            function (dialogId, _, _, _, _, _text)
-                _sh.chat:push(3)
-                if public:isScaning() then
-                    _sh.chat:push(4)
+            function (dialogId, _, _, _, _, text)
+                if private:isScanning() then
                     for _, _dialogId in ipairs(private:getDialogIds()) do
                         if dialogId == _dialogId then
-                            local prefix = ''
-                            local result = nil
-                            local exploded = _sh.helper:explode('\n', _text:gsub('{......}', ''))[1]
-                            for _, _prefix in ipairs(private:getPrefixes()) do
-                                if exploded:find(_prefix) then
-                                    prefix = _prefix
-                                    break
-                                end
+                            local name = private:extractProductName(text)
+                            if name ~= nil then
+                                private:setName(name)
+                                private:setScanned(true)
                             end
-                            local array = _sh.helper:explode(':', exploded)
-                            result = table.concat(array, ':', 2, #array)
-                            if result == nil or result == '' then
-                                array = _sh.helper:explode(' ', exploded)
-                                result = table.concat(array, ' ', 4, #array)
-                            end
-                            if result ~= nil then
-                                private:setName(prefix .. _sh.helper:trim(result))
-                                private.color = '00ff00'
-                            else
-                                private.color = 'ff0000'
-                            end
-                            _sh.chat:push(5)
-                            public:setScaning(false)
                             break
                         end
                     end
+                    _sh.dialogManager:sendDialogResponse(dialogId)
+                    private:setScanning(false)
+                    return false
                 end
-                _sh.chat:push(6)
-                sampSendDialogResponse(dialogId, 0)
-                return false
-            end
-        )
-    end
-
-    function private:initThreads()
-        _sh.threadManager:add(
-            nil,
-            function ()
-                while sampTextdrawIsExists(public:getTextdraw():getId()) do wait(0)
-                    renderDrawBoxWithBorder(
-                        public:getTextdraw():getX(),
-                        public:getTextdraw():getY(),
-                        public:getTextdraw():getWidth(),
-                        public:getTextdraw():getHeight(),
-                        '0x00ffffff',
-                        1,
-                        '0xff'..private.color
-                    )
-                end
-            end
+            end,
+            1000
         )
     end
 

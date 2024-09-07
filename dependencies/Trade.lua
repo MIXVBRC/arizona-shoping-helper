@@ -134,11 +134,11 @@ function class:new(_command, _default)
                                     message = message .. '{ffffff} {0000ff}х' .. (product.count or 1)
                                 end
                                 message = message .. '{ffffff} выставлен за {00ff00}' .. _sh.helper:formatPrice(price)
-                                sampSendDialogResponse(dialogId, 1, 0, input)
+                                _sh.dialogManager:sendDialogResponse(dialogId, 1, 0, input)
                                 _sh.chat:push(message)
                                 private:clearProduct()
                             else
-                                sampSendDialogResponse(dialogId, 0)
+                                _sh.dialogManager:sendDialogResponse(dialogId)
                                 _sh.dialogManager:show(
                                     '{65f0c6}¬ведите цену за предмет',
                                     name,
@@ -158,7 +158,7 @@ function class:new(_command, _default)
                             end
                             return false
                         elseif product.editType == 'delete' then
-                            sampSendDialogResponse(dialogId, 1)
+                            _sh.dialogManager:sendDialogResponse(dialogId, 1)
                             return false
                         end
                     end

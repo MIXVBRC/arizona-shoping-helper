@@ -2,21 +2,25 @@ local class = {}
 function class:new()
     local public = {}
     local private = {
-        ['events'] = {},
+        ['triggers'] = {},
     }
 
-    function public:add(_name, _function)
-        private.events[_name] = private.events[_name] or {}
-        table.insert(private.events[_name], _function)
+    function public:add(name, trigger, sort)
+        private.triggers[name] = private.triggers[name] or {}
+        table.insert(private.triggers[name], {
+            ['sort'] = sort or 1,
+            ['entity'] = trigger,
+        })
+        table.sort(private.triggers[name], function (a, b) return a.sort < b.sort end)
     end
 
-    function public:trigger(_name, ...)
+    function public:trigger(name, ...)
         local result = nil
-        local _functions = private.events[_name]
-        if _functions ~= nil then
-            for _, _function in ipairs(_functions) do
-                if type(_function) == 'function' then
-                    result = _function(...)
+        local triggers = private.triggers[name]
+        if triggers ~= nil then
+            for _, trigger in ipairs(triggers) do
+                if type(trigger.entity) == 'function' then
+                    result = trigger.entity(...)
                     if result ~= nil then
                         return result
                     end
@@ -37,6 +41,9 @@ function class:new()
         end
         function _sh.dependencies.events.onShowDialog(...)
             return public:trigger('onShowDialog', ...)
+        end
+        function _sh.dependencies.events.onSendDialogResponse(...)
+            return public:trigger('onSendDialogResponse', ...)
         end
     end
 

@@ -145,7 +145,7 @@ function class:new(_command, _default)
                         ( pointB:getY() + pointA:getY() ) / 2,
                         ( pointB:getZ() + pointA:getZ() ) / 2
                     )
-                    local alpha = _sh.color:alpha(100 - math.floor(distance * 100 / (private:getDistance() - 10)))
+                    local alpha = _sh.color:getAlpha(100 - math.floor(distance * 100 / (private:getDistance() - 10)))
                     local _, aX, aY, aZ, _, _ = convert3DCoordsToScreenEx(pointA:getX(), pointA:getY(), pointA:getZ())
                     local _, bX, bY, bZ, _, _ = convert3DCoordsToScreenEx(pointB:getX(), pointB:getY(), pointB:getZ())
                     if aZ > 0 and bZ > 0 then

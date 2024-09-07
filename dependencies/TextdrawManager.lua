@@ -4,6 +4,7 @@ function class:new()
     local private = {
         ['textdraws'] = {},
         ['idLinks'] = {},
+        ['all'] = {},
         ['cache'] = _sh.dependencies.cache:new(),
     }
 
@@ -13,17 +14,28 @@ function class:new()
         return private.textdraws or {}
     end
 
-    function public:getTextdrawById(id)
-        return private.idLinks[id]
+    function private:setTextdraws(textdraws)
+        private.textdraws = textdraws or {}
+        return public
     end
 
-    function private:setTextdraws(textdraws)
-        textdraws = textdraws or {}
-        private.idLinks = {}
-        for _, textdraw in ipairs(textdraws) do
-            private.idLinks[textdraw:getId()] = textdraw
+    function public:getTextdrawById(id)
+        for _, textdraw in ipairs(public:getTextdraws()) do
+            if id == textdraw:getId() then
+                return textdraw
+            end
         end
-        private.textdraws = textdraws
+        return nil
+    end
+
+    -- LOGICK
+
+    function private:pushDeleteTextdrawsEvent(textdraws)
+        if #textdraws > 0 then
+            for _, textdraw in ipairs(textdraws) do
+                _sh.eventManager:trigger('onDeleteÑlickableTextdraw', textdraw)
+            end
+        end
         return public
     end
 
@@ -50,31 +62,30 @@ function class:new()
                     data.lineHeight
                 )
                 local textdraws = {}
-                for _, textdraw in ipairs(public:getTextdraws()) do
-                    if sampTextdrawIsExists(textdraw:getId()) and id ~= textdraw:getId() then
-                        table.insert(textdraws, textdraw)
+                local deleteTextdraws = {}
+                if #public:getTextdraws() > 0 then
+                    for _, textdraw in ipairs(public:getTextdraws()) do
+                        if newTextdraw:getId() == textdraw:getId()
+                        or (newTextdraw:getX() == textdraw:getX() and newTextdraw:getY() == textdraw:getY())
+                        then
+                            table.insert(deleteTextdraws, textdraw)
+                        else
+                            table.insert(textdraws, textdraw)
+                            if textdraw:getX() < newTextdraw:getX()
+                            and textdraw:getY() < newTextdraw:getY()
+                            and textdraw:getX() + textdraw:getWidth() > newTextdraw:getX()
+                            and textdraw:getY() + textdraw:getHeight() > newTextdraw:getY()
+                            then
+                                textdraw:addChild(newTextdraw)
+                                _sh.eventManager:trigger('onTextdrawAddChild', textdraw)
+                            end
+                        end
                     end
                 end
                 if newTextdraw:isSelectable() then
-                    local newTextdraws = {}
-                    for _, textdraw in ipairs(textdraws) do
-                        if textdraw:getX() ~= newTextdraw:getX() or textdraw:getY() ~= newTextdraw:getY() then
-                            table.insert(newTextdraws, textdraw)
-                        end
-                    end
-                    table.insert(newTextdraws, newTextdraw)
-                    textdraws = newTextdraws
-                else
-                    for _, textdraw in ipairs(textdraws) do
-                        if textdraw:getX() < newTextdraw:getX()
-                        and textdraw:getY() < newTextdraw:getY()
-                        and textdraw:getX() + textdraw:getWidth() > newTextdraw:getX()
-                        and textdraw:getY() + textdraw:getHeight() > newTextdraw:getY()
-                        then
-                            textdraw:addChild(newTextdraw)
-                        end
-                    end
+                    table.insert(textdraws, newTextdraw)
                 end
+                private:pushDeleteTextdrawsEvent(deleteTextdraws)
                 private:setTextdraws(textdraws)
                 _sh.eventManager:trigger('onCreateTextdraw', newTextdraw)
             end
@@ -108,18 +119,18 @@ function class:new()
             nil,
             function ()
                 while true do wait(0)
-                    local flag = false
                     local textdraws = {}
+                    local deleteTextdraws = {}
                     for _, textdraw in ipairs(public:getTextdraws()) do
                         if sampTextdrawIsExists(textdraw:getId()) then
                             table.insert(textdraws, textdraw)
                         else
-                            _sh.eventManager:trigger('onDeleteTextdraw', textdraw)
-                            flag = true
+                            table.insert(deleteTextdraws, textdraw)
                         end
                     end
-                    if flag then
+                    if #deleteTextdraws > 0 then
                         private:setTextdraws(textdraws)
+                        private:pushDeleteTextdrawsEvent(deleteTextdraws)
                     end
                 end
             end
@@ -153,6 +164,32 @@ function class:new()
         --                     end
         --                 end
         --             end
+        --         end
+        --     end
+        -- )
+        -- _sh.threadManager:add(
+        --     nil,
+        --     function ()
+        --         while true do wait(0)
+        --             for _, textdraw in ipairs(public:getTextdraws()) do
+        --                 renderDrawBoxWithBorder(
+        --                     textdraw:getX(),
+        --                     textdraw:getY(),
+        --                     textdraw:getWidth(),
+        --                     textdraw:getHeight(),
+        --                     '0x00ffffff',
+        --                     1,
+        --                     _sh.color:getAlpha(50)..'ffffff'
+        --                 )
+        --             end
+        --         end
+        --     end
+        -- )
+        -- _sh.threadManager:add(
+        --     nil,
+        --     function ()
+        --         while true do wait(1000)
+        --             _sh.chat:push(#public:getTextdraws())
         --         end
         --     end
         -- )

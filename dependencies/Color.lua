@@ -36,7 +36,7 @@ function class:new()
         return public:getByNum(r) .. public:getByNum(g) .. public:getByNum(b)
     end
 
-    function public:alpha(num)
+    function public:getAlpha(num)
         if num > 100 then
             num = 100
         elseif num < 0 then

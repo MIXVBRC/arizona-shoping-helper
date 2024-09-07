@@ -127,7 +127,7 @@ function class:new(_command, _default)
                                     textdraw:getHeight(),
                                     '0x00ffffff',
                                     private:getBorder(),
-                                    _sh.color:alpha(private:getAlpha()) .. private:getColor()
+                                    _sh.color:getAlpha(private:getAlpha()) .. private:getColor()
                                 )
                                 break
                             end
@@ -196,7 +196,7 @@ function class:new(_command, _default)
             'onShowDialog',
             function (dialogId, _, _, _, _, text)
                 if _sh.player:inShop() and private:isActive() and private:isAdd() then
-                    sampSendDialogResponse(dialogId, 0, 0)
+                    _sh.dialogManager:sendDialogResponse(dialogId)
                     return false
                 end
             end

@@ -13,7 +13,7 @@ _sh = {
 local this = {
     ['dependencies'] = {
         {
-            ['name'] = 'moonloader',
+            ['name'] = 'moownloader',
             ['entity'] = 'moonloader',
             ['dependencies'] = {},
             ['init'] = false,
@@ -113,10 +113,24 @@ local this = {
             },
         },
         {
+            ['name'] = 'chat',
+            ['entity'] = 'dependencies.Chat',
+            ['dependencies'] = {},
+            ['init'] = true,
+            ['args'] = {},
+        },
+        {
             ['name'] = 'lowPoint',
             ['entity'] = 'dependencies.LowPoint',
             ['dependencies'] = {},
             ['init'] = false,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'eventManager',
+            ['entity'] = 'dependencies.EventManager',
+            ['dependencies'] = {},
+            ['init'] = true,
             ['args'] = {},
         },
         {
@@ -133,20 +147,6 @@ local this = {
             ['entity'] = 'dependencies.Dialog',
             ['dependencies'] = {},
             ['init'] = false,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'eventManager',
-            ['entity'] = 'dependencies.EventManager',
-            ['dependencies'] = {},
-            ['init'] = true,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'chat',
-            ['entity'] = 'dependencies.Chat',
-            ['dependencies'] = {},
-            ['init'] = true,
             ['args'] = {},
         },
         {
@@ -377,4 +377,5 @@ end
 function main()
     while not isSampAvailable() do wait(0) end
     this:init()
+    _sh.chat:push(111111)
 end
