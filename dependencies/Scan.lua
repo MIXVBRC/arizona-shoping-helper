@@ -33,6 +33,9 @@ function class:new(_command, _default)
 
     function public:toggleAdd()
         private.configManager:set('add', not public:isAdd())
+        if public:isAdd() and _sh.select:isAdd() then
+            _sh.select:toggleAdd()
+        end
         return public
     end
 
@@ -108,27 +111,6 @@ function class:new(_command, _default)
         return public
     end
 
-    -- WORK
-
-    function private:work()
-        local products = {}
-        for _, product in ipairs(_sh.productManager:getProducts()) do
-            if not product:isScanned() then
-                table.insert(products, product)
-            end
-        end
-        if #products > 0 then
-            private:setScanning(true)
-            for _, product in ipairs(products) do
-                if product:isExist() and public:isActive() and private:haveCode(product:getTextdraw():getCode()) then
-                    product:scan()
-                    wait(private:getTime())
-                end
-            end
-            private:setScanning(false)
-        end
-    end
-
     -- INITS
 
     function private:init()
@@ -151,7 +133,22 @@ function class:new(_command, _default)
             function ()
                 while true do wait(0)
                     if public:isActive() and not public:isAdd() then
-                        private:work()
+                        local products = {}
+                        for _, product in ipairs(_sh.productManager:getProducts()) do
+                            if not product:isScanned() then
+                                table.insert(products, product)
+                            end
+                        end
+                        if #products > 0 then
+                            private:setScanning(true)
+                            for _, product in ipairs(products) do
+                                if product:isExist() and public:isActive() and private:haveCode(product:getTextdraw():getCode()) then
+                                    product:scan()
+                                    wait(private:getTime())
+                                end
+                            end
+                            private:setScanning(false)
+                        end
                     end
                 end
             end
@@ -163,14 +160,15 @@ function class:new(_command, _default)
                     if public:isActive() then
                         for _, product in ipairs(_sh.productManager:getProducts()) do
                             if not product:isScanned() and private:haveCode(product:getTextdraw():getCode()) then
-                                _sh.render:pushBox(
+                                _sh.boxManager:push(
                                     product:getTextdraw():getX(),
                                     product:getTextdraw():getY(),
                                     product:getTextdraw():getWidth(),
                                     product:getTextdraw():getHeight(),
                                     '0x00000000',
                                     private.border,
-                                    _sh.color:getAlpha(50)..'ffffff'
+                                    _sh.color:getAlpha(50)..'ffffff',
+                                    1
                                 )
                             end
                         end

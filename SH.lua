@@ -251,6 +251,13 @@ local this = {
             ['args'] = {},
         },
         {
+            ['name'] = 'boxManager',
+            ['entity'] = 'dependencies.BoxManager',
+            ['dependencies'] = {},
+            ['init'] = true,
+            ['args'] = {},
+        },
+        {
             ['name'] = 'shopManager',
             ['entity'] = 'dependencies.ShopManager',
             ['dependencies'] = {},

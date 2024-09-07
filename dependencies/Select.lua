@@ -35,6 +35,9 @@ function class:new(_command, _default)
 
     function public:toggleAdd()
         private.configManager:set('add', not public:isAdd())
+        if public:isAdd() and _sh.scan:isAdd() then
+            _sh.scan:toggleAdd()
+        end
         return public
     end
 
@@ -117,14 +120,15 @@ function class:new(_command, _default)
             for _, name in ipairs(private:getProducts()) do
                 for _, product in ipairs(_sh.productManager:getProducts()) do
                     if name == product:getName() then
-                        _sh.render:pushBox(
+                        _sh.boxManager:push(
                             product:getTextdraw():getX(),
                             product:getTextdraw():getY(),
                             product:getTextdraw():getWidth(),
                             product:getTextdraw():getHeight(),
                             '0x00ffffff',
                             private:getBorder(),
-                            _sh.color:getAlpha(private:getAlpha()) .. private:getColor()
+                            _sh.color:getAlpha(private:getAlpha()) .. private:getColor(),
+                            2
                         )
                     end
                 end
@@ -173,7 +177,7 @@ function class:new(_command, _default)
         _sh.eventManager:add(
             'onClickProduct',
             function (product)
-                if _sh.player:inShop() and public:isActive() and public:isAdd() then
+                if not _sh.scan:isScanning() and _sh.player:inShop() and public:isActive() and public:isAdd() then
                     private:toggleProduct(product:getName())
                 end
             end
