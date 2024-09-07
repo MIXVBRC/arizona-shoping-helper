@@ -6,31 +6,31 @@ function class:new(_command, _default)
             'buy',
             'sell',
         },
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _sh.config, _default),
+        ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
     }
 
     -- ACTIVE
 
     function private:isActive()
-        return private.configManager:getOption('active')
+        return private.configManager:get('active')
     end
 
     function private:toggleActive()
-        private.configManager:setOption('active', not private:isActive())
+        private.configManager:set('active', not private:isActive())
         return public
     end
 
     -- MOD
 
     function private:getMod()
-        return private.configManager:getOption('mod')
+        return private.configManager:get('mod')
     end
 
     function private:switchMod()
         for _, mod in ipairs(private.mods) do
             if private:getMod() ~= mod then
-                private.configManager:setOption('mod', not private:isActive())
+                private.configManager:set('mod', not private:isActive())
                 break
             end
         end

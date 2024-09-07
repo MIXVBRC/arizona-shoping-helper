@@ -13,7 +13,7 @@ function class:new(_command, _default)
                 ['max'] = 60,
             },
         }),
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _sh.config, _default),
+        ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
         ['lowPoint'] = _sh.dependencies.lowPoint:new(),
         ['cache'] = _sh.dependencies.cache:new(),
@@ -22,47 +22,47 @@ function class:new(_command, _default)
     -- ACTIVE
 
     function private:isActive()
-        return private.configManager:getOption('active')
+        return private.configManager:get('active')
     end
 
     function private:toggleActive()
-        private.configManager:setOption('active', not private:isActive())
+        private.configManager:set('active', not private:isActive())
         return public
     end
 
     -- POLYGONS
 
     function private:getPolygons()
-        return private.configManager:getOption('polygons') or private.minmax:getMin('polygons')
+        return private.configManager:get('polygons') or private.minmax:getMin('polygons')
     end
 
     function private:setPolygons(polygons)
-        private.configManager:setOption('polygons', private.minmax:get(polygons, 'polygons'))
+        private.configManager:set('polygons', private.minmax:get(polygons, 'polygons'))
         return public
     end
 
     -- DISTANCE
 
     function private:getDistance()
-        return private.configManager:getOption('distance')
+        return private.configManager:get('distance') or private.minmax:getMin('distance')
     end
 
     function private:setDistance(distance)
-        private.configManager:setOption('distance', private.minmax:get(distance, 'distance'))
+        private.configManager:set('distance', private.minmax:get(distance, 'distance'))
         return public
     end
 
     -- COLOR
 
     function private:getColors()
-        return private.configManager:getOption('colors') or {}
+        return private.configManager:get('colors') or {}
     end
 
     function private:getColor(name)
         return private:getColors()[name]
     end
 
-    -- LOGICK
+    -- LOGIC
 
     function private:getShops()
         local shops = {}
@@ -149,7 +149,7 @@ function class:new(_command, _default)
                     local _, aX, aY, aZ, _, _ = convert3DCoordsToScreenEx(pointA:getX(), pointA:getY(), pointA:getZ())
                     local _, bX, bY, bZ, _, _ = convert3DCoordsToScreenEx(pointB:getX(), pointB:getY(), pointB:getZ())
                     if aZ > 0 and bZ > 0 then
-                        renderDrawLine(aX, aY, bX, bY, 1, alpha .. private:getColor('circle'))
+                        _sh.render:pushLine(aX, aY, bX, bY, 1, alpha .. private:getColor('circle'))
                     end
                 end
             end
@@ -218,7 +218,7 @@ function class:new(_command, _default)
             nil,
             function ()
                 while true do wait(0)
-                    if private:isActive() then
+                    if private:isActive() and not _sh.player:inShop() and not _sh.player:editProducts() then
                         private:work()
                     end
                 end
@@ -229,16 +229,10 @@ function class:new(_command, _default)
     function private:initCommands()
         private.commandManager:add('active', private.toggleActive)
         private.commandManager:add('polygons', function (polygons)
-            polygons = _sh.helper:getNumber(polygons)
-            if polygons ~= nil then
-                private:setPolygons(polygons)
-            end
+            private:setPolygons(_sh.helper:getNumber(polygons))
         end)
         private.commandManager:add('distance', function (distance)
-            distance = _sh.helper:getNumber(distance)
-            if distance ~= nil then
-                private:setDistance(distance)
-            end
+            private:setDistance(_sh.helper:getNumber(distance))
         end)
     end
 

@@ -4,6 +4,7 @@ function class:new(_customDialogId)
     local private = {
         ['customDialogId'] = _customDialogId,
         ['opened'] = false,
+        ['openedId'] = nil,
     }
 
     function private:getCustomDialogId()
@@ -14,12 +15,30 @@ function class:new(_customDialogId)
         return private.opened
     end
 
-    function private:setShowDialog(bool)
+    function private:setOpened(bool)
         private.opened = bool
         return public
     end
 
-    function public:sendDialogResponse(id, button, list, input)
+    function public:getOpenedId()
+        return private.openedId
+    end
+
+    function private:setOpenedId(id)
+        private.openedId = id
+        return public
+    end
+
+    -- LOGIC
+
+    function public:close()
+        if public:isOpened() and public:getOpenedId() ~= nil then
+            public:send(public:getOpenedId())
+        end
+        return public
+    end
+
+    function public:send(id, button, list, input)
         if id ~= nil then
             _sh.eventManager:trigger('onSendDialogResponse', id, button, list, input)
             sampSendDialogResponse(
@@ -53,16 +72,16 @@ function class:new(_customDialogId)
     function private:initEvents()
         _sh.eventManager:add(
             'onShowDialog',
-            function ()
-                _sh.chat:push('open')
-                private:setShowDialog(true)
+            function (id)
+                private:setOpened(true)
+                private:setOpenedId(id)
             end
         )
         _sh.eventManager:add(
             'onSendDialogResponse',
-            function ()
-                _sh.chat:push('close')
-                private:setShowDialog(false)
+            function (id)
+                private:setOpened(false)
+                private:setOpenedId(nil)
             end
         )
     end

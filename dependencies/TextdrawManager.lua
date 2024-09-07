@@ -28,7 +28,7 @@ function class:new()
         return nil
     end
 
-    -- LOGICK
+    -- LOGIC
 
     function private:pushDeleteTextdrawsEvent(textdraws)
         if #textdraws > 0 then
@@ -77,7 +77,7 @@ function class:new()
                             and textdraw:getY() + textdraw:getHeight() > newTextdraw:getY()
                             then
                                 textdraw:addChild(newTextdraw)
-                                _sh.eventManager:trigger('onTextdrawAddChild', textdraw)
+                                _sh.eventManager:trigger('onTextdrawAddChild', textdraw, newTextdraw)
                             end
                         end
                     end
@@ -135,64 +135,6 @@ function class:new()
                 end
             end
         )
-        -- _sh.threadManager:add(
-        --     nil,
-        --     function ()
-        --         while true do wait(0)
-        --             local textdraws = public:getTextdraws()
-        --             if #textdraws > 0 then
-        --                 for _, textdraw in ipairs(textdraws) do
-        --                     renderDrawBoxWithBorder(
-        --                         textdraw:getX(),
-        --                         textdraw:getY(),
-        --                         textdraw:getWidth(),
-        --                         textdraw:getHeight(),
-        --                         '0x00ffffff',
-        --                         1,
-        --                         '0xffffffff'
-        --                     )
-        --                     for _, childTextdraw in ipairs(textdraw:getChilds()) do
-        --                         renderDrawBoxWithBorder(
-        --                             childTextdraw:getX(),
-        --                             childTextdraw:getY(),
-        --                             childTextdraw:getWidth(),
-        --                             childTextdraw:getHeight(),
-        --                             '0x00ffffff',
-        --                             1,
-        --                             '0xff0000ff'
-        --                         )
-        --                     end
-        --                 end
-        --             end
-        --         end
-        --     end
-        -- )
-        -- _sh.threadManager:add(
-        --     nil,
-        --     function ()
-        --         while true do wait(0)
-        --             for _, textdraw in ipairs(public:getTextdraws()) do
-        --                 renderDrawBoxWithBorder(
-        --                     textdraw:getX(),
-        --                     textdraw:getY(),
-        --                     textdraw:getWidth(),
-        --                     textdraw:getHeight(),
-        --                     '0x00ffffff',
-        --                     1,
-        --                     _sh.color:getAlpha(50)..'ffffff'
-        --                 )
-        --             end
-        --         end
-        --     end
-        -- )
-        -- _sh.threadManager:add(
-        --     nil,
-        --     function ()
-        --         while true do wait(1000)
-        --             _sh.chat:push(#public:getTextdraws())
-        --         end
-        --     end
-        -- )
     end
 
     private:init()

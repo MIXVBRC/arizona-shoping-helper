@@ -13,7 +13,7 @@ function class:new(_command, _default)
                 ['max'] = 1440,
             },
         }),
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _sh.config, _default),
+        ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
         ['cache'] = _sh.dependencies.cache:new(),
     }
@@ -21,40 +21,40 @@ function class:new(_command, _default)
     -- ACTIVE
 
     function private:isActive()
-        return private.configManager:getOption('active')
+        return private.configManager:get('active')
     end
 
     function private:toggleActive()
-        private.configManager:setOption('active', not private:isActive())
+        private.configManager:set('active', not private:isActive())
         return public
     end
 
     -- DISTANCE
 
     function private:getDistance()
-        return private.configManager:getOption('distance')
+        return private.configManager:get('distance') or private.minmax:getMin('distance')
     end
 
     function private:setDistance(distance)
-        private.configManager:setOption('distance', private.minmax:get(distance, 'distance'))
+        private.configManager:set('distance', private.minmax:get(distance, 'distance'))
         return public
     end
 
     -- TIME
 
     function private:getTime()
-        return private.configManager:getOption('time')
+        return private.configManager:get('time') or private.minmax:getMin('time')
     end
 
     function private:setTime(time)
-        private.configManager:setOption('time', private.minmax:get(time, 'time'))
+        private.configManager:set('time', private.minmax:get(time, 'time'))
         return public
     end
 
     -- COLOR
 
     function private:getColor(name)
-        return private.configManager:getOption('colors')[name]
+        return private.configManager:get('colors')[name]
     end
 
     -- LAST
@@ -71,11 +71,11 @@ function class:new(_command, _default)
     -- HIDINGS
 
     function private:getHidings()
-        return private.configManager:getOption('hiding')
+        return private.configManager:get('hiding')
     end
 
     function private:setHidings(hidings)
-        private.configManager:setOption('hiding', hidings)
+        private.configManager:set('hiding', hidings)
         return public
     end
 
@@ -93,11 +93,11 @@ function class:new(_command, _default)
     -- SHOPS
 
     function private:getShops()
-        return private.configManager:getOption('shops') or {}
+        return private.configManager:get('shops') or {}
     end
 
     function private:setShops(shops)
-        return private.configManager:setOption('shops', shops)
+        return private.configManager:set('shops', shops)
     end
 
     function private:clearShops()
@@ -216,12 +216,10 @@ function class:new(_command, _default)
                 local alpha = _sh.color:getAlpha(100 - math.floor(distance * 100 / private:getDistance()))
                 if isPointOnScreen(render.x, render.y, render.z, 0) and distance < private:getDistance() then
                     local sceenX, sceenY = convert3DCoordsToScreen(render.x, render.y, render.z - 1)
-                    renderDrawLine(sceenX, sceenY, sceenX, sceenY - 90, 1, alpha .. private:getColor('stick'))
-                    renderDrawPolygon(sceenX, sceenY - 100, 20, 20, render.polygons, render.rotation, alpha .. render.color)
-                    if render.text ~= nil or render.text ~= '' then
-                        renderFontDrawText(_sh.font:get('Arial', 12, 4), render.text, sceenX + 15, sceenY - 110, alpha .. private:getColor('text'))
-                    else
-                        renderFontDrawText(_sh.font:get('Arial', 12, 4), render.text, sceenX + 15, sceenY - 110, alpha .. private:getColor('text'))
+                    _sh.render:pushLine(sceenX, sceenY, sceenX, sceenY - 90, 1, alpha .. private:getColor('stick'))
+                    _sh.render:pushPoint(sceenX, sceenY - 100, 20, 20, render.polygons, render.rotation, alpha .. render.color)
+                    if render.text ~= nil and render.text ~= '' then
+                        _sh.render:pushText(_sh.font:get('Arial', 12, 4), render.text, sceenX + 15, sceenY - 110, alpha .. private:getColor('text'))
                     end
                 end
             end
@@ -241,7 +239,7 @@ function class:new(_command, _default)
             nil,
             function ()
                 while true do wait(0)
-                    if private:isActive() then
+                    if private:isActive() and not _sh.player:inShop() and not _sh.player:editProducts() then
                         private:work()
                     end
                 end
@@ -274,25 +272,20 @@ function class:new(_command, _default)
         private.commandManager:add('active', private.toggleActive)
         private.commandManager:add('clear', private.clearShops)
         private.commandManager:add('distance', function (distance)
-            distance = _sh.helper:getNumber(distance)
-            if distance ~= nil then
-                private:setDistance(_sh.helper:getNumber(distance))
-            end
+            private:setDistance(_sh.helper:getNumber(distance))
         end)
         private.commandManager:add('time', function (time)
             time = _sh.helper:getNumber(time)
-            if time ~= nil then
-                local differenceTime = private:getTime() - time
-                local shops = private:getShops()
-                for _, shop in pairs(shops) do
-                    if shop.time == nil then
-                        shop.time = time
-                    end
-                    shop.time = shop.time - differenceTime * 60
+            local differenceTime = private:getTime() - time
+            local shops = private:getShops()
+            for _, shop in pairs(shops) do
+                if shop.time == nil then
+                    shop.time = time
                 end
-                private:setShops(shops)
-                private:setTime(_sh.helper:getNumber(time))
+                shop.time = shop.time - differenceTime * 60
             end
+            private:setShops(shops)
+            private:setTime(time)
         end)
         private.commandManager:add('select', function (text)
             local lastShopId = private:getLastShopId()

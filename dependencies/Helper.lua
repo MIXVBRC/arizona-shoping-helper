@@ -309,7 +309,7 @@ function class:new()
         text = tostring(text)
         text = text:match('%d+')
         text = tonumber(text)
-        return text or ''
+        return text or 0
     end
 
     function public:isPrice(text)

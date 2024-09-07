@@ -199,6 +199,13 @@ local this = {
             ['args'] = {},
         },
         {
+            ['name'] = 'render',
+            ['entity'] = 'dependencies.Render',
+            ['dependencies'] = {},
+            ['init'] = true,
+            ['args'] = {},
+        },
+        {
             ['name'] = 'font',
             ['entity'] = 'dependencies.Font',
             ['dependencies'] = {},
@@ -249,6 +256,20 @@ local this = {
             ['dependencies'] = {},
             ['init'] = true,
             ['args'] = {},
+        },
+        {
+            ['name'] = 'scan',
+            ['entity'] = 'dependencies.Scan',
+            ['dependencies'] = {},
+            ['init'] = true,
+            ['args'] = {
+                'scan',
+                {
+                    ['active'] = true,
+                    ['add'] = false,
+                    ['time'] = 500,
+                },
+            },
         },
         {
             ['name'] = 'radius',
@@ -377,5 +398,4 @@ end
 function main()
     while not isSampAvailable() do wait(0) end
     this:init()
-    _sh.chat:push(111111)
 end

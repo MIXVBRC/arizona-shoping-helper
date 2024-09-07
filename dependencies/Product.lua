@@ -1,14 +1,15 @@
 local class = {}
-function class:new(_name, _code, _price, _mod, _textdraw)
+function class:new(_name, _price, _mod, _textdraw)
     local public = {}
     local private = {
         ['name'] = _name,
-        ['code'] = _code,
+        ['code'] = nil,
         ['price'] = _price,
         ['mod'] = _mod,
         ['textdraw'] = _textdraw,
         ['scanning'] = false,
         ['scanned'] = false,
+        ['exist'] = true,
         ['dialogIds'] = {
             3082,
             26541,
@@ -29,10 +30,6 @@ function class:new(_name, _code, _price, _mod, _textdraw)
         return public
     end
 
-    function public:getCode()
-        return private.code
-    end
-
     function public:getPrice()
         return private.price
     end
@@ -41,7 +38,7 @@ function class:new(_name, _code, _price, _mod, _textdraw)
         return private.textdraw
     end
 
-    function private:isScanning()
+    function public:isScanning()
         return private.scanning
     end
 
@@ -67,7 +64,16 @@ function class:new(_name, _code, _price, _mod, _textdraw)
         return private.prefixes
     end
 
-    -- LOGICK
+    function public:isExist()
+        return private.exist
+    end
+
+    -- LOGIC
+
+    function public:delete()
+        private.exist = false
+        _sh.eventManager:trigger('onDeleteProduct', public)
+    end
 
     function public:scan()
         if not public:isScanned() and sampTextdrawIsExists(public:getTextdraw():getId()) then
@@ -77,7 +83,21 @@ function class:new(_name, _code, _price, _mod, _textdraw)
         return public
     end
 
-    function private:extractProductName(text)
+    function public:scanDialogName(dialogId, text)
+        for _, _dialogId in ipairs(private:getDialogIds()) do
+            if dialogId == _dialogId then
+                local name = private:extractName(text)
+                if name ~= nil then
+                    private:setName(name)
+                    private:setScanned(true)
+                end
+                break
+            end
+        end
+        private:setScanning(false)
+    end
+
+    function private:extractName(text)
         local prefix = ''
         local result = nil
         local exploded = _sh.helper:explode('\n', text:gsub('{......}', ''))[1]
@@ -99,30 +119,16 @@ function class:new(_name, _code, _price, _mod, _textdraw)
     -- INITS
 
     function private:init()
-        private:initEvents()
+        private:initThrades()
     end
 
-    function private:initEvents()
-        _sh.eventManager:add(
-            'onShowDialog',
-            function (dialogId, _, _, _, _, text)
-                if private:isScanning() then
-                    for _, _dialogId in ipairs(private:getDialogIds()) do
-                        if dialogId == _dialogId then
-                            local name = private:extractProductName(text)
-                            if name ~= nil then
-                                private:setName(name)
-                                private:setScanned(true)
-                            end
-                            break
-                        end
-                    end
-                    _sh.dialogManager:sendDialogResponse(dialogId)
-                    private:setScanning(false)
-                    return false
-                end
-            end,
-            1000
+    function private:initThrades()
+        _sh.threadManager:add(
+            nil,
+            function ()
+                while sampTextdrawIsExists(public:getTextdraw():getId()) do wait(0) end
+                public:delete()
+            end
         )
     end
 

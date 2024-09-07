@@ -3,11 +3,12 @@ function class:new()
     local public = {}
     local private = {
         ['products'] = {},
+        ['lastProduct'] = nil,
     }
 
     -- PRODUCTS
 
-    function private:getProducts()
+    function public:getProducts()
         return private.products
     end
 
@@ -18,7 +19,61 @@ function class:new()
 
     function private:addProduct(product)
         table.insert(private.products, product)
+        private:setLastProduct(product)
         return public
+    end
+
+    function private:deleteProduct(_product)
+        local products = {}
+        for _, product in ipairs(public:getProducts()) do
+            if _product:getTextdraw():getId() ~= product:getTextdraw():getId() then
+                table.insert(products, product)
+            else
+                product:delete()
+            end
+        end
+        private:setProducts(products)
+        return public
+    end
+
+    -- LAST PRODUCT
+
+    function private:getLastProduct()
+        return private.lastProduct
+    end
+
+    function private:setLastProduct(lastProduct)
+        private.lastProduct = lastProduct
+        return public
+    end
+
+    -- LOGIC
+
+    function private:createProduct(textdraw)
+        if private:getLastProduct() ~= nil and private:getLastProduct():getTextdraw():getId() == textdraw:getId() then
+            private:deleteProduct(private:getLastProduct())
+        end
+        local params = {
+            ['name'] = textdraw:getCode(),
+            ['price'] = nil,
+            ['mod'] = 'sell',
+            ['textdraw'] = textdraw,
+        }
+        for _, childTextdraw in ipairs(textdraw:getChilds()) do
+            if _sh.helper:isPrice(childTextdraw:getText()) then
+                params.price = _sh.helper:extractPrice(textdraw:getText())
+            else
+                params.name = _sh.helper:md5(params.name .. textdraw:getCode())
+            end
+        end
+        local product = _sh.dependencies.product:new(
+            params.name,
+            params.price,
+            params.mod,
+            params.textdraw
+        )
+        private:addProduct(product)
+        _sh.eventManager:trigger('onCreateProduct', product)
     end
 
     -- INITS
@@ -29,46 +84,32 @@ function class:new()
     end
 
     function private:initThreads()
-        _sh.threadManager:add(
-            nil,
-            function ()
-                while true do wait(0)
-                    for _, product in ipairs(private:getProducts()) do
-                        if not product:isScanned() then
-                            product:scan()
-                            _sh.chat:push(product:getName())
-                            wait(500)
-                        end
-                    end
-                end
-            end
-        )
-        _sh.threadManager:add(
-            nil,
-            function ()
-                while true do wait(0)
-                    if not _sh.dialogManager:isOpened() then
-                        for _, product in ipairs(private:getProducts()) do
-                            local color = 'ffffff'
-                            local scale = 1
-                            if product:isScanned() then
-                                color = '00ff00'
-                                scale = 5
-                            end
-                            renderDrawBoxWithBorder(
-                                product:getTextdraw():getX(),
-                                product:getTextdraw():getY(),
-                                product:getTextdraw():getWidth(),
-                                product:getTextdraw():getHeight(),
-                                '0x00ffffff',
-                                scale,
-                                '0xff' .. color
-                            )
-                        end
-                    end
-                end
-            end
-        )
+        -- _sh.threadManager:add(
+        --     nil,
+        --     function ()
+        --         while true do wait(0)
+        --             if not _sh.dialogManager:isOpened() then
+        --                 for _, product in ipairs(public:getProducts()) do
+        --                     local color = 'ffffff'
+        --                     local scale = 1
+        --                     if product:isScanned() then
+        --                         color = '00ff00'
+        --                         scale = 5
+        --                     end
+        --                     _sh.render:pushBox(
+        --                         product:getTextdraw():getX(),
+        --                         product:getTextdraw():getY(),
+        --                         product:getTextdraw():getWidth(),
+        --                         product:getTextdraw():getHeight(),
+        --                         '0x00ffffff',
+        --                         scale,
+        --                         '0xff' .. color
+        --                     )
+        --                 end
+        --             end
+        --         end
+        --     end
+        -- )
     end
 
     function private:initEvents()
@@ -78,14 +119,8 @@ function class:new()
                 if _sh.player:inShop() then
                     for _, childTextdraw in ipairs(textdraw:getChilds()) do
                         if _sh.helper:isPrice(childTextdraw:getText()) then
-                            private:addProduct(_sh.dependencies.product:new(
-                                nil,
-                                textdraw:getCode(),
-                                _sh.helper:extractPrice(childTextdraw:getText()),
-                                'sell',
-                                textdraw
-                            ))
-                            break
+                            private:createProduct(textdraw)
+                            return
                         end
                     end
                 end
@@ -95,12 +130,24 @@ function class:new()
             'onDelete—lickableTextdraw',
             function (textdraw)
                 local products = {}
-                for _, product in ipairs(private:getProducts()) do
+                for _, product in ipairs(public:getProducts()) do
                     if textdraw:getId() ~= product:getTextdraw():getId() then
                         table.insert(products, product)
+                    else
+                        private:deleteProduct(product)
                     end
                 end
                 private:setProducts(products)
+            end
+        )
+        _sh.eventManager:add(
+            'onSendClickTextDraw',
+            function (id)
+                for _, product in ipairs(public:getProducts()) do
+                    if id == product:getTextdraw():getId() then
+                        _sh.eventManager:trigger('onClickProduct', product)
+                    end
+                end
             end
         )
     end

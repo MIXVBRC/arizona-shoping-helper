@@ -12,102 +12,101 @@ function class:new(_command, _default)
                 ['max'] = 100,
             },
         }),
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _sh.config, _default),
+        ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
-        ['cache'] = _sh.dependencies.cache:new(),
     }
 
     -- ACTIVE
 
-    function private:isActive()
-        return private.configManager:getOption('active')
+    function public:isActive()
+        return private.configManager:get('active')
     end
 
-    function private:toggleActive()
-        private.configManager:setOption('active', not private:isActive())
+    function public:toggleActive()
+        private.configManager:set('active', not public:isActive())
         return public
     end
 
     -- ADD
 
-    function private:isAdd()
-        return private.configManager:getOption('add')
+    function public:isAdd()
+        return private.configManager:get('add')
     end
 
-    function private:toggleAdd()
-        private.configManager:setOption('add', not private:isAdd())
+    function public:toggleAdd()
+        private.configManager:set('add', not public:isAdd())
         return public
     end
 
     -- BORDER
 
     function private:getBorder()
-        return private.configManager:getOption('border')
+        return private.configManager:get('border') or private.minmax:getMin('border')
     end
 
     function private:setBorder(border)
-        private.configManager:setOption('border', private.minmax:get(border, 'border'))
+        private.configManager:set('border', private.minmax:get(border, 'border'))
         return public
     end
 
     -- COLOR
 
     function private:getColor()
-        return private.configManager:getOption('color')
+        return private.configManager:get('color')
     end
 
     function private:setColor(color)
-        return private.configManager:setOption('color', color or '0000ff')
+        return private.configManager:set('color', color or '0000ff')
     end
 
     -- ALPHA
 
     function private:getAlpha()
-        return private.configManager:getOption('alpha')
+        return private.configManager:get('alpha') or private.minmax:getMin('alpha')
     end
 
     function private:setAlpha(alpha)
-        return private.configManager:setOption('alpha', private.minmax:get(alpha, 'alpha'))
+        return private.configManager:set('alpha', private.minmax:get(alpha, 'alpha'))
     end
 
-    -- TEXTDRAWS
+    -- PRODUCTS
 
-    function private:getTextdrawCodes()
-        return private.configManager:getOption('items') or {}
+    function private:getProducts()
+        return private.configManager:get('products') or {}
     end
 
-    function private:setTextdrawsCodes(textdrawCodes)
-        textdrawCodes = textdrawCodes or {}
-        private.configManager:setOption('items', textdrawCodes)
+    function private:setProducts(productNames)
+        productNames = productNames or {}
+        private.configManager:set('products', productNames)
         return public
     end
 
-    function private:addTextdrawCode(code)
-        local textdrawCodes = private:getTextdrawCodes()
-        table.insert(textdrawCodes, code)
-        private:setTextdrawsCodes(textdrawCodes)
+    function private:addProduct(name)
+        local productNames = private:getProducts()
+        table.insert(productNames, name)
+        private:setProducts(productNames)
         return public
     end
 
-    function private:deleteTextdrawCode(code)
-        local textdrawCodes = {}
-        for _, textdrawCode in ipairs(private:getTextdrawCodes()) do
-            if code ~= textdrawCode then
-                table.insert(textdrawCodes, textdrawCode)
+    function private:deleteProduct(name)
+        local productNames = {}
+        for _, productName in ipairs(private:getProducts()) do
+            if name ~= productName then
+                table.insert(productNames, productName)
             end
         end
-        private:setTextdrawsCodes(textdrawCodes)
+        private:setProducts(productNames)
         return public
     end
 
-    function private:toggleTextdrawCode(code)
-        for _, textdrawCode in ipairs(private:getTextdrawCodes()) do
-            if code == textdrawCode then
-                private:deleteTextdrawCode(code)
+    function private:toggleProduct(name)
+        for _, productName in ipairs(private:getProducts()) do
+            if name == productName then
+                private:deleteProduct(name)
                 return public
             end
         end
-        private:addTextdrawCode(code)
+        private:addProduct(name)
         return public
     end
 
@@ -115,23 +114,18 @@ function class:new(_command, _default)
 
     function private:work()
         if _sh.player:inShop() then
-            for _, code in ipairs(private:getTextdrawCodes()) do
-                for _, textdraw in ipairs(_sh.textdrawManager:getTextdraws()) do
-                    if code == textdraw:getCode() then
-                        for _, childTextdraw in ipairs(textdraw:getChilds()) do
-                            if _sh.helper:isPrice(childTextdraw:getText()) then
-                                renderDrawBoxWithBorder(
-                                    textdraw:getX(),
-                                    textdraw:getY(),
-                                    textdraw:getWidth(),
-                                    textdraw:getHeight(),
-                                    '0x00ffffff',
-                                    private:getBorder(),
-                                    _sh.color:getAlpha(private:getAlpha()) .. private:getColor()
-                                )
-                                break
-                            end
-                        end
+            for _, name in ipairs(private:getProducts()) do
+                for _, product in ipairs(_sh.productManager:getProducts()) do
+                    if name == product:getName() then
+                        _sh.render:pushBox(
+                            product:getTextdraw():getX(),
+                            product:getTextdraw():getY(),
+                            product:getTextdraw():getWidth(),
+                            product:getTextdraw():getHeight(),
+                            '0x00ffffff',
+                            private:getBorder(),
+                            _sh.color:getAlpha(private:getAlpha()) .. private:getColor()
+                        )
                     end
                 end
             end
@@ -147,8 +141,8 @@ function class:new(_command, _default)
     end
 
     function private:initCommands()
-        private.commandManager:add('active', private.toggleActive)
-        private.commandManager:add('add', private.toggleAdd)
+        private.commandManager:add('active', public.toggleActive)
+        private.commandManager:add('add', public.toggleAdd)
         private.commandManager:add('border', function (border)
             private:setBorder(_sh.helper:getNumber(border))
         end)
@@ -167,7 +161,7 @@ function class:new(_command, _default)
             nil,
             function ()
                 while true do wait(0)
-                    if private:isActive() then
+                    if public:isActive() then
                         private:work()
                     end
                 end
@@ -177,26 +171,18 @@ function class:new(_command, _default)
 
     function private:initEvents()
         _sh.eventManager:add(
-            'onSendClickTextDraw',
-            function (textdrawId)
-                if _sh.player:inShop() and private:isActive() and private:isAdd() then
-                    local textdraw = _sh.textdrawManager:getTextdrawById(textdrawId)
-                    if textdraw ~= nil then
-                        for _, childTextdraw in ipairs(textdraw:getChilds()) do
-                            if _sh.helper:isPrice(childTextdraw:getText()) then
-                                private:toggleTextdrawCode(textdraw:getCode())
-                                return
-                            end
-                        end
-                    end
+            'onClickProduct',
+            function (product)
+                if _sh.player:inShop() and public:isActive() and public:isAdd() then
+                    private:toggleProduct(product:getName())
                 end
             end
         )
         _sh.eventManager:add(
             'onShowDialog',
-            function (dialogId, _, _, _, _, text)
-                if _sh.player:inShop() and private:isActive() and private:isAdd() then
-                    _sh.dialogManager:sendDialogResponse(dialogId)
+            function ()
+                if not _sh.scan:isScanning() and _sh.player:inShop() and public:isActive() and public:isAdd() then
+                    _sh.dialogManager:close()
                     return false
                 end
             end

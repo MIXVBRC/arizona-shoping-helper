@@ -9,18 +9,18 @@ function class:new(_command, _default)
             ['needCount'] = false,
             ['editType'] = 'add',
         },
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _sh.config, _default),
+        ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
     }
 
     -- ACTIVE
 
     function private:isActive()
-        return private.configManager:getOption('active')
+        return private.configManager:get('active')
     end
 
     function private:toggleActive()
-        private.configManager:setOption('active', not private:isActive())
+        private.configManager:set('active', not private:isActive())
         return public
     end
 
@@ -59,11 +59,11 @@ function class:new(_command, _default)
     -- PRODUCTPRICES
 
     function private:getProductPrices()
-        return private.configManager:getOption('prices') or {}
+        return private.configManager:get('prices') or {}
     end
 
     function private:setProductPrices(prices)
-        private.configManager:setOption('prices', prices or {})
+        private.configManager:set('prices', prices or {})
         return public
     end
 
@@ -134,11 +134,11 @@ function class:new(_command, _default)
                                     message = message .. '{ffffff} {0000ff}х' .. (product.count or 1)
                                 end
                                 message = message .. '{ffffff} выставлен за {00ff00}' .. _sh.helper:formatPrice(price)
-                                _sh.dialogManager:sendDialogResponse(dialogId, 1, 0, input)
+                                _sh.dialogManager:send(dialogId, 1, 0, input)
                                 _sh.chat:push(message)
                                 private:clearProduct()
                             else
-                                _sh.dialogManager:sendDialogResponse(dialogId)
+                                _sh.dialogManager:close()
                                 _sh.dialogManager:show(
                                     '{65f0c6}¬ведите цену за предмет',
                                     name,
@@ -158,12 +158,13 @@ function class:new(_command, _default)
                             end
                             return false
                         elseif product.editType == 'delete' then
-                            _sh.dialogManager:sendDialogResponse(dialogId, 1)
+                            _sh.dialogManager:send(dialogId, 1)
                             return false
                         end
                     end
                 end
-            end
+            end,
+            1000
         )
     end
 
