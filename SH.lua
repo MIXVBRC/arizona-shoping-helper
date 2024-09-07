@@ -71,21 +71,28 @@ local this = {
         {
             ['name'] = 'circle',
             ['entity'] = 'dependencies.Circle',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'point',
+                'helper',
+            },
             ['init'] = false,
             ['args'] = {},
         },
         {
             ['name'] = 'circleManager',
             ['entity'] = 'dependencies.CircleManager',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'circle',
+            },
             ['init'] = false,
             ['args'] = {},
         },
         {
             ['name'] = 'shop',
             ['entity'] = 'dependencies.Shop',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'helper',
+            },
             ['init'] = false,
             ['args'] = {},
         },
@@ -99,14 +106,18 @@ local this = {
         {
             ['name'] = 'configManager',
             ['entity'] = 'dependencies.ConfigManager',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'config'
+            },
             ['init'] = false,
             ['args'] = {},
         },
         {
             ['name'] = 'commandManager',
             ['entity'] = 'dependencies.CommandManager',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'message',
+            },
             ['init'] = true,
             ['args'] = {
                 'active',
@@ -122,21 +133,29 @@ local this = {
         {
             ['name'] = 'lowPoint',
             ['entity'] = 'dependencies.LowPoint',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'player',
+                'render',
+            },
             ['init'] = false,
             ['args'] = {},
         },
         {
             ['name'] = 'eventManager',
             ['entity'] = 'dependencies.EventManager',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'events',
+            },
             ['init'] = true,
             ['args'] = {},
         },
         {
             ['name'] = 'dialogManager',
             ['entity'] = 'dependencies.DialogManager',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'eventManager',
+                'dialog',
+            },
             ['init'] = true,
             ['args'] = {
                 777,
@@ -145,7 +164,9 @@ local this = {
         {
             ['name'] = 'dialog',
             ['entity'] = 'dependencies.Dialog',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'threadManager',
+            },
             ['init'] = false,
             ['args'] = {},
         },
@@ -159,56 +180,80 @@ local this = {
         {
             ['name'] = 'textdraw',
             ['entity'] = 'dependencies.Textdraw',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'helper',
+                'eventManager',
+            },
             ['init'] = false,
             ['args'] = {},
         },
         {
             ['name'] = 'product',
             ['entity'] = 'dependencies.Product',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'eventManager',
+                'helper',
+                'threadManager',
+            },
             ['init'] = false,
             ['args'] = {},
         },
         {
             ['name'] = 'productManager',
             ['entity'] = 'dependencies.ProductManager',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'helper',
+                'product',
+                'eventManager',
+            },
             ['init'] = true,
             ['args'] = {},
         },
         {
             ['name'] = 'textdrawManager',
             ['entity'] = 'dependencies.TextdrawManager',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'textdraw',
+                'eventManager',
+                'threadManager',
+            },
             ['init'] = true,
             ['args'] = {},
         },
         {
             ['name'] = 'exception',
             ['entity'] = 'dependencies.Exception',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'error',
+            },
             ['init'] = false,
             ['args'] = {},
         },
         {
             ['name'] = 'error',
             ['entity'] = 'dependencies.Error',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'chat',
+            },
             ['init'] = false,
             ['args'] = {},
         },
         {
             ['name'] = 'render',
             ['entity'] = 'dependencies.Render',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'threadManager',
+            },
             ['init'] = true,
             ['args'] = {},
         },
         {
             ['name'] = 'font',
             ['entity'] = 'dependencies.Font',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'cache',
+                'helper',
+            },
             ['init'] = true,
             ['args'] = {},
         },
@@ -222,14 +267,22 @@ local this = {
         {
             ['name'] = 'helper',
             ['entity'] = 'dependencies.Helper',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'player',
+                'md5',
+                'encoding',
+                'json',
+                'ini',
+            },
             ['init'] = true,
             ['args'] = {},
         },
         {
             ['name'] = 'config',
             ['entity'] = 'dependencies.Config',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'helper',
+            },
             ['init'] = true,
             ['args'] = {
                 'ShopingHelper_base',
@@ -239,35 +292,69 @@ local this = {
         {
             ['name'] = 'message',
             ['entity'] = 'dependencies.Message',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'color',
+                'helper',
+                'config',
+            },
             ['init'] = true,
             ['args'] = {},
         },
         {
             ['name'] = 'player',
             ['entity'] = 'dependencies.Player',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'cache',
+                'eventManager',
+                'threadManager',
+                'message',
+                'helper',
+            },
             ['init'] = true,
             ['args'] = {},
         },
         {
             ['name'] = 'boxManager',
             ['entity'] = 'dependencies.BoxManager',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'helper',
+                'threadManager',
+                'render',
+            },
             ['init'] = true,
             ['args'] = {},
         },
         {
             ['name'] = 'shopManager',
             ['entity'] = 'dependencies.ShopManager',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'message',
+                'cache',
+                'helper',
+                'threadManager',
+                'shop',
+                'eventManager',
+            },
             ['init'] = true,
             ['args'] = {},
         },
         {
             ['name'] = 'scan',
             ['entity'] = 'dependencies.Scan',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'minMax',
+                'configManager',
+                'commandManager',
+                'select',
+                'helper',
+                'threadManager',
+                'productManager',
+                'boxManager',
+                'color',
+                'eventManager',
+                'player',
+                'dialogManager',
+            },
             ['init'] = true,
             ['args'] = {
                 'scan',
@@ -282,6 +369,7 @@ local this = {
             ['name'] = 'radius',
             ['entity'] = 'dependencies.Radius',
             ['dependencies'] = {
+                'minMax',
                 'point',
                 'color',
                 'cache',
@@ -289,6 +377,11 @@ local this = {
                 'lowPoint',
                 'configManager',
                 'commandManager',
+                'shopManager',
+                'render',
+                'circleManager',
+                'threadManager',
+                'player',
             },
             ['init'] = true,
             ['args'] = {
@@ -308,7 +401,21 @@ local this = {
         {
             ['name'] = 'visit',
             ['entity'] = 'dependencies.Visit',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'minMax',
+                'configManager',
+                'commandManager',
+                'cache',
+                'shopManager',
+                'player',
+                'message',
+                'helper',
+                'color',
+                'render',
+                'font',
+                'threadManager',
+                'eventManager',
+            },
             ['init'] = true,
             ['args'] = {
                 'visit',
@@ -343,7 +450,19 @@ local this = {
         {
             ['name'] = 'select',
             ['entity'] = 'dependencies.Select',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'minMax',
+                'configManager',
+                'commandManager',
+                'scan',
+                'player',
+                'productManager',
+                'boxManager',
+                'color',
+                'helper',
+                'threadManager',
+                'dialogManager',
+            },
             ['init'] = true,
             ['args'] = {
                 'select',
@@ -359,7 +478,11 @@ local this = {
         {
             ['name'] = 'swipe',
             ['entity'] = 'dependencies.Swipe',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'configManager',
+                'commandManager',
+                'eventManager',
+            },
             ['init'] = true,
             ['args'] = {
                 'swipe',
@@ -372,7 +495,16 @@ local this = {
         {
             ['name'] = 'trade',
             ['entity'] = 'dependencies.Trade',
-            ['dependencies'] = {},
+            ['dependencies'] = {
+                'configManager',
+                'commandManager',
+                'eventManager',
+                'textdrawManager',
+                'player',
+                'helper',
+                'chat',
+                'dialogManager',
+            },
             ['init'] = true,
             ['args'] = {
                 'trade',

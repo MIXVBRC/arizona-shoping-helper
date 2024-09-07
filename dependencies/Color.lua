@@ -42,7 +42,7 @@ function class:new()
         elseif num < 0 then
             num = 0
         end
-        return '0x' .. _sh.color:getByNum(255 / 100 * num)
+        return '0x' .. public:getByNum(255 / 100 * num)
     end
 
     return public

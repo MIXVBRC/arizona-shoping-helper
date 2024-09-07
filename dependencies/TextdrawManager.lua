@@ -5,7 +5,6 @@ function class:new()
         ['textdraws'] = {},
         ['idLinks'] = {},
         ['all'] = {},
-        ['cache'] = _sh.dependencies.cache:new(),
     }
 
     -- TEXTDRAWS
