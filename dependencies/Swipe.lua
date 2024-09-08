@@ -3,6 +3,7 @@ function class:new(_command, _default)
     local public = {}
     local private = {
         ['button'] = nil,
+        ['swipe'] = true,
         ['mods'] = {
             'buy',
             'sale',
@@ -49,6 +50,20 @@ function class:new(_command, _default)
         return public
     end
 
+    -- SWIPE
+
+    function public:isSwipe()
+        if private:isActive() then
+            return private.swipe
+        end
+        return false
+    end
+
+    function private:setSwipe(bool)
+        private.swipe = bool
+        return public
+    end
+
     -- INITS
 
     function private:init()
@@ -79,12 +94,17 @@ function class:new(_command, _default)
             nil,
             function ()
                 while true do wait(0)
-                    if private:isActive() and _sh.player:inShop() then
-                        local button = private:getButton()
-                        if button ~= nil and button.mod ~= private:getMod() and button.textdraw:getParent() ~= nil then
-                            sampSendClickTextdraw(button.textdraw:getParent():getId())
-                            private:setButton(nil)
-                            wait(1000)
+                    if private:isActive() then
+                        if _sh.player:inShop() then
+                            local button = private:getButton()
+                            if button ~= nil and button.mod ~= private:getMod() and button.textdraw:getParent() ~= nil then
+                                sampSendClickTextdraw(button.textdraw:getParent():getId())
+                                wait(500)
+                            else
+                                private:setSwipe(false)
+                            end
+                        else
+                            private:setSwipe(true)
                         end
                     end
                 end

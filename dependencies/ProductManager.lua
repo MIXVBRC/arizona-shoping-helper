@@ -57,7 +57,6 @@ function class:new()
             ['name'] = nil,
             ['code'] = textdraw:getCode(),
             ['price'] = nil,
-            ['mod'] = 'sell',
             ['textdraw'] = textdraw,
         }
         for _, childTextdraw in ipairs(textdraw:getChilds()) do
@@ -71,7 +70,6 @@ function class:new()
             params.name,
             params.code,
             params.price,
-            params.mod,
             params.textdraw
         )
         private:addProduct(product)

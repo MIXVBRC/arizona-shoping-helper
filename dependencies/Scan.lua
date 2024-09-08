@@ -137,7 +137,7 @@ function class:new(_command, _default)
             nil,
             function ()
                 while true do wait(0)
-                    if public:isActive() and not public:isAdd() then
+                    if public:isActive() and not public:isAdd() and not _sh.swipe:isSwipe() then
                         local products = {}
                         for _, product in ipairs(_sh.productManager:getProducts()) do
                             if not product:isScanned() then
@@ -162,7 +162,7 @@ function class:new(_command, _default)
             nil,
             function ()
                 while true do wait(0)
-                    if public:isActive() then
+                    if public:isActive() and _sh.player:inShop() and not _sh.swipe:isSwipe() then
                         for _, product in ipairs(_sh.productManager:getProducts()) do
                             if not product:isScanned() and private:haveCode(product:getCode()) then
                                 _sh.boxManager:push(

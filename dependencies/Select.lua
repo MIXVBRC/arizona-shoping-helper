@@ -121,7 +121,7 @@ function class:new(_command, _default)
     -- WORK
 
     function private:work()
-        if _sh.player:inShop() and not _sh.dialogManager:isOpened() then
+        if _sh.player:inShop() and not _sh.dialogManager:isOpened() and not _sh.swipe:isSwipe() then
             for _, sign in ipairs(private:getProducts()) do
                 for _, product in ipairs(_sh.productManager:getProducts()) do
                     if (product:isScanned() and sign == product:getName()) or sign == product:getCode() then

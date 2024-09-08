@@ -1,11 +1,10 @@
 local class = {}
-function class:new(_name, _code, _price, _mod, _textdraw)
+function class:new(_name, _code, _price, _textdraw)
     local public = {}
     local private = {
         ['name'] = _name,
         ['code'] = _code,
         ['price'] = _price,
-        ['mod'] = _mod,
         ['textdraw'] = _textdraw,
         ['scanning'] = false,
         ['scanned'] = false,

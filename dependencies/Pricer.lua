@@ -79,13 +79,13 @@ function class:new(_command, _default)
         return public
     end
 
-    function private:haweProduct(sign)
+    function private:getProduct(sign)
         for _, product in ipairs(private:getProducts()) do
             if sign == product.sign then
-                return true
+                return product
             end
         end
-        return false
+        return nil
     end
 
     function private:addProduct(product)
@@ -124,32 +124,40 @@ function class:new(_command, _default)
     -- WORK
 
     function private:work()
-        if _sh.player:inShop() and not _sh.dialogManager:isOpened() then
+        if _sh.player:inShop() and not _sh.dialogManager:isOpened() and not _sh.swipe:isSwipe() then
             for _, product in ipairs(private:getProducts()) do
                 for _, _product in ipairs(_sh.productManager:getProducts()) do
                     if product.sign == _product:getName() or product.sign == _product:getCode() then
-                        local color = 'ff0000'
-                        local price = product.price - (_product:getPrice() + (_product:getPrice() / 100 * private:getCommission()))
-                        if price >= 0 then
-                            color = '00ff00'
+                        local mod = _sh.shopManager:getMod()
+                        local price = product.price[mod]
+                        if price ~= nil and price > 0 then
+                            local color = 'ff0000'
+                            if mod == 'buy' then
+                                price = price - (_product:getPrice() + (_product:getPrice() / 100 * private:getCommission()))
+                            else
+                                price = (_product:getPrice() + (_product:getPrice() / 100 * private:getCommission())) - price
+                            end
+                            if price >= 0 then
+                                color = '00ff00'
+                            end
+                            _sh.boxManager:push(
+                                _product:getTextdraw():getX(),
+                                _product:getTextdraw():getY(),
+                                _product:getTextdraw():getWidth(),
+                                _product:getTextdraw():getHeight(),
+                                '0x00000000',
+                                private:getBorder(),
+                                _sh.color:getAlpha(100) .. color,
+                                2
+                            )
+                            _sh.render:pushText(
+                                _sh.font:get('Verdana', 8, 9),
+                                _sh.helper:formatPrice(price),
+                                _product:getTextdraw():getX() + 5,
+                                _product:getTextdraw():getY() + 5,
+                                _sh.color:getAlpha(100) .. color
+                            )
                         end
-                        _sh.boxManager:push(
-                            _product:getTextdraw():getX(),
-                            _product:getTextdraw():getY(),
-                            _product:getTextdraw():getWidth(),
-                            _product:getTextdraw():getHeight(),
-                            '0x00000000',
-                            private:getBorder(),
-                            _sh.color:getAlpha(100) .. color,
-                            2
-                        )
-                        _sh.render:pushText(
-                            _sh.font:get('Verdana', 8, 9),
-                            _sh.helper:formatPrice(price),
-                            _product:getTextdraw():getX() + 5,
-                            _product:getTextdraw():getY() + 5,
-                            _sh.color:getAlpha(100) .. color
-                        )
                     end
                 end
             end
@@ -198,7 +206,7 @@ function class:new(_command, _default)
                         sign = product:getName()
                     end
                     _sh.dialogManager:show(
-                        '{65f0c6}Введите цену за товар',
+                        '{65f0c6}Введите цену ( 0 - удалить )',
                         product:getName(),
                         '{'.._sh.color:get('green') .. '}Готово',
                         '{'.._sh.color:get('red') .. '}Отмена',
@@ -206,19 +214,18 @@ function class:new(_command, _default)
                         function (button, _, input)
                             if button == 1 then
                                 input = _sh.helper:getNumber(input)
-                                if input > 0 then
-                                    if private:haweProduct(sign) then
-                                        private:changeProduct(sign, {
-                                            ['price'] = input
-                                        })
-                                    else
-                                        private:addProduct({
-                                            ['sign'] = sign,
-                                            ['price'] = input
-                                        })
-                                    end
+                                local _product = private:getProduct(sign)
+                                local mod = _sh.shopManager:getMod()
+                                if _product ~= nil then
+                                    _product.price[mod] = input
+                                    private:changeProduct(sign, _product)
                                 else
-                                    private:deleteProduct(sign)
+                                    private:addProduct({
+                                        ['sign'] = sign,
+                                        ['price'] = {
+                                            [mod] = input
+                                        }
+                                    })
                                 end
                             end
                         end

@@ -37,7 +37,7 @@ function class:new(_command, _default)
     -- WIRK
 
     function private:work()
-        if _sh.player:inShop() and not _sh.dialogManager:isOpened() then
+        if _sh.player:inShop() and not _sh.dialogManager:isOpened() and not _sh.swipe:isSwipe() then
             for _, product in ipairs(_sh.productManager:getProducts()) do
                 _sh.boxManager:push(
                     product:getTextdraw():getX(),

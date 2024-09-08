@@ -411,6 +411,18 @@ local this = {
             },
         },
         {
+            ['name'] = 'swipe',
+            ['entity'] = 'dependencies.Swipe',
+            ['init'] = true,
+            ['args'] = {
+                'swipe',
+                {
+                    ['active'] = false,
+                    ['mod'] = 'buy',
+                },
+            },
+        },
+        {
             ['name'] = 'hiding',
             ['entity'] = 'dependencies.Hiding',
             ['init'] = true,
@@ -503,18 +515,6 @@ local this = {
             },
         },
         {
-            ['name'] = 'swipe',
-            ['entity'] = 'dependencies.Swipe',
-            ['init'] = true,
-            ['args'] = {
-                'swipe',
-                {
-                    ['active'] = false,
-                    ['mod'] = 'buy',
-                },
-            },
-        },
-        {
             ['name'] = 'trade',
             ['entity'] = 'dependencies.Trade',
             ['init'] = true,
@@ -535,6 +535,7 @@ local this = {
                     ['active'] = false,
                     ['add'] = false,
                     ['border'] = 2,
+                    ['commission'] = 3,
                 },
             },
         },

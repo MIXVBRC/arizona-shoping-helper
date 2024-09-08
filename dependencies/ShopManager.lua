@@ -3,6 +3,7 @@ function class:new(_centralModelIds)
     local public = {}
     local private = {
         ['shops'] = {},
+        ['mod'] = 'sell',
         ['mods'] = {
             [_sh.message:get('system_mod_sale')] = 'sale',
             [_sh.message:get('system_mod_buy')] = 'buy',
@@ -25,6 +26,23 @@ function class:new(_centralModelIds)
     function private:addShop(shop)
         table.insert(private.shops, shop)
         return public
+    end
+
+    -- MOD
+
+    function public:getMod()
+        return private.mod
+    end
+
+    function private:setMod(mod)
+        private.mod = mod
+        return public
+    end
+
+    -- MODS
+
+    function private:getModByName(name)
+        return private.mods[name]
     end
 
     -- CENTRAL MODEL IDS
@@ -136,8 +154,9 @@ function class:new(_centralModelIds)
                         text = _sh.helper:textDecode(textdraw:getText())
                         private.cache:add(cacheKey, text)
                     end
-                    local mod = private.mods[text]
+                    local mod = private:getModByName(text)
                     if mod ~= nil then
+                        private:setMod(mod)
                         local shop = public:getNearby()
                         if shop ~= nil then
                             _sh.eventManager:trigger('onVisitShop', shop, mod, textdraw)
