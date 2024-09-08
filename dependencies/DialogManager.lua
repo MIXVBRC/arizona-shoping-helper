@@ -79,7 +79,7 @@ function class:new(_customDialogId)
         )
         _sh.eventManager:add(
             'onSendDialogResponse',
-            function (id)
+            function ()
                 private:setOpened(false)
                 private:setOpenedId(nil)
             end

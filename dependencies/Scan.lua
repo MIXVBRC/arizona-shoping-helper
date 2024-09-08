@@ -142,7 +142,7 @@ function class:new(_command, _default)
                         if #products > 0 then
                             private:setScanning(true)
                             for _, product in ipairs(products) do
-                                if product:isExist() and public:isActive() and private:haveCode(product:getTextdraw():getCode()) then
+                                if product:isExist() and public:isActive() and private:haveCode(product:getName()) then
                                     product:scan()
                                     wait(private:getTime())
                                 end
@@ -159,7 +159,7 @@ function class:new(_command, _default)
                 while true do wait(0)
                     if public:isActive() then
                         for _, product in ipairs(_sh.productManager:getProducts()) do
-                            if not product:isScanned() and private:haveCode(product:getTextdraw():getCode()) then
+                            if not product:isScanned() and private:haveCode(product:getName()) then
                                 _sh.boxManager:push(
                                     product:getTextdraw():getX(),
                                     product:getTextdraw():getY(),
@@ -193,8 +193,8 @@ function class:new(_command, _default)
         _sh.eventManager:add(
             'onClickProduct',
             function (product)
-                if _sh.player:inShop() and public:isActive() and public:isAdd() then
-                    private:toggleCode(product:getTextdraw():getCode())
+                if _sh.player:inShop() and public:isActive() and public:isAdd() and not product:isScanned() then
+                    private:toggleCode(product:getName())
                 end
             end
         )

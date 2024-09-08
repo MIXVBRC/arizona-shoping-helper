@@ -3,6 +3,7 @@ function class:new(_command, _default)
     local public = {}
     local private = {
         ['lastShopId'] = nil,
+        ['checkTime'] = 60,
         ['minmax'] = _sh.dependencies.minMax:new({
             ['distance'] = {
                 ['min'] = 30,
@@ -57,7 +58,7 @@ function class:new(_command, _default)
         return private.configManager:get('colors')[name]
     end
 
-    -- LAST
+    -- LAST SHOP ID
 
     function private:getLastShopId()
         return private.lastShopId
@@ -66,6 +67,12 @@ function class:new(_command, _default)
     function private:setLastShopId(id)
         private.lastShopId = id
         return public
+    end
+
+    -- CHECK TIME
+
+    function private:getCheckTime()
+        return private.checkTime
     end
 
     -- HIDINGS
@@ -105,22 +112,29 @@ function class:new(_command, _default)
     end
 
     function private:getShop(id)
-        return private:getShops()[id]
+        for _, shop in ipairs(private:getShops()) do
+            if id == shop.id then
+                return shop
+            end
+        end
+        return nil
     end
 
-    function private:addShop(id, data)
+    function private:addShop(shop)
         local shops = private:getShops()
-        shops[id] = data
+        table.insert(shops, shop)
         private:setShops(shops)
         return public
     end
 
-    function private:changeShop(_id, _data)
+    function private:changeShop(id, data)
         local shops = private:getShops()
-        for id, shop in pairs(private:getShops()) do
-            if _id == id then
-                for key, value in pairs(_data) do
-                    shop[key] = value
+        for _, shop in pairs(shops) do
+            if id == shop.id then
+                for key, value in pairs(data) do
+                    if key ~= 'id' then
+                        shop[key] = value
+                    end
                 end
             end
         end
@@ -132,7 +146,7 @@ function class:new(_command, _default)
 
     function private:work()
         local time = os.time()
-        local shops = _sh.shopManager:getAll()
+        local shops = _sh.shopManager:getShops()
         local renders = private.cache:get('renders')
         if renders == nil then
             renders = {}
@@ -169,9 +183,9 @@ function class:new(_command, _default)
                     shopTypes = {'empty'}
                     render.color = private:getColor('empty')
                 end
-                local visitShop = private:getShop(shop:getId())
                 local show = false
-                if visitShop ~= nil and visitShop.time ~= nil then
+                local visitShop = private:getShop(shop:getId())
+                if visitShop ~= nil then
                     if time <= visitShop.time and (visitShop.mod == shop:getMod() or visitShop.mod == _sh.message:get('message_shop_edit')) then
                         shopTypes = {'visit'}
                         render.color = private:getColor('visit')
@@ -179,9 +193,8 @@ function class:new(_command, _default)
                             render.text = math.ceil((visitShop.time - timeNow) / 60) .. ' min'
                         end
                     else
-                        visitShop.time = nil
                         private:changeShop(shop:getId(), {
-                            ['time'] = visitShop.time,
+                            ['time'] = 0,
                             ['mod'] = shop:getMod(),
                         })
                     end
@@ -248,20 +261,19 @@ function class:new(_command, _default)
         _sh.threadManager:add(
             nil,
             function ()
-                while true do wait(1000 * 60)
-                    local shops = private:getShops()
+                while true do wait(1000 * private:getCheckTime())
                     local time = os.time()
                     local flag = false
-                    local new = {}
-                    for id, shop in pairs(shops) do
-                        if shop.time ~= nil and time < shop.time then
-                            new[id] = shop
+                    local shops = {}
+                    for _, shop in pairs(private:getShops()) do
+                        if not shop.select and time < shop.time then
+                            table.insert(shops, shop)
                         else
                             flag = true
                         end
                     end
                     if flag then
-                        private:setShops(new)
+                        private:setShops(shops)
                     end
                 end
             end
@@ -291,17 +303,19 @@ function class:new(_command, _default)
             local lastShopId = private:getLastShopId()
             if lastShopId ~= nil then
                 local shop = private:getShop(lastShopId)
-                local data = {
-                    ['select'] = true,
-                    ['text'] = text,
-                }
-                if shop.select then
-                    data = {
-                        ['select'] = false,
-                        ['text'] = '',
+                if shop ~= nil then
+                    local data = {
+                        ['select'] = true,
+                        ['text'] = text,
                     }
+                    if shop.select then
+                        data = {
+                            ['select'] = false,
+                            ['text'] = '',
+                        }
+                    end
+                    private:changeShop(lastShopId, data)
                 end
-                private:changeShop(lastShopId, data)
             end
         end)
         for hiding, _ in pairs(private:getHidings()) do
@@ -326,15 +340,13 @@ function class:new(_command, _default)
                         }
                     )
                 else
-                    private:addShop(
-                        shop:getId(),
-                        {
-                            ['time'] = time,
-                            ['mod'] = shop:getMod(),
-                            ['select'] = false,
-                            ['text'] = '',
-                        }
-                    )
+                    private:addShop({
+                        ['id'] = shop:getId(),
+                        ['time'] = time,
+                        ['mod'] = shop:getMod(),
+                        ['select'] = false,
+                        ['text'] = '',
+                    })
                 end
             end
         )

@@ -9,7 +9,7 @@ function class:new()
     function public:add(name, trigger, sort)
         private.triggers[name] = private.triggers[name] or {}
         table.insert(private.triggers[name], {
-            ['sort'] = sort or 1,
+            ['sort'] = sort or 100,
             ['entity'] = trigger,
         })
         table.sort(private.triggers[name], function (a, b) return a.sort < b.sort end)

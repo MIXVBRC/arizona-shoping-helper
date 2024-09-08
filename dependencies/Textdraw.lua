@@ -21,29 +21,43 @@ function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _hei
         ['time'] = os.clock(),
     }
 
+    -- ID
+
     function public:getId()
         return private.id
     end
+
+    -- MODEL
 
     function public:getModel()
         return private.model
     end
 
+    -- TEXT
+
     function public:getText()
         return private.text
     end
+
+    -- COLOR
 
     function public:getColor()
         return private.color
     end
 
+    -- CODE
+
     function public:getCode()
         return private.code
     end
 
+    -- SELECTABLE
+
     function public:isSelectable()
         return private.selectable
     end
+
+    -- POSITION
 
     function public:getPosition()
         return private.position
@@ -67,6 +81,8 @@ function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _hei
         return public
     end
 
+    -- SIZE
+
     function public:getSize()
         return private.size
     end
@@ -89,9 +105,13 @@ function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _hei
         return public
     end
 
+    -- TIME
+
     function public:getTime()
         return private.time
     end
+
+    -- CLILDS
 
     function public:getChilds()
         return private.childs
@@ -102,6 +122,8 @@ function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _hei
         table.insert(private.childs, textdraw)
         return public
     end
+
+    -- PAREND
 
     function public:getParent()
         return private.parent
@@ -116,6 +138,8 @@ function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _hei
         return public
     end
 
+    -- LOGIC
+
     function public:setData(data)
         if data ~= nil then
             _sh.eventManager:trigger('onBeforeChangeTextdraw', public, data)
@@ -126,6 +150,8 @@ function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _hei
         end
         return public
     end
+
+    -- INITS
 
     function private:init()
         private.position.x, private.position.y = convertGameScreenCoordsToWindowScreenCoords(public:getX(), public:getY())

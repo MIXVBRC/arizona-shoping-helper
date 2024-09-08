@@ -2,9 +2,10 @@ local class = {}
 function class:new(_command, _default)
     local public = {}
     local private = {
+        ['button'] = nil,
         ['mods'] = {
             'buy',
-            'sell',
+            'sale',
         },
         ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
@@ -21,6 +22,17 @@ function class:new(_command, _default)
         return public
     end
 
+    -- BUTTON
+
+    function private:getButton()
+        return private.button
+    end
+
+    function private:setButton(button)
+        private.button = button
+        return public
+    end
+
     -- MOD
 
     function private:getMod()
@@ -30,7 +42,7 @@ function class:new(_command, _default)
     function private:switchMod()
         for _, mod in ipairs(private.mods) do
             if private:getMod() ~= mod then
-                private.configManager:set('mod', not private:isActive())
+                private.configManager:set('mod', mod)
                 break
             end
         end
@@ -42,6 +54,7 @@ function class:new(_command, _default)
     function private:init()
         private:initCommands()
         private:initEvents()
+        private:initThreads()
     end
 
     function private:initCommands()
@@ -52,11 +65,27 @@ function class:new(_command, _default)
     function private:initEvents()
         _sh.eventManager:add(
             'onVisitShop',
-            function (shop, mod, textdraw)
-                if private:isActive() and mod ~= private:getMod() then
-                    local parent = textdraw:getParent()
-                    if parent ~= nil then
-                        sampSendClickTextdraw(parent:getId())
+            function (_, mod, textdraw)
+                private:setButton({
+                    ['mod'] = mod,
+                    ['textdraw'] = textdraw,
+                })
+            end
+        )
+    end
+
+    function private:initThreads()
+        _sh.threadManager:add(
+            nil,
+            function ()
+                while true do wait(0)
+                    if private:isActive() and _sh.player:inShop() then
+                        local button = private:getButton()
+                        if button ~= nil and button.mod ~= private:getMod() and button.textdraw:getParent() ~= nil then
+                            sampSendClickTextdraw(button.textdraw:getParent():getId())
+                            private:setButton(nil)
+                            wait(1000)
+                        end
                     end
                 end
             end

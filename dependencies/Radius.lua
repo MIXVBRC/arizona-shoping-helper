@@ -66,7 +66,7 @@ function class:new(_command, _default)
 
     function private:getShops()
         local shops = {}
-        for _, shop in ipairs(_sh.shopManager:getAll()) do
+        for _, shop in ipairs(_sh.shopManager:getShops()) do
             if not shop:isCentral() then
                 local distance = _sh.helper:distanceToPlayer2d(shop:getX(), shop:getY())
                 if distance < private:getDistance() then
@@ -80,15 +80,17 @@ function class:new(_command, _default)
     function private:getCircles(shops)
         local circles = {}
         for _, shop in ipairs(shops) do
-            table.insert(circles, {
-                ['position'] = {
-                    ['x'] = shop:getX(),
-                    ['y'] = shop:getY(),
-                    ['z'] = shop:getZ() - 0.8,
-                },
-                ['radius'] = private.radius,
-                ['polygons'] = private:getPolygons(),
-            })
+            if shop:getAdmin() ~= nil then
+                table.insert(circles, {
+                    ['position'] = {
+                        ['x'] = shop:getAdmin():getX(),
+                        ['y'] = shop:getAdmin():getY(),
+                        ['z'] = shop:getAdmin():getZ() - 0.8,
+                    },
+                    ['radius'] = private.radius,
+                    ['polygons'] = private:getPolygons(),
+                })
+            end
         end
         return circles
     end
@@ -194,14 +196,16 @@ function class:new(_command, _default)
         end
         private:drawSegments(segments)
         local shop = _sh.shopManager:getNearby()
-        if not shop:isCentral() then
-            local distance = _sh.helper:distanceToPlayer2d(shop:getX(), shop:getY())
-            if distance < 6 then
-                private.lowPoint:setColor(private:getColor('green'))
-                if distance <= private.radius then
-                    private.lowPoint:setColor(private:getColor('red'))
+        if shop ~= nil and not shop:isCentral() then
+            if shop:getAdmin() ~= nil then
+                local distance = _sh.helper:distanceToPlayer2d(shop:getAdmin():getX(), shop:getAdmin():getY())
+                if distance < 6 then
+                    private.lowPoint:setColor(private:getColor('green'))
+                    if distance <= private.radius then
+                        private.lowPoint:setColor(private:getColor('red'))
+                    end
+                    private.lowPoint:render()
                 end
-                private.lowPoint:render()
             end
         end
     end

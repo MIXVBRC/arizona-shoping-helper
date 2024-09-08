@@ -2,6 +2,7 @@ local class = {}
 function class:new(_command, _default)
     local public = {}
     local private = {
+        ['editPrice'] = false,
         ['editShop'] = false,
         ['product'] = {
             ['textdraw'] = nil,
@@ -24,14 +25,14 @@ function class:new(_command, _default)
         return public
     end
 
-    -- EDIT SHOP
+    -- EDIT PRICE
 
-    function private:isEditShop()
-        return private.editShop
+    function private:isEditPrice()
+        return private.editPrice
     end
 
-    function private:setEditShop(boolean)
-        private.editShop = boolean
+    function private:setEditPrice(bool)
+        private.editPrice = bool
         return public
     end
 
@@ -94,28 +95,33 @@ function class:new(_command, _default)
         _sh.eventManager:add(
             'onSendClickTextDraw',
             function (textdrawId)
-                if _sh.player:editProducts() and private:isActive() then
-                    local textdraw = _sh.textdrawManager:getTextdrawById(textdrawId)
-                    if textdraw ~= nil then
-                        local count = 1
-                        local needCount = false
-                        for _, childTextdraw in ipairs(textdraw:getChilds()) do
-                            if _sh.helper:isPrice(childTextdraw:getText()) then
-                                private:setProduct(textdraw, 1, false, 'delete')
-                                return
-                            elseif _sh.helper:isNumber(childTextdraw:getText()) then
-                                count = _sh.helper:getNumber(childTextdraw:getText())
-                                needCount = true
-                                break
+                if private:isEditPrice() then
+                    return false
+                else
+                    if _sh.player:editProducts() and private:isActive() then
+                        local textdraw = _sh.textdrawManager:getTextdrawById(textdrawId)
+                        if textdraw ~= nil then
+                            local count = 1
+                            local needCount = false
+                            for _, childTextdraw in ipairs(textdraw:getChilds()) do
+                                if _sh.helper:isPrice(childTextdraw:getText()) then
+                                    private:setProduct(textdraw, 1, false, 'delete')
+                                    return
+                                elseif _sh.helper:isNumber(childTextdraw:getText()) then
+                                    count = _sh.helper:getNumber(childTextdraw:getText())
+                                    needCount = true
+                                    break
+                                end
                             end
+                            if count > 1 and isKeyDown(VK_CONTROL) then
+                                count = count - 1
+                            end
+                            private:setProduct(textdraw, count, needCount, 'add')
                         end
-                        if count > 1 and isKeyDown(VK_CONTROL) then
-                            count = count - 1
-                        end
-                        private:setProduct(textdraw, count, needCount, 'add')
                     end
                 end
-            end
+            end,
+            1
         )
         _sh.eventManager:add(
             'onShowDialog',
@@ -131,14 +137,16 @@ function class:new(_command, _default)
                                 local input = price
                                 if product.needCount and product.count ~= nil then
                                     input =  table.concat({product.count,price}, ',')
-                                    message = message .. '{ffffff} {0000ff}х' .. (product.count or 1)
+                                    message = message .. '{ffffff} {0000ff}х' .. product.count
                                 end
+                                _sh.chat:push(input)
                                 message = message .. '{ffffff} выставлен за {00ff00}' .. _sh.helper:formatPrice(price)
                                 _sh.dialogManager:send(dialogId, 1, 0, input)
                                 _sh.chat:push(message)
                                 private:clearProduct()
                             else
                                 _sh.dialogManager:close()
+                                private:setEditPrice(true)
                                 _sh.dialogManager:show(
                                     '{65f0c6}Введите цену за предмет',
                                     name,
@@ -146,6 +154,7 @@ function class:new(_command, _default)
                                     'Отмена',
                                     1,
                                     function (button, _, input)
+                                        private:setEditPrice(false)
                                         if button == 1 then
                                             input = _sh.helper:getNumber(input)
                                             private:addProductPrice(name, input)

@@ -8,6 +8,7 @@ function class:new()
             ['blue'] = '42bdb5',
             ['orange'] = 'ffd700',
             ['white'] = 'ffffff',
+            ['black'] = '000000',
         }
     }
 

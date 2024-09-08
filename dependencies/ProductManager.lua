@@ -61,9 +61,9 @@ function class:new()
         }
         for _, childTextdraw in ipairs(textdraw:getChilds()) do
             if _sh.helper:isPrice(childTextdraw:getText()) then
-                params.price = _sh.helper:extractPrice(textdraw:getText())
+                params.price = _sh.helper:extractPrice(childTextdraw:getText())
             else
-                params.name = _sh.helper:md5(params.name .. textdraw:getCode())
+                params.name = _sh.helper:md5(params.name .. childTextdraw:getCode())
             end
         end
         local product = _sh.dependencies.product:new(
@@ -79,37 +79,7 @@ function class:new()
     -- INITS
 
     function private:init()
-        private:initThreads()
         private:initEvents()
-    end
-
-    function private:initThreads()
-        -- _sh.threadManager:add(
-        --     nil,
-        --     function ()
-        --         while true do wait(0)
-        --             if not _sh.dialogManager:isOpened() then
-        --                 for _, product in ipairs(public:getProducts()) do
-        --                     local color = 'ffffff'
-        --                     local scale = 1
-        --                     if product:isScanned() then
-        --                         color = '00ff00'
-        --                         scale = 5
-        --                     end
-        --                     _sh.render:pushBox(
-        --                         product:getTextdraw():getX(),
-        --                         product:getTextdraw():getY(),
-        --                         product:getTextdraw():getWidth(),
-        --                         product:getTextdraw():getHeight(),
-        --                         '0x00ffffff',
-        --                         scale,
-        --                         '0xff' .. color
-        --                     )
-        --                 end
-        --             end
-        --         end
-        --     end
-        -- )
     end
 
     function private:initEvents()
