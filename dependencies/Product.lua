@@ -1,9 +1,9 @@
 local class = {}
-function class:new(_name, _price, _mod, _textdraw)
+function class:new(_name, _code, _price, _mod, _textdraw)
     local public = {}
     local private = {
         ['name'] = _name,
-        ['code'] = nil,
+        ['code'] = _code,
         ['price'] = _price,
         ['mod'] = _mod,
         ['textdraw'] = _textdraw,
@@ -28,6 +28,10 @@ function class:new(_name, _price, _mod, _textdraw)
     function private:setName(name)
         private.name = name
         return public
+    end
+
+    function public:getCode()
+        return private.code
     end
 
     function public:getPrice()

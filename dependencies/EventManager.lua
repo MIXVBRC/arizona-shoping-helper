@@ -3,7 +3,6 @@ function class:new()
     local public = {}
     local private = {
         ['triggers'] = {},
-        ['doubleClick'] = nil
     }
 
     function public:add(name, trigger, sort)

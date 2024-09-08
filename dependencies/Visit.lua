@@ -167,26 +167,26 @@ function class:new(_command, _default)
                     render.color = private:getColor('player')
                     render.polygons = 3
                     render.rotation = 180
-                elseif shop:getMod() == _sh.message:get('message_shop_sell') then -- visit_shop_mod_sell
+                elseif shop:getMod() == _sh.message:get('system_shop_sell') then -- visit_shop_mod_sell
                     shopTypes = {'sell'}
                     render.color = private:getColor('sell')
-                elseif shop:getMod() == _sh.message:get('message_shop_buy') then
+                elseif shop:getMod() == _sh.message:get('system_shop_buy') then
                     shopTypes = {'buy'}
                     render.color = private:getColor('buy')
-                elseif shop:getMod() == _sh.message:get('message_shop_sell_buy') then
+                elseif shop:getMod() == _sh.message:get('system_shop_sell_buy') then
                     shopTypes = {'sell','buy'}
                     render.color = private:getColor('sell_buy')
-                elseif shop:getMod() == _sh.message:get('message_shop_edit') then
+                elseif shop:getMod() == _sh.message:get('system_shop_edit') then
                     shopTypes = {'edit'}
                     render.color = private:getColor('edit')
-                elseif shop:getMod() == _sh.message:get('message_shop_empty') then
+                elseif shop:getMod() == _sh.message:get('system_shop_empty') then
                     shopTypes = {'empty'}
                     render.color = private:getColor('empty')
                 end
                 local show = false
                 local visitShop = private:getShop(shop:getId())
                 if visitShop ~= nil then
-                    if time <= visitShop.time and (visitShop.mod == shop:getMod() or visitShop.mod == _sh.message:get('message_shop_edit')) then
+                    if time <= visitShop.time and (visitShop.mod == shop:getMod() or visitShop.mod == _sh.message:get('system_shop_edit')) then
                         shopTypes = {'visit'}
                         render.color = private:getColor('visit')
                         if private:getHiding('time') then

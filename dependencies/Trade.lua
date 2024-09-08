@@ -57,7 +57,7 @@ function class:new(_command, _default)
         return public
     end
 
-    -- PRODUCTPRICES
+    -- PRODUCTP RICES
 
     function private:getProductPrices()
         return private.configManager:get('prices') or {}
@@ -133,16 +133,31 @@ function class:new(_command, _default)
                             local name = text:match('^.*%(%s+{.+}(.+){.+}%s+%).*$')
                             local price = private:getProductPrice(name)
                             if price ~= nil and not isKeyDown(VK_SHIFT) then
-                                local message = '{00ff00}'.. name
                                 local input = price
                                 if product.needCount and product.count ~= nil then
                                     input =  table.concat({product.count,price}, ',')
-                                    message = message .. '{ffffff} {0000ff}х' .. product.count
+                                    _sh.chat:push(
+                                        _sh.message:get(
+                                            'message_trade_add_product_count',
+                                            {
+                                                name,
+                                                product.count,
+                                                _sh.helper:formatPrice(price),
+                                            }
+                                        )
+                                    )
+                                else
+                                    _sh.chat:push(
+                                        _sh.message:get(
+                                            'message_trade_add_product',
+                                            {
+                                                name,
+                                                _sh.helper:formatPrice(price),
+                                            }
+                                        )
+                                    )
                                 end
-                                _sh.chat:push(input)
-                                message = message .. '{ffffff} выставлен за {00ff00}' .. _sh.helper:formatPrice(price)
                                 _sh.dialogManager:send(dialogId, 1, 0, input)
-                                _sh.chat:push(message)
                                 private:clearProduct()
                             else
                                 _sh.dialogManager:close()

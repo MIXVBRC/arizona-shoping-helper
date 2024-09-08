@@ -54,7 +54,8 @@ function class:new()
             private:deleteProduct(private:getLastProduct())
         end
         local params = {
-            ['name'] = textdraw:getCode(),
+            ['name'] = nil,
+            ['code'] = textdraw:getCode(),
             ['price'] = nil,
             ['mod'] = 'sell',
             ['textdraw'] = textdraw,
@@ -63,11 +64,12 @@ function class:new()
             if _sh.helper:isPrice(childTextdraw:getText()) then
                 params.price = _sh.helper:extractPrice(childTextdraw:getText())
             else
-                params.name = _sh.helper:md5(params.name .. childTextdraw:getCode())
+                params.code = _sh.helper:md5(params.code .. childTextdraw:getCode())
             end
         end
         local product = _sh.dependencies.product:new(
             params.name,
+            params.code,
             params.price,
             params.mod,
             params.textdraw
@@ -115,7 +117,7 @@ function class:new()
             function (id)
                 for _, product in ipairs(public:getProducts()) do
                     if id == product:getTextdraw():getId() then
-                        _sh.eventManager:trigger('onClickProduct', product)
+                        return _sh.eventManager:trigger('onClickProduct', product)
                     end
                 end
             end

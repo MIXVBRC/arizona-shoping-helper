@@ -33,8 +33,13 @@ function class:new(_command, _default)
 
     function public:toggleAdd()
         private.configManager:set('add', not public:isAdd())
-        if public:isAdd() and _sh.select:isAdd() then
-            _sh.select:toggleAdd()
+        if public:isAdd() then
+            if _sh.select ~= nil and _sh.select:isAdd() then
+                _sh.select:toggleAdd()
+            end
+            if _sh.pricer ~= nil and _sh.pricer:isAdd() then
+                _sh.pricer:toggleAdd()
+            end
         end
         return public
     end
@@ -67,9 +72,9 @@ function class:new(_command, _default)
         return private.configManager:get('codes') or {}
     end
 
-    function private:setCodes(productNames)
-        productNames = productNames or {}
-        private.configManager:set('codes', productNames)
+    function private:setCodes(productCodes)
+        productCodes = productCodes or {}
+        private.configManager:set('codes', productCodes)
         return public
     end
 
@@ -83,31 +88,31 @@ function class:new(_command, _default)
     end
 
     function private:addCode(name)
-        local productNames = private:getCodes()
-        table.insert(productNames, name)
-        private:setCodes(productNames)
+        local productCodes = private:getCodes()
+        table.insert(productCodes, name)
+        private:setCodes(productCodes)
         return public
     end
 
-    function private:deleteCode(name)
-        local productNames = {}
-        for _, productName in ipairs(private:getCodes()) do
-            if name ~= productName then
-                table.insert(productNames, productName)
+    function private:deleteCode(code)
+        local productCodes = {}
+        for _, productCode in ipairs(private:getCodes()) do
+            if code ~= productCode then
+                table.insert(productCodes, productCode)
             end
         end
-        private:setCodes(productNames)
+        private:setCodes(productCodes)
         return public
     end
 
-    function private:toggleCode(name)
-        for _, productName in ipairs(private:getCodes()) do
-            if name == productName then
-                private:deleteCode(name)
+    function private:toggleCode(code)
+        for _, productCode in ipairs(private:getCodes()) do
+            if code == productCode then
+                private:deleteCode(code)
                 return public
             end
         end
-        private:addCode(name)
+        private:addCode(code)
         return public
     end
 
@@ -142,7 +147,7 @@ function class:new(_command, _default)
                         if #products > 0 then
                             private:setScanning(true)
                             for _, product in ipairs(products) do
-                                if product:isExist() and public:isActive() and private:haveCode(product:getName()) then
+                                if product:isExist() and public:isActive() and private:haveCode(product:getCode()) then
                                     product:scan()
                                     wait(private:getTime())
                                 end
@@ -159,7 +164,7 @@ function class:new(_command, _default)
                 while true do wait(0)
                     if public:isActive() then
                         for _, product in ipairs(_sh.productManager:getProducts()) do
-                            if not product:isScanned() and private:haveCode(product:getName()) then
+                            if not product:isScanned() and private:haveCode(product:getCode()) then
                                 _sh.boxManager:push(
                                     product:getTextdraw():getX(),
                                     product:getTextdraw():getY(),
@@ -193,18 +198,17 @@ function class:new(_command, _default)
         _sh.eventManager:add(
             'onClickProduct',
             function (product)
-                if _sh.player:inShop() and public:isActive() and public:isAdd() and not product:isScanned() then
-                    private:toggleCode(product:getName())
+                if _sh.player:inShop() and public:isActive() and public:isAdd() then
+                    private:toggleCode(product:getCode())
+                    return false
                 end
-            end
+            end,
+            1
         )
         _sh.eventManager:add(
             'onShowDialog',
             function (dialogId, _, _, _, _, text)
-                if _sh.player:inShop() and public:isActive() and public:isAdd() then
-                    _sh.dialogManager:close()
-                    return false
-                else
+                if public:isScanning() then
                     for _, product in ipairs(_sh.productManager:getProducts()) do
                         if product:isScanning() then
                             product:scanDialogName(dialogId, text)

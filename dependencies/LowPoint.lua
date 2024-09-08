@@ -2,8 +2,8 @@ local class = {}
 function class:new()
     local public = {}
     local private = {
-        ['color'] = 'ffffff',
-        ['alpha'] = '0xff',
+        ['color'] = _sh.color:get('white'),
+        ['alpha'] = _sh.color:getAlpha(100),
     }
 
     function private:getColor()

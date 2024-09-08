@@ -12,11 +12,6 @@ function class:new(_x, _y, _z, _title, _admin)
         ['central'] = false,
         ['title'] = _title,
         ['admin'] = _admin,
-        ['centralModelIds'] = {
-            3861,
-            14211,
-            14210,
-        },
     }
 
     function public:getId()
@@ -60,7 +55,7 @@ function class:new(_x, _y, _z, _title, _admin)
         if public:getTitle() ~= nil then
             return public:getTitle():getMod()
         end
-        return _sh.message:get('message_shop_empty')
+        return _sh.message:get('system_shop_empty')
     end
 
     function public:isEmpty()
@@ -97,7 +92,7 @@ function class:new(_x, _y, _z, _title, _admin)
         end
         local cacheKey = 'shop_' .. _sh.helper:md5(public:getX()..public:getY()..public:getZ())
         if _sh.cache:get(cacheKey) == nil then
-            for _, object in ipairs(_sh.helper:getObjectsByIds(private.centralModelIds)) do
+            for _, object in ipairs(_sh.helper:getObjectsByIds(_sh.shopManager:getCentralModelIds())) do
                 local _, objectX, objectY, objectZ = getObjectCoordinates(object)
                 local distance = getDistanceBetweenCoords3d(
                     public:getX(), public:getY(), public:getZ(),

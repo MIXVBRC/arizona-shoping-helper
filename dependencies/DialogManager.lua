@@ -52,6 +52,8 @@ function class:new(_customDialogId)
     end
 
     function public:show(title, text, submitButtonText, closeButtonText, dialogType, execute)
+        private:setOpened(true)
+        private:setOpenedId(private:getCustomDialogId())
         _sh.dependencies.dialog:new(
             private:getCustomDialogId(),
             title,
@@ -59,7 +61,11 @@ function class:new(_customDialogId)
             submitButtonText,
             closeButtonText,
             dialogType,
-            execute
+            function (button, list, input)
+                execute(button, list, input)
+                private:setOpened(false)
+                private:setOpenedId(nil)
+            end
         )
     end
 

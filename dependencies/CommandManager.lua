@@ -9,12 +9,16 @@ function class:new(_prefix)
         return table.concat({_sh.script.command, private.prefix, _name}, '-')
     end
 
+    function public:getCommandMessageName(_name)
+        return 'command_' .. table.concat({_sh.script.command, private.prefix, _name}, '_') .. '_description'
+    end
+
     function public:add(_name, _function)
         local command = public:getCommandName(_name)
         table.insert(_sh.commands, {
             ['name'] = command,
+            ['message'] = public:getCommandMessageName(_name),
             ['_function'] = _function,
-            ['description'] = _sh.message:get('command_'..command..'_description') or '',
         })
         sampRegisterChatCommand(
             command,

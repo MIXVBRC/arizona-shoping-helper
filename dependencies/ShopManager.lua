@@ -1,19 +1,13 @@
 local class = {}
-function class:new()
+function class:new(_centralModelIds)
     local public = {}
     local private = {
         ['shops'] = {},
         ['mods'] = {
-            [_sh.message:get('sale_mod_sale')] = 'sale',
-            [_sh.message:get('sale_mod_buy')] = 'buy',
-            [_sh.message:get('sale_mod_sale_en')] = 'sale',
-            [_sh.message:get('sale_mod_buy_en')] = 'buy',
+            [_sh.message:get('system_mod_sale')] = 'sale',
+            [_sh.message:get('system_mod_buy')] = 'buy',
         },
-        ['centralModelIds'] = {
-            3861,
-            14211,
-            14210,
-        },
+        ['centralModelIds'] = _centralModelIds or {},
         ['cache'] = _sh.dependencies.cache:new(),
     }
 
@@ -31,6 +25,12 @@ function class:new()
     function private:addShop(shop)
         table.insert(private.shops, shop)
         return public
+    end
+
+    -- CENTRAL MODEL IDS
+
+    function public:getCentralModelIds()
+        return private.centralModelIds
     end
 
     -- LOGIC
@@ -71,7 +71,7 @@ function class:new()
                         local admins = {}
                         for _, textId in ipairs(_sh.helper:getTextIds()) do
                             local text, _, x, y, z, _, _, _, _ = sampGet3dTextInfoById(textId)
-                            if text == _sh.message:get('message_shop') then
+                            if text == _sh.message:get('system_shop') then
                                 table.insert(shops, {
                                     ['x'] = x,
                                     ['y'] = y,
@@ -84,7 +84,7 @@ function class:new()
                                     y,
                                     z
                                 ))
-                            elseif text:find('^' .. _sh.message:get('product_management') .. '$') then
+                            elseif text:find('^' .. _sh.message:get('system_product_management') .. '$') then
                                 table.insert(admins, _sh.dependencies.shopAdmin:new(
                                     text,
                                     x,
@@ -129,11 +129,19 @@ function class:new()
         _sh.eventManager:add(
             'onAfterChangeTextdraw',
             function (textdraw)
-                local mod = private.mods[textdraw:getText()]
-                if mod ~= nil then
-                    local shop = public:getNearby()
-                    if shop ~= nil then
-                        _sh.eventManager:trigger('onVisitShop', shop, mod, textdraw)
+                if textdraw:getText() ~= '' then
+                    local cacheKey = 'text_'..textdraw:getText()
+                    local text = private.cache:get(cacheKey)
+                    if text == nil then
+                        text = _sh.helper:textDecode(textdraw:getText())
+                        private.cache:add(cacheKey, text)
+                    end
+                    local mod = private.mods[text]
+                    if mod ~= nil then
+                        local shop = public:getNearby()
+                        if shop ~= nil then
+                            _sh.eventManager:trigger('onVisitShop', shop, mod, textdraw)
+                        end
                     end
                 end
             end

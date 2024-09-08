@@ -1,15 +1,8 @@
 local class = {}
-function class:new()
+function class:new(_colors)
     local public = {}
     local private = {
-        ['colors'] = {
-            ['red'] = '992e2e',
-            ['green'] = '3cc23c',
-            ['blue'] = '42bdb5',
-            ['orange'] = 'ffd700',
-            ['white'] = 'ffffff',
-            ['black'] = '000000',
-        }
+        ['colors'] = _colors
     }
 
     function public:get(name)

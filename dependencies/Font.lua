@@ -9,7 +9,7 @@ function class:new()
         local cacheKey = _sh.helper:md5(name .. '-' .. height .. '-' .. flags)
         local font = private.cache:get(cacheKey)
         if font == nil then
-            font = renderCreateFont("Arial", 12, 4)
+            font = renderCreateFont(name, height, flags)
             private.cache:add(cacheKey, font)
         end
         return font
