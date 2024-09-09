@@ -86,7 +86,7 @@ function class:new()
         _sh.eventManager:add(
             'onTextdrawAddChild',
             function (textdraw)
-                if _sh.player:inShop() then
+                if _sh.player:isShoping() then
                     for _, childTextdraw in ipairs(textdraw:getChilds()) do
                         if _sh.helper:isPrice(childTextdraw:getText()) then
                             private:createProduct(textdraw)

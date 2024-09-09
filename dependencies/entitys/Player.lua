@@ -2,8 +2,8 @@ local class = {}
 function class:new()
     local public = {}
     local private = {
-        ['inShop'] = false,
-        ['editProductList'] = false,
+        ['shoping'] = false,
+        ['admining'] = false,
         ['cache'] = _sh.dependencies.cache:new(),
     }
 
@@ -37,21 +37,21 @@ function class:new()
         return public:getPosition().z
     end
 
-    function public:inShop()
-        return private.inShop
+    function public:isShoping()
+        return private.shoping
     end
 
-    function private:setShop(inShop)
-        private.inShop = inShop
+    function private:setShoping(bool)
+        private.shoping = bool
         return public
     end
 
-    function public:editProducts()
-        return private.editProductList
+    function public:isAdmining()
+        return private.admining
     end
 
-    function private:setEditProducts(editProductList)
-        private.editProductList = editProductList
+    function private:setAdmining(bool)
+        private.admining = bool
         return public
     end
 
@@ -70,23 +70,37 @@ function class:new()
                         text = _sh.helper:textDecode(textdraw:getText())
                         private.cache:add(cacheKey, text)
                     end
-                    if not public:inShop() and text == _sh.message:get('system_shop_textdraw') then
-                        private:setShop(true)
+                    if not public:isShoping() and text == _sh.message:get('system_shop_textdraw') then
+                        private:setShoping(true)
                         _sh.threadManager:add(
                             nil,
                             function () wait(0) while sampTextdrawIsExists(textdraw:getId()) do wait(0) end
-                                private:setShop(false)
+                                private:setShoping(false)
                             end
                         )
                     end
-                    if not public:editProducts() and text == _sh.message:get('system_trade_textdraw') then
-                        private:setEditProducts(true)
+                    if not public:isAdmining() and text == _sh.message:get('system_trade_textdraw') then
+                        private:setAdmining(true)
                         _sh.threadManager:add(
                             nil,
                             function () wait(0) while sampTextdrawIsExists(textdraw:getId()) do wait(0) end
-                                private:setEditProducts(false)
+                                private:setAdmining(false)
                             end
                         )
+                    end
+                end
+            end
+        )
+        _sh.eventManager:add(
+            'onShowDialog',
+            function (_, _, title)
+                title = _sh.helper:removeColors(title)
+                if title:find('^Ыртър Й%d+$') then
+                    local shop = _sh.shopManager:getNearby()
+                    if shop ~= nil then
+                        _sh.chat:push(1)
+                        local id = _sh.helper:getNumber(title:match('^Ыртър Й(%d+)$'))
+                        _sh.eventManager:trigger('onEnterShopAdmining', shop, id)
                     end
                 end
             end

@@ -111,10 +111,10 @@ function class:new(_name, _code, _price, _textdraw)
             end
         end
         local array = _sh.helper:explode(':', exploded)
-        result = table.concat(array, ':', 2, #array)
+        result = _sh.helper:implode(':', array, 2, #array)
         if result == nil or result == '' then
             array = _sh.helper:explode(' ', exploded)
-            result = table.concat(array, ' ', 4, #array)
+            result = _sh.helper:implode(' ', array, 4, #array)
         end
         return prefix .. _sh.helper:trim(result)
     end

@@ -49,14 +49,14 @@ function class:new(_id, _title, _text, _submitButtonText, _closeButtonText, _dia
         if public:getDialogType() == 0 or public:getDialogType() == 1 or public:getDialogType() == 3 then
             text = public:getText()
         elseif public:getDialogType() == 2 then
-            text = table.concat(public:getText(), '\n')
+            text = _sh.helper:implode('\n', public:getText())
         else
             text = ''
             for _, value in ipairs(public:getText()) do
                 if text == '' then
-                    text = table.concat(value, '\t')
+                    text = _sh.helper:implode('\t', value)
                 else
-                    text = text .. '\n' .. table.concat(value, '\t')
+                    text = text .. '\n' .. _sh.helper:implode('\t', value)
                 end
             end
         end

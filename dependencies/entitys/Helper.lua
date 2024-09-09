@@ -47,7 +47,7 @@ function class:new(_symbols)
                 table.insert(result, private.symbols.decode[symbol] or symbol)
             end
         )
-        return table.concat(result)
+        return _sh.helper:implode('', result)
     end
 
     function public:textEncode(text)
@@ -57,7 +57,7 @@ function class:new(_symbols)
                 table.insert(result, private.symbols.encode[symbol] or symbol)
             end
         )
-        return table.concat(result)
+        return _sh.helper:implode('', result)
     end
 
     function public:getObjectsByIds(ids)
@@ -152,6 +152,10 @@ function class:new(_symbols)
         return result
     end
 
+    function public:implode(separator, array, from, to)
+        return table.concat(array, separator or '', from or 1, to or #array)
+    end
+
     function public:trim(text)
         text = tostring(text)
         return text:gsub('^%s+', ''):gsub('%s+$', '')
@@ -201,6 +205,10 @@ function class:new(_symbols)
         end
         price = public:getNumber(price)
         return price
+    end
+
+    function public:removeColors(text)
+        return tostring(text:gsub('{%w%w%w%w%w%w}', ''))
     end
 
     return public

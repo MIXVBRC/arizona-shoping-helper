@@ -1,19 +1,10 @@
 local class = {}
-function class:new(_command, _default)
+function class:new(_command, _default, _minmax)
     local public = {}
     local private = {
         ['lastShopId'] = nil,
         ['checkTime'] = 60,
-        ['minmax'] = _sh.dependencies.minMax:new({
-            ['distance'] = {
-                ['min'] = 30,
-                ['max'] = 200,
-            },
-            ['time'] = {
-                ['min'] = 1,
-                ['max'] = 1440,
-            },
-        }),
+        ['minmax'] = _sh.dependencies.minMax:new(_minmax),
         ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
         ['cache'] = _sh.dependencies.cache:new(),
@@ -87,14 +78,32 @@ function class:new(_command, _default)
     end
 
     function private:getHiding(name)
-        return private:getHidings()[name]
+        for _, hiding in ipairs(private:getHidings()) do
+            if name == hiding.name then
+                return hiding
+            end
+        end
+        return nil
     end
 
     function private:toggleHiding(name)
         local hidings = private:getHidings()
-        hidings[name] = not hidings[name]
+        for _, hiding in ipairs(hidings) do
+            if name == hiding.name then
+                hiding.active = not hiding.active
+            end
+        end
         private:setHidings(hidings)
         return public
+    end
+
+    function private:isHidingActive(name)
+        for _, hiding in ipairs(private:getHidings()) do
+            if name == hiding.name then
+                return hiding.active
+            end
+        end
+        return nil
     end
 
     -- SHOPS
@@ -189,7 +198,7 @@ function class:new(_command, _default)
                     if time <= visitShop.time and (visitShop.mod == shop:getMod() or visitShop.mod == _sh.message:get('system_shop_edit')) then
                         shopTypes = {'visit'}
                         render.color = private:getColor('visit')
-                        if private:getHiding('time') then
+                        if private:isHidingActive('time') then
                             render.text = math.ceil((visitShop.time - timeNow) / 60) .. ' min'
                         end
                     else
@@ -208,7 +217,7 @@ function class:new(_command, _default)
                 end
                 if not show then
                     for _, shopType in ipairs(shopTypes) do
-                        if private:getHiding(shopType) then
+                        if private:isHidingActive(shopType) then
                             show = true
                         end
                     end
@@ -252,7 +261,7 @@ function class:new(_command, _default)
             nil,
             function ()
                 while true do wait(0)
-                    if private:isActive() and not _sh.player:inShop() and not _sh.player:editProducts() then
+                    if private:isActive() and not _sh.player:isShoping() and not _sh.player:isAdmining() then
                         private:work()
                     end
                 end
@@ -318,9 +327,9 @@ function class:new(_command, _default)
                 end
             end
         end)
-        for hiding, _ in pairs(private:getHidings()) do
-            private.commandManager:add(table.concat({'active', hiding}, '-'), function ()
-                private:toggleHiding(hiding)
+        for _, hiding in ipairs(private:getHidings()) do
+            private.commandManager:add({'active', hiding.name}, function ()
+                private:toggleHiding(hiding.name)
             end)
         end
     end

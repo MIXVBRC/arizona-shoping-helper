@@ -95,7 +95,7 @@ function class:new(_command, _default)
             function ()
                 while true do wait(0)
                     if private:isActive() then
-                        if _sh.player:inShop() then
+                        if _sh.player:isShoping() then
                             local button = private:getButton()
                             if button ~= nil and button.mod ~= private:getMod() and button.textdraw:getParent() ~= nil then
                                 sampSendClickTextdraw(button.textdraw:getParent():getId())

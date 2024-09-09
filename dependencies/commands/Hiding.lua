@@ -1,13 +1,8 @@
 local class = {}
-function class:new(_command, _default)
+function class:new(_command, _default, _minmax)
     local public = {}
     local private = {
-        ['minmax'] = _sh.dependencies.minMax:new({
-            ['alpha'] = {
-                ['min'] = 0,
-                ['max'] = 100,
-            },
-        }),
+        ['minmax'] = _sh.dependencies.minMax:new(_minmax),
         ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
     }
@@ -37,7 +32,7 @@ function class:new(_command, _default)
     -- WIRK
 
     function private:work()
-        if _sh.player:inShop() and not _sh.dialogManager:isOpened() and not _sh.swipe:isSwipe() then
+        if _sh.player:isShoping() and not _sh.dialogManager:isOpened() and not _sh.swipe:isSwipe() then
             for _, product in ipairs(_sh.productManager:getProducts()) do
                 _sh.boxManager:push(
                     product:getTextdraw():getX(),

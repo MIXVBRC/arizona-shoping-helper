@@ -136,7 +136,7 @@ function class:new(_centralModelIds)
                                 admin
                             ))
                         end
-                        private.cache:add('shops', public:getShops(), 2)
+                        private.cache:add('shops', public:getShops(), 1)
                     end
                 end
             end

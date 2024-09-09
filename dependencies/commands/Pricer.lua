@@ -1,17 +1,8 @@
 local class = {}
-function class:new(_command, _default)
+function class:new(_command, _default, _minmax)
     local public = {}
     local private = {
-        ['minmax'] = _sh.dependencies.minMax:new({
-            ['border'] = {
-                ['min'] = 1,
-                ['max'] = 5,
-            },
-            ['commission'] = {
-                ['min'] = 0,
-                ['max'] = 100,
-            },
-        }),
+        ['minmax'] = _sh.dependencies.minMax:new(_minmax),
         ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
     }
@@ -124,7 +115,7 @@ function class:new(_command, _default)
     -- WORK
 
     function private:work()
-        if _sh.player:inShop() and not _sh.dialogManager:isOpened() and not _sh.swipe:isSwipe() then
+        if _sh.player:isShoping() and not _sh.dialogManager:isOpened() and not _sh.swipe:isSwipe() then
             for _, product in ipairs(private:getProducts()) do
                 for _, _product in ipairs(_sh.productManager:getProducts()) do
                     if product.sign == _product:getName() or product.sign == _product:getCode() then
@@ -200,7 +191,7 @@ function class:new(_command, _default)
         _sh.eventManager:add(
             'onClickProduct',
             function (product)
-                if not _sh.scan:isScanning() and _sh.player:inShop() and public:isActive() and public:isAdd() then
+                if not _sh.scan:isScanning() and _sh.player:isShoping() and public:isActive() and public:isAdd() then
                     local sign = product:getCode()
                     if product:isScanned() then
                         sign = product:getName()

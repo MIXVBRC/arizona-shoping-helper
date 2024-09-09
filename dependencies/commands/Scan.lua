@@ -1,15 +1,10 @@
 local class = {}
-function class:new(_command, _default)
+function class:new(_command, _default, _minmax)
     local public = {}
     local private = {
         ['scanning'] = false,
         ['border'] = 1,
-        ['minmax'] = _sh.dependencies.minMax:new({
-            ['time'] = {
-                ['min'] = 200,
-                ['max'] = 1000,
-            },
-        }),
+        ['minmax'] = _sh.dependencies.minMax:new(_minmax),
         ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
     }
@@ -162,7 +157,7 @@ function class:new(_command, _default)
             nil,
             function ()
                 while true do wait(0)
-                    if public:isActive() and _sh.player:inShop() and not _sh.swipe:isSwipe() then
+                    if public:isActive() and _sh.player:isShoping() and not _sh.swipe:isSwipe() then
                         for _, product in ipairs(_sh.productManager:getProducts()) do
                             if not product:isScanned() and private:haveCode(product:getCode()) then
                                 _sh.boxManager:push(
@@ -198,7 +193,7 @@ function class:new(_command, _default)
         _sh.eventManager:add(
             'onClickProduct',
             function (product)
-                if _sh.player:inShop() and public:isActive() and public:isAdd() then
+                if _sh.player:isShoping() and public:isActive() and public:isAdd() then
                     private:toggleCode(product:getCode())
                     return false
                 end

@@ -1,18 +1,9 @@
 local class = {}
-function class:new(_command, _default)
+function class:new(_command, _default, _minmax)
     local public = {}
     local private = {
         ['radius'] = 5,
-        ['minmax'] = _sh.dependencies.minMax:new({
-            ['polygons'] = {
-                ['min'] = 24,
-                ['max'] = 48,
-            },
-            ['distance'] = {
-                ['min'] = 30,
-                ['max'] = 60,
-            },
-        }),
+        ['minmax'] = _sh.dependencies.minMax:new(_minmax),
         ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
         ['commandManager'] = _sh.dependencies.commandManager:new(_command),
         ['lowPoint'] = _sh.dependencies.lowPoint:new(),
@@ -222,7 +213,7 @@ function class:new(_command, _default)
             nil,
             function ()
                 while true do wait(0)
-                    if private:isActive() and not _sh.player:inShop() and not _sh.player:editProducts() then
+                    if private:isActive() and not _sh.player:isShoping() and not _sh.player:isAdmining() then
                         private:work()
                     end
                 end

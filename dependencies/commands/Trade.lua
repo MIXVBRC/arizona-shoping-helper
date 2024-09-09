@@ -98,7 +98,7 @@ function class:new(_command, _default)
                 if private:isEditPrice() then
                     return false
                 else
-                    if _sh.player:editProducts() and private:isActive() then
+                    if _sh.player:isAdmining() and private:isActive() then
                         local textdraw = _sh.textdrawManager:getTextdrawById(textdrawId)
                         if textdraw ~= nil then
                             local count = 1
@@ -113,8 +113,11 @@ function class:new(_command, _default)
                                     break
                                 end
                             end
-                            if count > 1 and isKeyDown(VK_CONTROL) then
+                            if isKeyDown(VK_CONTROL) then
                                 count = count - 1
+                                if count <= 0 then
+                                    return false
+                                end
                             end
                             private:setProduct(textdraw, count, needCount, 'add')
                         end
@@ -126,7 +129,7 @@ function class:new(_command, _default)
         _sh.eventManager:add(
             'onShowDialog',
             function (dialogId, _, _, _, _, text)
-                if _sh.player:editProducts() and private:isActive() then
+                if _sh.player:isAdmining() and private:isActive() then
                     local product = private:getProduct()
                     if product.textdraw ~= nil then
                         if product.editType == 'add' then
@@ -135,7 +138,7 @@ function class:new(_command, _default)
                             if price ~= nil and not isKeyDown(VK_SHIFT) then
                                 local input = price
                                 if product.needCount and product.count ~= nil then
-                                    input =  table.concat({product.count,price}, ',')
+                                    input =  _sh.helper:implode(',', {product.count,price})
                                     _sh.chat:push(
                                         _sh.message:get(
                                             'message_trade_add_product_count',
