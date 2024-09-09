@@ -355,10 +355,10 @@ local this = {
                 'ShopingHelper_langs',
                 {
                     ['rus'] = {
-                        ['system_mod_buy'] = 'ПРОДАЖА',
-                        ['system_mod_sale'] = 'СКУПКА',
-                        ['system_shop_textdraw'] = 'МАГАЗИН',
-                        ['system_trade_textdraw'] = 'НА ПРОДАЖЕ',
+                        ['system_shop_mod_buy'] = 'ПРОДАЖА',
+                        ['system_shop_mod_sale'] = 'СКУПКА',
+                        ['system_shop_shoping_textdraw'] = 'МАГАЗИН',
+                        ['system_shop_admining_textdraw'] = 'НА ПРОДАЖЕ',
 
                         ['system_shop_edit'] = 'редактирует',
                         ['system_shop'] = 'Лавка',
@@ -368,8 +368,19 @@ local this = {
                         ['system_shop_empty'] = 'пустая',
                         ['system_product_management'] = 'Управления товарами.',
 
+                        ['system_regex_dialog_shop_id_find'] = '^Лавка №%d+$',
+                        ['system_regex_dialog_shop_id_match'] = '^Лавка №(%d+)$',
+
+                        ['message_ad_push'] = '/findilavka #1# #2#',
+                        ['message_ad_push_central_market'] = '/findilavka #1# (ЦР) #2#',
+                        ['message_ad_next_push_time'] = '{white}Следующая реклама будет показана через {orange}#1# {white}минут',
+
                         ['message_trade_add_product_count'] = '{green}#1# {blue}#2# {white}выставлен за {green}#3#',
                         ['message_trade_add_product'] = '{green}#1# {white}выставлен за {green}#2#',
+
+                        ['message_trade_dialog_title'] = '{orange}Введите цену за предмет',
+                        ['message_trade_dialog_button_yes'] = '{green}Добавить',
+                        ['message_trade_dialog_button_no'] = '{red}Отмена',
                     }
                 }
             },

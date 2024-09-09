@@ -2,8 +2,7 @@ local class = {}
 function class:new(_command, _default)
     local public = {}
     local private = {
-        ['editPrice'] = false,
-        ['editShop'] = false,
+        ['edit'] = false,
         ['product'] = {
             ['textdraw'] = nil,
             ['count'] = 1,
@@ -25,14 +24,14 @@ function class:new(_command, _default)
         return public
     end
 
-    -- EDIT PRICE
+    -- EDIT
 
-    function private:isEditPrice()
-        return private.editPrice
+    function private:isEdit()
+        return private.edit
     end
 
-    function private:setEditPrice(bool)
-        private.editPrice = bool
+    function private:setEdit(bool)
+        private.edit = bool
         return public
     end
 
@@ -95,7 +94,7 @@ function class:new(_command, _default)
         _sh.eventManager:add(
             'onSendClickTextDraw',
             function (textdrawId)
-                if private:isEditPrice() then
+                if private:isEdit() then
                     return false
                 else
                     if _sh.player:isAdmining() and private:isActive() then
@@ -139,40 +138,30 @@ function class:new(_command, _default)
                                 local input = price
                                 if product.needCount and product.count ~= nil then
                                     input =  _sh.helper:implode(',', {product.count,price})
-                                    _sh.chat:push(
-                                        _sh.message:get(
-                                            'message_trade_add_product_count',
-                                            {
-                                                name,
-                                                product.count,
-                                                _sh.helper:formatPrice(price),
-                                            }
-                                        )
-                                    )
+                                    _sh.chat:push(_sh.message:get('message_trade_add_product_count', {
+                                        name,
+                                        product.count,
+                                        _sh.helper:formatPrice(price),
+                                    }))
                                 else
-                                    _sh.chat:push(
-                                        _sh.message:get(
-                                            'message_trade_add_product',
-                                            {
-                                                name,
-                                                _sh.helper:formatPrice(price),
-                                            }
-                                        )
-                                    )
+                                    _sh.chat:push(_sh.message:get('message_trade_add_product', {
+                                        name,
+                                        _sh.helper:formatPrice(price),
+                                    }))
                                 end
                                 _sh.dialogManager:send(dialogId, 1, 0, input)
                                 private:clearProduct()
                             else
                                 _sh.dialogManager:close()
-                                private:setEditPrice(true)
+                                private:setEdit(true)
                                 _sh.dialogManager:show(
-                                    '{65f0c6}Введите цену за предмет',
+                                    _sh.message:get('message_trade_dialog_title'),
                                     name,
-                                    'Добавить',
-                                    'Отмена',
+                                    _sh.message:get('message_trade_dialog_button_yes'),
+                                    _sh.message:get('message_trade_dialog_button_no'),
                                     1,
                                     function (button, _, input)
-                                        private:setEditPrice(false)
+                                        private:setEdit(false)
                                         if button == 1 then
                                             input = _sh.helper:getNumber(input)
                                             private:addProductPrice(name, input)

@@ -5,8 +5,8 @@ function class:new(_centralModelIds)
         ['shops'] = {},
         ['mod'] = 'sell',
         ['mods'] = {
-            [_sh.message:get('system_mod_sale')] = 'sale',
-            [_sh.message:get('system_mod_buy')] = 'buy',
+            [_sh.message:get('system_shop_mod_sale')] = 'sale',
+            [_sh.message:get('system_shop_mod_buy')] = 'buy',
         },
         ['centralModelIds'] = _centralModelIds or {},
         ['cache'] = _sh.dependencies.cache:new(),
@@ -67,7 +67,7 @@ function class:new(_centralModelIds)
                 nearbyShop = shop
             end
         end
-        return nearbyShop
+        return nearbyShop, minDistance
     end
 
     -- INITS

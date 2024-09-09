@@ -85,17 +85,6 @@ function class:new(_command, _default, _minmax)
         return public
     end
 
-    -- ACTIVE
-
-    function private:isPushing()
-        return private.pushing
-    end
-
-    function private:setPushing(bool)
-        private.pushing = bool
-        return public
-    end
-
     -- PUSH AT
 
     function private:getPushAt()
@@ -104,6 +93,17 @@ function class:new(_command, _default, _minmax)
 
     function private:setPushAt(time)
         private.configManager:set('pushAt', math.abs(time or 0))
+        return public
+    end
+
+    -- PUSHING
+
+    function private:isPushing()
+        return private.pushing
+    end
+
+    function private:setPushing(bool)
+        private.pushing = bool
         return public
     end
 
@@ -118,7 +118,7 @@ function class:new(_command, _default, _minmax)
         return public
     end
 
-    -- ID
+    -- SHOP
 
     function private:getShop()
         return private.shop
@@ -127,6 +127,12 @@ function class:new(_command, _default, _minmax)
     function private:setShop(shop)
         private.shop = shop
         return public
+    end
+
+    -- LOGIC
+
+    function private:getRemainingTime()
+        return math.ceil((private:getPushAt() - os.time()) / 60)
     end
 
     -- INITS
@@ -154,6 +160,11 @@ function class:new(_command, _default, _minmax)
                 private:toggleChat(chat.name)
             end)
         end
+        private.commandManager:add('left', function ()
+            _sh.chat:push(_sh.message:get('message_ad_next_push_time', {
+                private:getRemainingTime()
+            }))
+        end)
     end
 
     function private:initEvents()
@@ -164,21 +175,48 @@ function class:new(_command, _default, _minmax)
                 private:setShop(shop)
             end
         )
+        _sh.eventManager:add(
+            'onShowDialog',
+            function (id)
+                if private:isPushing() then
+                    _sh.dialogManager:send(id, 1)
+                    private:setPushing(false)
+                    return false
+                end
+            end,
+            1000
+        )
     end
 
     function private:initThreads()
         _sh.threadManager:add(
             nil,
             function ()
-                while true do wait(60000)
-                    if not _sh.dialogManager:isOpened() and not _sh.player:isShoping() and not _sh.player:isAdmining() then
-                        if private:isActive() and private:getMessage() ~= '' and os.time() >= private:getPushAt() and private:getId() ~= nil then
-                            private:setPushing(true)
-                            local message = '/findilavka' 
+                while true do wait(1000)
+                    if private:isActive() and not _sh.dialogManager:isOpened() and not _sh.player:isShoping() and not _sh.player:isAdmining() then
+                        if private:getMessage() ~= '' and private:getPushAt() <= os.time() and private:getId() ~= nil then
+                            local data = {
+                                private:getId(),
+                                private:getMessage()
+                            }
+                            local message = ''
+                            if private:getShop() ~= nil and private:getShop():isCentral() then
+                                message = _sh.message:get('message_ad_push_central_market', data)
+                            else
+                                message = _sh.message:get('message_ad_push', data)
+                            end
+                            for _, chat in ipairs(private:getChats()) do
+                                if chat.active then
+                                    private:setPushing(true)
+                                    sampProcessChatInput(_sh.helper:implode(' ', {'/'..chat.name, message}))
+                                    wait(1000)
+                                end
+                            end
                             private:setPushAt(os.time() + private:getTime() * 60)
-                            _sh.chat:push(private:getMessage())
-                            -- sampProcessChatInput('/findilavka 10')
                             private:setPushing(false)
+                            _sh.chat:push(_sh.message:get('message_ad_next_push_time', {
+                                private:getRemainingTime()
+                            }))
                         end
                     end
                 end

@@ -70,7 +70,7 @@ function class:new()
                         text = _sh.helper:textDecode(textdraw:getText())
                         private.cache:add(cacheKey, text)
                     end
-                    if not public:isShoping() and text == _sh.message:get('system_shop_textdraw') then
+                    if not public:isShoping() and text == _sh.message:get('system_shop_shoping_textdraw') then
                         private:setShoping(true)
                         _sh.threadManager:add(
                             nil,
@@ -79,7 +79,7 @@ function class:new()
                             end
                         )
                     end
-                    if not public:isAdmining() and text == _sh.message:get('system_trade_textdraw') then
+                    if not public:isAdmining() and text == _sh.message:get('system_shop_admining_textdraw') then
                         private:setAdmining(true)
                         _sh.threadManager:add(
                             nil,
@@ -92,17 +92,21 @@ function class:new()
             end
         )
         _sh.eventManager:add(
-            'onShowDialog',
+            'onShowDialogShopAdmining',
             function (_, _, title)
-                title = _sh.helper:removeColors(title)
-                if title:find('^Ыртър Й%d+$') then
-                    local shop = _sh.shopManager:getNearby()
-                    if shop ~= nil then
-                        _sh.chat:push(1)
-                        local id = _sh.helper:getNumber(title:match('^Ыртър Й(%d+)$'))
-                        _sh.eventManager:trigger('onEnterShopAdmining', shop, id)
+                _sh.threadManager:add(
+                    nil,
+                    function ()
+                        while _sh.dialogManager:isOpened() do wait(1000)
+                            local shop = _sh.shopManager:getNearby()
+                            if shop ~= nil and shop:getPlayer() == public:getName() then
+                                local id = _sh.helper:getNumber(title:match(_sh.message:get('system_regex_dialog_shop_id_match')))
+                                _sh.eventManager:trigger('onEnterShopAdmining', shop, id)
+                                return
+                            end
+                        end
                     end
-                end
+                )
             end
         )
     end

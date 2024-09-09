@@ -81,13 +81,24 @@ function class:new(_customDialogId)
             function (id)
                 private:setOpened(true)
                 private:setOpenedId(id)
-            end
+            end,
+            1
         )
         _sh.eventManager:add(
             'onSendDialogResponse',
             function ()
                 private:setOpened(false)
                 private:setOpenedId(nil)
+            end,
+            1
+        )
+        _sh.eventManager:add(
+            'onShowDialog',
+            function (id, style, title, button1, button2, text)
+                title = _sh.helper:removeColors(title)
+                if title:find(_sh.message:get('system_regex_dialog_shop_id_find')) then
+                    _sh.eventManager:trigger('onShowDialogShopAdmining', id, style, title, button1, button2, text)
+                end
             end
         )
     end
