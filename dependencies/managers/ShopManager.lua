@@ -1,6 +1,6 @@
 local class = {}
 function class:new(_centralModelIds)
-    local public = {}
+    local this = {}
     local private = {
         ['shops'] = {},
         ['mod'] = 'sell',
@@ -14,29 +14,29 @@ function class:new(_centralModelIds)
 
     -- SHOPS
 
-    function public:getShops()
+    function this:getShops()
         return private.shops or {}
     end
 
     function private:setShops(shops)
         private.shops = shops or {}
-        return public
+        return this
     end
 
     function private:addShop(shop)
         table.insert(private.shops, shop)
-        return public
+        return this
     end
 
     -- MOD
 
-    function public:getMod()
+    function this:getMod()
         return private.mod
     end
 
     function private:setMod(mod)
         private.mod = mod
-        return public
+        return this
     end
 
     -- MODS
@@ -47,16 +47,16 @@ function class:new(_centralModelIds)
 
     -- CENTRAL MODEL IDS
 
-    function public:getCentralModelIds()
+    function this:getCentralModelIds()
         return private.centralModelIds
     end
 
     -- LOGIC
 
-    function public:getNearby()
+    function this:getNearby()
         local nearbyShop = nil
         local minDistance = nil
-        for _, shop in ipairs(public:getShops()) do
+        for _, shop in ipairs(this:getShops()) do
             local x, y, z = shop:getX(), shop:getY(), shop:getZ()
             if shop:getAdmin() ~= nil then
                 x, y, z = shop:getAdmin():getX(), shop:getAdmin():getY(), shop:getAdmin():getZ()
@@ -102,7 +102,7 @@ function class:new(_centralModelIds)
                                     y,
                                     z
                                 ))
-                            elseif text:find('^' .. _sh.message:get('system_product_management') .. '$') then
+                            elseif text:find('^' .. _sh.message:get('system_shop_product_management') .. '$') then
                                 table.insert(admins, _sh.dependencies.shopAdmin:new(
                                     text,
                                     x,
@@ -136,7 +136,7 @@ function class:new(_centralModelIds)
                                 admin
                             ))
                         end
-                        private.cache:add('shops', public:getShops(), 1)
+                        private.cache:add('shops', this:getShops(), 1)
                     end
                 end
             end
@@ -157,7 +157,7 @@ function class:new(_centralModelIds)
                     local mod = private:getModByName(text)
                     if mod ~= nil then
                         private:setMod(mod)
-                        local shop = public:getNearby()
+                        local shop = this:getNearby()
                         if shop ~= nil then
                             _sh.eventManager:trigger('onVisitShop', shop, mod, textdraw)
                         end
@@ -168,6 +168,6 @@ function class:new(_centralModelIds)
     end
 
     private:init()
-    return public
+    return this
 end
 return class

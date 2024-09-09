@@ -1,6 +1,6 @@
 local class = {}
 function class:new(_x, _y, _z, _angle)
-    local public = {}
+    local this = {}
     local private = {
         ['id'] = _sh.helper:md5((_x or 0)..(_y or 0)..(_z or 0)..(_angle or 0)),
         ['position'] = {
@@ -11,30 +11,30 @@ function class:new(_x, _y, _z, _angle)
         ['angle'] = _angle or 0,
     }
 
-    function public:getId()
+    function this:getId()
         return private.id
     end
 
-    function public:getPosition()
+    function this:getPosition()
         return private.position
     end
 
-    function public:getX()
-        return public:getPosition().x
+    function this:getX()
+        return this:getPosition().x
     end
 
-    function public:getY()
-        return public:getPosition().y
+    function this:getY()
+        return this:getPosition().y
     end
 
-    function public:getZ()
-        return public:getPosition().z
+    function this:getZ()
+        return this:getPosition().z
     end
 
-    function public:getAngle()
+    function this:getAngle()
         return private.angle
     end
 
-    return public
+    return this
 end
 return class

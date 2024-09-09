@@ -1,6 +1,6 @@
 local class = {}
 function class:new(_message)
-    local public = {}
+    local this = {}
     local private = {
         ['message'] = _message
     }
@@ -11,6 +11,6 @@ function class:new(_message)
     end
 
     private:init()
-    return public
+    return this
 end
 return class

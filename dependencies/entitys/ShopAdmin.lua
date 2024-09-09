@@ -1,6 +1,6 @@
 local class = {}
 function class:new(_text, _x, _y, _z)
-    local public = {}
+    local this = {}
     local private = {
         ['text'] = _text,
         ['position'] = {
@@ -10,26 +10,26 @@ function class:new(_text, _x, _y, _z)
         },
     }
 
-    function public:getText()
+    function this:getText()
         return private.text
     end
 
-    function public:getPosition()
+    function this:getPosition()
         return private.position
     end
 
-    function public:getX()
-        return public:getPosition().x
+    function this:getX()
+        return this:getPosition().x
     end
 
-    function public:getY()
-        return public:getPosition().y
+    function this:getY()
+        return this:getPosition().y
     end
 
-    function public:getZ()
-        return public:getPosition().z
+    function this:getZ()
+        return this:getPosition().z
     end
 
-    return public
+    return this
 end
 return class

@@ -1,11 +1,12 @@
 local class = {}
-function class:new(_command, _default, _minmax)
-    local public = {}
+function class:new(_name, _default, _minmax)
+    local this = {}
     local private = {
+        ['name'] = _name,
         ['radius'] = 5,
         ['minmax'] = _sh.dependencies.minMax:new(_minmax),
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_command),
+        ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
+        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
         ['lowPoint'] = _sh.dependencies.lowPoint:new(),
         ['cache'] = _sh.dependencies.cache:new(),
     }
@@ -18,7 +19,7 @@ function class:new(_command, _default, _minmax)
 
     function private:toggleActive()
         private.configManager:set('active', not private:isActive())
-        return public
+        return this
     end
 
     -- POLYGONS
@@ -29,7 +30,7 @@ function class:new(_command, _default, _minmax)
 
     function private:setPolygons(polygons)
         private.configManager:set('polygons', private.minmax:get(polygons, 'polygons'))
-        return public
+        return this
     end
 
     -- DISTANCE
@@ -40,7 +41,7 @@ function class:new(_command, _default, _minmax)
 
     function private:setDistance(distance)
         private.configManager:set('distance', private.minmax:get(distance, 'distance'))
-        return public
+        return this
     end
 
     -- COLOR
@@ -204,8 +205,23 @@ function class:new(_command, _default, _minmax)
     -- INITS
 
     function private:init()
-        private:initThreads()
-        private:initCommands()
+        if _sh[private.name] ~= nil then
+            return _sh[private.name]
+        end
+        private:initCommands():initThreads()
+        return this
+    end
+
+    function private:initCommands()
+        private.commandManager
+        :add('active', private.toggleActive)
+        :add('polygons', function (polygons)
+            private:setPolygons(_sh.helper:getNumber(polygons))
+        end)
+        :add('distance', function (distance)
+            private:setDistance(_sh.helper:getNumber(distance))
+        end)
+        return private
     end
 
     function private:initThreads()
@@ -219,19 +235,9 @@ function class:new(_command, _default, _minmax)
                 end
             end
         )
+        return private
     end
 
-    function private:initCommands()
-        private.commandManager:add('active', private.toggleActive)
-        private.commandManager:add('polygons', function (polygons)
-            private:setPolygons(_sh.helper:getNumber(polygons))
-        end)
-        private.commandManager:add('distance', function (distance)
-            private:setDistance(_sh.helper:getNumber(distance))
-        end)
-    end
-
-    private:init()
-    return public
+    return private:init()
 end
 return class

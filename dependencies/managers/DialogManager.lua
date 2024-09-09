@@ -1,6 +1,6 @@
 local class = {}
 function class:new(_customDialogId)
-    local public = {}
+    local this = {}
     local private = {
         ['customDialogId'] = _customDialogId,
         ['opened'] = false,
@@ -11,34 +11,34 @@ function class:new(_customDialogId)
         return private.customDialogId
     end
 
-    function public:isOpened()
+    function this:isOpened()
         return private.opened
     end
 
     function private:setOpened(bool)
         private.opened = bool
-        return public
+        return this
     end
 
-    function public:getOpenedId()
+    function this:getOpenedId()
         return private.openedId
     end
 
     function private:setOpenedId(id)
         private.openedId = id
-        return public
+        return this
     end
 
     -- LOGIC
 
-    function public:close()
-        if public:isOpened() and public:getOpenedId() ~= nil then
-            public:send(public:getOpenedId())
+    function this:close()
+        if this:isOpened() and this:getOpenedId() ~= nil then
+            this:send(this:getOpenedId())
         end
-        return public
+        return this
     end
 
-    function public:send(id, button, list, input)
+    function this:send(id, button, list, input)
         if id ~= nil then
             _sh.eventManager:trigger('onSendDialogResponse', id, button, list, input)
             sampSendDialogResponse(
@@ -48,10 +48,10 @@ function class:new(_customDialogId)
                 input or ''
             )
         end
-        return public
+        return this
     end
 
-    function public:show(title, text, submitButtonText, closeButtonText, dialogType, execute)
+    function this:show(title, text, submitButtonText, closeButtonText, dialogType, execute)
         private:setOpened(true)
         private:setOpenedId(private:getCustomDialogId())
         _sh.dependencies.dialog:new(
@@ -78,9 +78,25 @@ function class:new(_customDialogId)
     function private:initEvents()
         _sh.eventManager:add(
             'onShowDialog',
-            function (id)
+            function (id, style, title, button1, button2, text)
                 private:setOpened(true)
                 private:setOpenedId(id)
+                button1 = _sh.helper:removeColors(button1)
+                button2 = _sh.helper:removeColors(button2)
+                text = _sh.helper:removeColors(text)
+                title = _sh.helper:removeColors(title)
+                if title:find(_sh.message:get('system_regex_find_dialog_title_shop_id')) then
+                    return _sh.eventManager:trigger('onShowDialogShopAdmining', id, style, title, button1, button2, text)
+                elseif title:find(_sh.message:get('system_regex_find_dialog_title_buy_product')) then
+                    if style == 0 or style == 1 then
+                        _sh.chat:push(_sh.scan:extractNameFromDialog(text))
+                        return _sh.eventManager:trigger('onShowDialogBuyProduct', id, style, title, button1, button2, text)
+                    elseif style == 2 then
+                        return _sh.eventManager:trigger('onShowDialogListBuyProduct', id, style, title, button1, button2, text)
+                    end
+                elseif title:find(_sh.message:get('system_regex_find_dialog_title_remove_sale')) then
+                    return _sh.eventManager:trigger('onShowDialogRemoveSaleProduct', id, style, title, button1, button2, text)
+                end
             end,
             1
         )
@@ -92,18 +108,9 @@ function class:new(_customDialogId)
             end,
             1
         )
-        _sh.eventManager:add(
-            'onShowDialog',
-            function (id, style, title, button1, button2, text)
-                title = _sh.helper:removeColors(title)
-                if title:find(_sh.message:get('system_regex_dialog_shop_id_find')) then
-                    _sh.eventManager:trigger('onShowDialogShopAdmining', id, style, title, button1, button2, text)
-                end
-            end
-        )
     end
 
     private:init()
-    return public
+    return this
 end
 return class

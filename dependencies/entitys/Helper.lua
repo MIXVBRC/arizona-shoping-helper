@@ -1,46 +1,46 @@
 local class = {}
 function class:new(_symbols)
-    local public = {}
+    local this = {}
     local private = {
         ['symbols'] = _symbols or {},
     }
 
-    function public:normalize(num, index)
+    function this:normalize(num, index)
         index = index or 1000
         num = math.floor(num * index) / index
         return num
     end
 
-    function public:normalizePosition(x, y, z, index)
+    function this:normalizePosition(x, y, z, index)
         return {
-            ['x'] = public:normalize(x, index),
-            ['y'] = public:normalize(y, index),
-            ['z'] = public:normalize(z, index),
+            ['x'] = this:normalize(x, index),
+            ['y'] = this:normalize(y, index),
+            ['z'] = this:normalize(z, index),
         }
     end
 
-    function public:md5(string)
+    function this:md5(string)
         return _sh.dependencies.md5.sumhexa(string)
     end
 
-    function public:jsonDecode(json)
+    function this:jsonDecode(json)
         return _sh.dependencies.json.decode(json)
     end
 
-    function public:jsonEncode(array)
+    function this:jsonEncode(array)
         return _sh.dependencies.json.encode(array)
     end
 
-    function public:iniLoad(default, name)
+    function this:iniLoad(default, name)
         return _sh.dependencies.ini.load(default, name)
     end
 
-    function public:iniSave(data, name)
+    function this:iniSave(data, name)
         _sh.dependencies.ini.save(data, name)
-        return public
+        return this
     end
 
-    function public:textDecode(text)
+    function this:textDecode(text)
         local result = {}
         text:gsub('.',
             function(symbol)
@@ -50,7 +50,7 @@ function class:new(_symbols)
         return _sh.helper:implode('', result)
     end
 
-    function public:textEncode(text)
+    function this:textEncode(text)
         local result = {}
         text:gsub('.',
             function(symbol)
@@ -60,7 +60,7 @@ function class:new(_symbols)
         return _sh.helper:implode('', result)
     end
 
-    function public:getObjectsByIds(ids)
+    function this:getObjectsByIds(ids)
         local objects = {}
         for _, object in ipairs(getAllObjects()) do
             local objectId = getObjectModel(object)
@@ -73,7 +73,7 @@ function class:new(_symbols)
         return objects
     end
 
-    function public:getTextIds()
+    function this:getTextIds()
         local textIds = {}
         for textId = 0, 2048 do
             if sampIs3dTextDefined(textId) then
@@ -83,7 +83,7 @@ function class:new(_symbols)
         return textIds
     end
 
-    function public:getAngle(x, y)
+    function this:getAngle(x, y)
         local angle = math.atan2(x, y) / math.pi * 180
         if angle < 0 then
             angle = angle + 360
@@ -91,11 +91,11 @@ function class:new(_symbols)
         return angle
     end
 
-    function public:tableClone(_table)
+    function this:tableClone(_table)
         return {table.unpack(_table)}
     end
 
-    function public:trace(aX, aY, aZ, bX, bY, bZ)
+    function this:trace(aX, aY, aZ, bX, bY, bZ)
         local touch, data = processLineOfSight(
             aX, aY, aZ,
             bX, bY, bZ
@@ -114,14 +114,14 @@ function class:new(_symbols)
         }
     end
 
-    function public:omitPosition(_x, _y, _z, index)
+    function this:omitPosition(_x, _y, _z, index)
         index = index or 10
         local position = {
             ['x'] = _x,
             ['y'] = _y,
             ['z'] = _z,
         }
-        local trace = public:trace(
+        local trace = this:trace(
             position.x, position.y, position.z + index,
             position.x, position.y, position.z - index
         )
@@ -135,15 +135,15 @@ function class:new(_symbols)
         return position
     end
 
-    function public:distanceToPlayer2d(_x, _y)
+    function this:distanceToPlayer2d(_x, _y)
         return getDistanceBetweenCoords2d(_sh.player:getX(), _sh.player:getY(), _x, _y)
     end
 
-    function public:distanceToPlayer3d(_x, _y, _z)
+    function this:distanceToPlayer3d(_x, _y, _z)
         return getDistanceBetweenCoords3d(_sh.player:getX(), _sh.player:getY(), _sh.player:getZ(), _x, _y, _z)
     end
 
-    function public:explode(separator, text)
+    function this:explode(separator, text)
         separator = separator or '.'
         local result = {}
         for part in string.gmatch(text, "([^"..separator.."]+)") do
@@ -152,30 +152,43 @@ function class:new(_symbols)
         return result
     end
 
-    function public:implode(separator, array, from, to)
-        return table.concat(array, separator or '', from or 1, to or #array)
+    function this:implode(separator, array, from, to)
+        from = from or 1
+        to = to or #array
+        for index, value in ipairs(array) do
+            if value == '' or value == nil then
+                if index < from then
+                    from = from - 1
+                end
+                if index <= to then
+                    to = to - 1
+                end
+                table.remove(array, index)
+            end
+        end
+        return table.concat(array, separator or '', from, to)
     end
 
-    function public:trim(text)
+    function this:trim(text)
         text = tostring(text)
         return text:gsub('^%s+', ''):gsub('%s+$', '')
     end
 
-    function public:isNumber(text)
+    function this:isNumber(text)
         if text:find('^%d+$') then
             return true
         end
         return false
     end
 
-    function public:getNumber(text)
+    function this:getNumber(text)
         text = tostring(text)
         text = text:match('%d+')
         text = tonumber(text)
         return text or 0
     end
 
-    function public:isPrice(text)
+    function this:isPrice(text)
         text = text:gsub('%s+', ''):gsub(',', '')
         if text:find('^.*$%d+$') then
             return true
@@ -183,7 +196,7 @@ function class:new(_symbols)
         return false
     end
 
-    function public:isVCPrice(text)
+    function this:isVCPrice(text)
         text = text:gsub('%s+', ''):gsub(',', '')
         if text:find('^VC%$%d+$') then
             return true
@@ -191,26 +204,26 @@ function class:new(_symbols)
         return false
     end
 
-    function public:formatPrice(price)
-        price = public:getNumber(price)
+    function this:formatPrice(price)
+        price = this:getNumber(price)
         price = tostring(price)
         return '$'..price:reverse():gsub('(%d%d%d)','%1.'):gsub('(%d%d%d).$','%1'):reverse()
     end
 
-    function public:extractPrice(price)
-        if public:isVCPrice(price) then
+    function this:extractPrice(price)
+        if this:isVCPrice(price) then
             price = price:gsub('%s+', ''):gsub('^VC%$',''):gsub(',',''):gsub('%s', '')
         else
             price = price:gsub('%s+', ''):gsub('^%$',''):gsub(',',''):gsub('%s', '')
         end
-        price = public:getNumber(price)
+        price = this:getNumber(price)
         return price
     end
 
-    function public:removeColors(text)
+    function this:removeColors(text)
         return tostring(text:gsub('{%w%w%w%w%w%w}', ''))
     end
 
-    return public
+    return this
 end
 return class

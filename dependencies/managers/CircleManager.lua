@@ -1,26 +1,26 @@
 local class = {}
 function class:new()
-    local public = {}
+    local this = {}
     local private = {
         ['circles'] = {},
     }
 
-    function public:getAll()
+    function this:getAll()
         return private.circles
     end
 
-    function public:clear()
+    function this:clear()
         private.circles = {}
-        return public
+        return this
     end
 
-    function public:create(x, y, z, radius, polygons)
+    function this:create(x, y, z, radius, polygons)
         table.insert(private.circles, _sh.dependencies.circle:new(x, y, z, radius, polygons))
-        return public
+        return this
     end
 
-    function public:booleanUnion()
-        for _, circle in ipairs(public:getAll()) do
+    function this:booleanUnion()
+        for _, circle in ipairs(this:getAll()) do
             local intersectingCircles = private:getIntersectingCircles(circle)
             if #intersectingCircles > 0 then
                 for _, intersectingCircle in ipairs(intersectingCircles) do
@@ -56,12 +56,12 @@ function class:new()
                 end
             end
         end
-        return public
+        return this
     end
 
     function private:getIntersectingCircles(_circle)
         local intersectingCircles = {}
-        for _, circle in ipairs(public:getAll()) do
+        for _, circle in ipairs(this:getAll()) do
             local distance = getDistanceBetweenCoords2d(
                 _circle:getX(), _circle:getY(),
                 circle:getX(), circle:getY()
@@ -73,6 +73,6 @@ function class:new()
         return intersectingCircles
     end
 
-    return public
+    return this
 end
 return class

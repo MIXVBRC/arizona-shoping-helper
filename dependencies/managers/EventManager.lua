@@ -1,11 +1,11 @@
 local class = {}
 function class:new()
-    local public = {}
+    local this = {}
     local private = {
         ['triggers'] = {},
     }
 
-    function public:add(name, trigger, sort)
+    function this:add(name, trigger, sort)
         private.triggers[name] = private.triggers[name] or {}
         table.insert(private.triggers[name], {
             ['sort'] = sort or 100,
@@ -14,7 +14,7 @@ function class:new()
         table.sort(private.triggers[name], function (a, b) return a.sort < b.sort end)
     end
 
-    function public:trigger(name, ...)
+    function this:trigger(name, ...)
         local result = nil
         local triggers = private.triggers[name]
         if triggers ~= nil then
@@ -31,23 +31,23 @@ function class:new()
 
     function private:init()
         function _sh.dependencies.events.onShowTextDraw(...)
-            return public:trigger('onShowTextDraw', ...)
+            return this:trigger('onShowTextDraw', ...)
         end
         function _sh.dependencies.events.onTextDrawSetString(...)
-            return public:trigger('onTextDrawSetString', ...)
+            return this:trigger('onTextDrawSetString', ...)
         end
         function _sh.dependencies.events.onSendClickTextDraw(...)
-            return public:trigger('onSendClickTextDraw', ...)
+            return this:trigger('onSendClickTextDraw', ...)
         end
         function _sh.dependencies.events.onShowDialog(...)
-            return public:trigger('onShowDialog', ...)
+            return this:trigger('onShowDialog', ...)
         end
         function _sh.dependencies.events.onSendDialogResponse(...)
-            return public:trigger('onSendDialogResponse', ...)
+            return this:trigger('onSendDialogResponse', ...)
         end
     end
 
     private:init()
-    return public
+    return this
 end
 return class

@@ -1,32 +1,33 @@
 local class = {}
-function class:new(_command, _default, _minmax)
-    local public = {}
+function class:new(_name, _default, _minmax)
+    local this = {}
     local private = {
+        ['name'] = _name,
         ['minmax'] = _sh.dependencies.minMax:new(_minmax),
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_command),
+        ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
+        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
     }
 
     -- ACTIVE
 
-    function public:isActive()
+    function this:isActive()
         return private.configManager:get('active')
     end
 
-    function public:toggleActive()
-        private.configManager:set('active', not public:isActive())
-        return public
+    function this:toggleActive()
+        private.configManager:set('active', not this:isActive())
+        return this
     end
 
     -- ADD
 
-    function public:isAdd()
+    function this:isAdd()
         return private.configManager:get('add')
     end
 
-    function public:toggleAdd()
-        private.configManager:set('add', not public:isAdd())
-        if public:isAdd() then
+    function this:toggleAdd()
+        private.configManager:set('add', not this:isAdd())
+        if this:isAdd() then
             if _sh.scan:isAdd() then
                 _sh.scan:toggleAdd()
             end
@@ -34,7 +35,7 @@ function class:new(_command, _default, _minmax)
                 _sh.select:toggleAdd()
             end
         end
-        return public
+        return this
     end
 
     -- BORDER
@@ -45,7 +46,7 @@ function class:new(_command, _default, _minmax)
 
     function private:setBorder(border)
         private.configManager:set('border', private.minmax:get(border, 'border'))
-        return public
+        return this
     end
 
     -- COMMISSION
@@ -56,7 +57,7 @@ function class:new(_command, _default, _minmax)
 
     function private:setCommission(commission)
         private.configManager:set('commission', private.minmax:get(commission, 'commission'))
-        return public
+        return this
     end
 
     -- PRODUCTS
@@ -67,7 +68,7 @@ function class:new(_command, _default, _minmax)
 
     function private:setProducts(products)
         private.configManager:set('products', products or {})
-        return public
+        return this
     end
 
     function private:getProduct(sign)
@@ -83,7 +84,7 @@ function class:new(_command, _default, _minmax)
         local products = private:getProducts()
         table.insert(products, product)
         private:setProducts(products)
-        return public
+        return this
     end
 
     function private:deleteProduct(sign)
@@ -94,7 +95,7 @@ function class:new(_command, _default, _minmax)
             end
         end
         private:setProducts(products)
-        return public
+        return this
     end
 
     function private:changeProduct(sign, data)
@@ -118,7 +119,7 @@ function class:new(_command, _default, _minmax)
         if _sh.player:isShoping() and not _sh.dialogManager:isOpened() and not _sh.swipe:isSwipe() then
             for _, product in ipairs(private:getProducts()) do
                 for _, _product in ipairs(_sh.productManager:getProducts()) do
-                    if product.sign == _product:getName() or product.sign == _product:getCode() then
+                    if product.sign == _product:getSign() then
                         local mod = _sh.shopManager:getMod()
                         local price = product.price[mod]
                         if price ~= nil and price > 0 then
@@ -158,20 +159,24 @@ function class:new(_command, _default, _minmax)
     -- INITS
 
     function private:init()
-        private:initCommands()
-        private:initThreads()
-        private:initEvents()
+        if _sh[private.name] ~= nil then
+            return _sh[private.name]
+        end
+        private:initCommands():initThreads():initEvents()
+        return this
     end
 
     function private:initCommands()
-        private.commandManager:add('active', public.toggleActive)
-        private.commandManager:add('add', public.toggleAdd)
-        private.commandManager:add('border', function (border)
+        private.commandManager
+        :add('active', this.toggleActive)
+        :add('add', this.toggleAdd)
+        :add('border', function (border)
             private:setBorder(_sh.helper:getNumber(border))
         end)
-        private.commandManager:add('commission', function (commission)
+        :add('commission', function (commission)
             private:setCommission(_sh.helper:getNumber(commission))
         end)
+        return private
     end
 
     function private:initThreads()
@@ -179,34 +184,33 @@ function class:new(_command, _default, _minmax)
             nil,
             function ()
                 while true do wait(0)
-                    if public:isActive() then
+                    if this:isActive() then
                         private:work()
                     end
                 end
             end
         )
+        return private
     end
 
     function private:initEvents()
         _sh.eventManager:add(
             'onClickProduct',
             function (product)
-                if not _sh.scan:isScanning() and _sh.player:isShoping() and public:isActive() and public:isAdd() then
-                    local sign = product:getCode()
-                    if product:isScanned() then
-                        sign = product:getName()
-                    end
+                if not _sh.scan:isScanning() and _sh.player:isShoping() and this:isActive() and this:isAdd() then
+                    local sign = product:getSign()
                     _sh.dialogManager:show(
-                        '{65f0c6}Введите цену ( 0 - удалить )',
+                        _sh.message:get('message_pricer_dialog_title'),
                         product:getName(),
-                        '{'.._sh.color:get('green') .. '}Готово',
-                        '{'.._sh.color:get('red') .. '}Отмена',
+                        _sh.message:get('message_pricer_dialog_button_yes'),
+                        _sh.message:get('message_pricer_dialog_button_no'),
                         1,
                         function (button, _, input)
                             if button == 1 then
                                 input = _sh.helper:getNumber(input)
                                 local _product = private:getProduct(sign)
                                 local mod = _sh.shopManager:getMod()
+                                _sh.chat:push(product:getTextdraw():getId())
                                 if _product ~= nil then
                                     _product.price[mod] = input
                                     private:changeProduct(sign, _product)
@@ -226,9 +230,9 @@ function class:new(_command, _default, _minmax)
             end,
             1000
         )
+        return private
     end
 
-    private:init()
-    return public
+    return private:init()
 end
 return class

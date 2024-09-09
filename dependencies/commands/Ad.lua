@@ -1,13 +1,14 @@
 local class = {}
-function class:new(_command, _default, _minmax)
-    local public = {}
+function class:new(_name, _default, _minmax)
+    local this = {}
     local private = {
+        ['name'] = _name,
         ['pushing'] = false,
         ['id'] = nil,
         ['shop'] = nil,
         ['minmax'] = _sh.dependencies.minMax:new(_minmax),
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_command),
+        ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
+        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
     }
 
     -- ACTIVE
@@ -16,9 +17,14 @@ function class:new(_command, _default, _minmax)
         return private.configManager:get('active')
     end
 
+    function private:setActive(bool)
+        private.configManager:set('active', bool)
+        return this
+    end
+
     function private:toggleActive()
-        private.configManager:set('active', not private:isActive())
-        return public
+        private:setActive(not private:isActive())
+        return this
     end
 
     -- MESSAGE
@@ -29,7 +35,7 @@ function class:new(_command, _default, _minmax)
 
     function private:setMessage(message)
         private.configManager:set('message', message or '')
-        return public
+        return this
     end
 
     -- TIME
@@ -40,7 +46,7 @@ function class:new(_command, _default, _minmax)
 
     function private:setTime(time)
         private.configManager:set('time', private.minmax:get(time, 'time'))
-        return public
+        return this
     end
 
     -- CHATS
@@ -51,7 +57,7 @@ function class:new(_command, _default, _minmax)
 
     function private:setChats(chats)
         private.configManager:set('chats', chats or {})
-        return public
+        return this
     end
 
     function private:getChat(name)
@@ -71,7 +77,7 @@ function class:new(_command, _default, _minmax)
             end
         end
         private:setChats(chats)
-        return public
+        return this
     end
 
     function private:toggleChat(name)
@@ -82,7 +88,7 @@ function class:new(_command, _default, _minmax)
             end
         end
         private:setChats(chats)
-        return public
+        return this
     end
 
     -- PUSH AT
@@ -93,7 +99,7 @@ function class:new(_command, _default, _minmax)
 
     function private:setPushAt(time)
         private.configManager:set('pushAt', math.abs(time or 0))
-        return public
+        return this
     end
 
     -- PUSHING
@@ -104,7 +110,7 @@ function class:new(_command, _default, _minmax)
 
     function private:setPushing(bool)
         private.pushing = bool
-        return public
+        return this
     end
 
     -- ID
@@ -115,7 +121,7 @@ function class:new(_command, _default, _minmax)
 
     function private:setId(id)
         private.id = id
-        return public
+        return this
     end
 
     -- SHOP
@@ -126,7 +132,7 @@ function class:new(_command, _default, _minmax)
 
     function private:setShop(shop)
         private.shop = shop
-        return public
+        return this
     end
 
     -- LOGIC
@@ -138,33 +144,45 @@ function class:new(_command, _default, _minmax)
     -- INITS
 
     function private:init()
-        private:initCommands()
-        private:initEvents()
-        private:initThreads()
+        if _sh[private.name] ~= nil then
+            return _sh[private.name]
+        end
+        private:initCommands():initEvents():initThreads()
+        return this
     end
 
     function private:initCommands()
-        private.commandManager:add('active', private.toggleActive)
-        private.commandManager:add('message', function (message)
+        private.commandManager
+        :add('active', private.toggleActive)
+        :add('message', function (message)
             private:setMessage(message)
         end)
-        private.commandManager:add('time', function (time)
+        :add('time', function (time)
             time = _sh.helper:getNumber(time)
             if private:getPushAt() > 0 then
                 private:setPushAt(private:getPushAt() - (private:getTime() - time) * 60)
             end
             private:setTime(time)
         end)
+        :add('left', function ()
+            if not private:isActive() then
+                _sh.chat:push(_sh.message:get('message_ad_push_error_active'))
+            elseif private:getMessage() == '' then
+                _sh.chat:push(_sh.message:get('message_ad_push_error_message'))
+            elseif private:getId() == nil then
+                _sh.chat:push(_sh.message:get('message_ad_push_error_number'))
+            else
+                _sh.chat:push(_sh.message:get('message_ad_next_push_time', {
+                    private:getRemainingTime()
+                }))
+            end
+        end)
         for _, chat in ipairs(private:getChats()) do
             private.commandManager:add({'active', chat.name}, function ()
                 private:toggleChat(chat.name)
             end)
         end
-        private.commandManager:add('left', function ()
-            _sh.chat:push(_sh.message:get('message_ad_next_push_time', {
-                private:getRemainingTime()
-            }))
-        end)
+        return private
     end
 
     function private:initEvents()
@@ -186,6 +204,7 @@ function class:new(_command, _default, _minmax)
             end,
             1000
         )
+        return private
     end
 
     function private:initThreads()
@@ -194,37 +213,46 @@ function class:new(_command, _default, _minmax)
             function ()
                 while true do wait(1000)
                     if private:isActive() and not _sh.dialogManager:isOpened() and not _sh.player:isShoping() and not _sh.player:isAdmining() then
-                        if private:getMessage() ~= '' and private:getPushAt() <= os.time() and private:getId() ~= nil then
-                            local data = {
-                                private:getId(),
-                                private:getMessage()
-                            }
-                            local message = ''
-                            if private:getShop() ~= nil and private:getShop():isCentral() then
-                                message = _sh.message:get('message_ad_push_central_market', data)
-                            else
-                                message = _sh.message:get('message_ad_push', data)
-                            end
-                            for _, chat in ipairs(private:getChats()) do
-                                if chat.active then
-                                    private:setPushing(true)
-                                    sampProcessChatInput(_sh.helper:implode(' ', {'/'..chat.name, message}))
-                                    wait(1000)
+                        if private:getPushAt() <= os.time() then
+                            if private:getMessage() ~= '' and private:getId() ~= nil then
+                                local data = {
+                                    private:getId(),
+                                    private:getMessage()
+                                }
+                                local message = ''
+                                if private:getShop() ~= nil and private:getShop():isCentral() then
+                                    message = _sh.message:get('message_ad_push_central_market', data)
+                                else
+                                    message = _sh.message:get('message_ad_push', data)
                                 end
+                                for _, chat in ipairs(private:getChats()) do
+                                    if chat.active then
+                                        private:setPushing(true)
+                                        sampProcessChatInput(_sh.helper:implode(' ', {'/'..chat.name, message}))
+                                        wait(1000)
+                                    end
+                                end
+                                private:setPushAt(os.time() + private:getTime() * 60)
+                                private:setPushing(false)
+                                _sh.chat:push(_sh.message:get('message_ad_next_push_time', {
+                                    private:getRemainingTime()
+                                }))
+                            else
+                                if private:getMessage() == '' then
+                                    _sh.chat:push(_sh.message:get('message_ad_push_error_message'))
+                                elseif private:getId() == nil then
+                                    _sh.chat:push(_sh.message:get('message_ad_push_error_number'))
+                                end
+                                private:setActive(false)
                             end
-                            private:setPushAt(os.time() + private:getTime() * 60)
-                            private:setPushing(false)
-                            _sh.chat:push(_sh.message:get('message_ad_next_push_time', {
-                                private:getRemainingTime()
-                            }))
                         end
                     end
                 end
             end
         )
+        return private
     end
 
-    private:init()
-    return public
+    return private:init()
 end
 return class

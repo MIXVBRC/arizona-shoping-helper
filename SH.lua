@@ -161,7 +161,9 @@ local this = {
             ['name'] = 'productManager',
             ['entity'] = 'dependencies.managers.ProductManager',
             ['init'] = true,
-            ['args'] = {},
+            ['args'] = {
+                'productManager',
+            },
         },
         {
             ['name'] = 'textdrawManager',
@@ -366,14 +368,22 @@ local this = {
                         ['system_shop_buy'] = 'покупает',
                         ['system_shop_sell_buy'] = 'продаёт и покупает',
                         ['system_shop_empty'] = 'пустая',
-                        ['system_product_management'] = 'Управления товарами.',
+                        ['system_shop_product_management'] = 'Управления товарами.',
 
-                        ['system_regex_dialog_shop_id_find'] = '^Лавка №%d+$',
-                        ['system_regex_dialog_shop_id_match'] = '^Лавка №(%d+)$',
+                        ['system_regex_find_dialog_title_shop_id'] = '^Лавка №%d+$',
+                        ['system_regex_match_dialog_title_shop_id'] = '^Лавка №(%d+)$',
+                        ['system_regex_find_dialog_title_buy_product'] = '^Покупка предмета$',
+                        ['system_regex_find_dialog_title_remove_sale'] = '^Снятие с продажи$',
+                        ['system_regex_gsub_dialog_text_item_match_item'] = 'Предмет: ',
+                        ['system_regex_gsub_dialog_text_item_match_bottle'] = 'Эликсир: ',
+                        ['system_regex_gsub_dialog_text_item_match_accessory'] = 'Аксессуар: ',
 
                         ['message_ad_push'] = '/findilavka #1# #2#',
                         ['message_ad_push_central_market'] = '/findilavka #1# (ЦР) #2#',
-                        ['message_ad_next_push_time'] = '{white}Следующая реклама будет показана через {orange}#1# {white}минут',
+                        ['message_ad_next_push_time'] = '{white}Следующая реклама будет показана через {orange}#1# {white}мин.',
+                        ['message_ad_push_error_active'] = '{red}Реклама не будет показана! {white}(функционал не активен)',
+                        ['message_ad_push_error_number'] = '{red}Реклама не будет показана! {white}(неизвестен номер лавки)',
+                        ['message_ad_push_error_message'] = '{red}Реклама не будет показана! {white}(нет задан текст)',
 
                         ['message_trade_add_product_count'] = '{green}#1# {blue}#2# {white}выставлен за {green}#3#',
                         ['message_trade_add_product'] = '{green}#1# {white}выставлен за {green}#2#',
@@ -381,6 +391,10 @@ local this = {
                         ['message_trade_dialog_title'] = '{orange}Введите цену за предмет',
                         ['message_trade_dialog_button_yes'] = '{green}Добавить',
                         ['message_trade_dialog_button_no'] = '{red}Отмена',
+
+                        ['message_pricer_dialog_title'] = '{orange}Введите цену ( 0 - удалить )',
+                        ['message_pricer_dialog_button_yes'] = '{green}Готово',
+                        ['message_pricer_dialog_button_no'] = '{red}Отмена',
                     }
                 }
             },
@@ -647,7 +661,7 @@ local this = {
                 },
                 {
                     ['time'] = {
-                        ['min'] = 15,
+                        ['min'] = 3,
                     },
                 },
             },

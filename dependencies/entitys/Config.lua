@@ -1,6 +1,6 @@
 local class = {}
 function class:new(_name, _default)
-    local public = {}
+    local this = {}
     local private = {
         ['name'] = (_name or 'config') .. '.ini',
         ['data'] = _default or {},
@@ -19,23 +19,23 @@ function class:new(_name, _default)
         return title .. '-' .. name
     end
 
-    function public:get(title, name)
+    function this:get(title, name)
         if private.data[title] ~= nil then
             return private.data[title][name]
         end
         return nil
     end
 
-    function public:set(title, name, data)
+    function this:set(title, name, data)
         if title ~= private:getArrayName() and data ~= private:getArrayName() then
             private.data[title] = private.data[title] or {}
             private.data[title][name] = data
             private:save()
         end
-        return public
+        return this
     end
 
-    function public:delete(_title, _name)
+    function this:delete(_title, _name)
         if _title ~= private:getArrayName() then
             local data = {}
             local jsonName = private:getArrayDataName(_title, _name)
@@ -50,7 +50,7 @@ function class:new(_name, _default)
             private.data = data
             private:save()
         end
-        return public
+        return this
     end
 
     function private:collect()
@@ -83,23 +83,23 @@ function class:new(_name, _default)
         private:collect()
         private.data = _sh.helper:iniLoad(private.data, private:getName())
         private:disassemble()
-        return public
+        return this
     end
 
     function private:save()
         private:collect()
         _sh.helper:iniSave(private.data, private:getName())
         private:disassemble()
-        return public
+        return this
     end
 
-    function public:init()
+    function this:init()
         private:load()
         private:save()
-        return public
+        return this
     end
 
-    public:init()
-    return public
+    this:init()
+    return this
 end
 return class

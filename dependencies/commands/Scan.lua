@@ -1,34 +1,36 @@
 local class = {}
-function class:new(_command, _default, _minmax)
-    local public = {}
+function class:new(_name, _default, _minmax)
+    local this = {}
     local private = {
+        ['name'] = _name,
         ['scanning'] = false,
+        ['scanningProduct'] = nil,
         ['border'] = 1,
         ['minmax'] = _sh.dependencies.minMax:new(_minmax),
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_command),
+        ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
+        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
     }
 
     -- ACTIVE
 
-    function public:isActive()
+    function this:isActive()
         return private.configManager:get('active')
     end
 
-    function public:toggleActive()
-        private.configManager:set('active', not public:isActive())
-        return public
+    function this:toggleActive()
+        private.configManager:set('active', not this:isActive())
+        return this
     end
 
     -- ADD
 
-    function public:isAdd()
+    function this:isAdd()
         return private.configManager:get('add')
     end
 
-    function public:toggleAdd()
-        private.configManager:set('add', not public:isAdd())
-        if public:isAdd() then
+    function this:toggleAdd()
+        private.configManager:set('add', not this:isAdd())
+        if this:isAdd() then
             if _sh.select ~= nil and _sh.select:isAdd() then
                 _sh.select:toggleAdd()
             end
@@ -36,7 +38,7 @@ function class:new(_command, _default, _minmax)
                 _sh.pricer:toggleAdd()
             end
         end
-        return public
+        return this
     end
 
     -- TIME
@@ -47,21 +49,30 @@ function class:new(_command, _default, _minmax)
 
     function private:setTime(time)
         private.configManager:set('time', private.minmax:get(time, 'time'))
-        return public
+        return this
     end
 
     -- SCANNING
 
-    function public:isScanning()
-        return private.scanning
+    function this:isScanning()
+        if private:getScanningProduct() ~= nil then
+            return true
+        end
+        return false
     end
 
-    function private:setScanning(bool)
-        private.scanning = bool
-        return public
+    -- SCANNING PRODUCT
+
+    function private:getScanningProduct()
+        return private.scanningProduct
     end
 
-    -- PRODUCTS
+    function private:setScanningProduct(product)
+        private.scanningProduct = product
+        return this
+    end
+
+    -- CODES
 
     function private:getCodes()
         return private.configManager:get('codes') or {}
@@ -70,7 +81,7 @@ function class:new(_command, _default, _minmax)
     function private:setCodes(productCodes)
         productCodes = productCodes or {}
         private.configManager:set('codes', productCodes)
-        return public
+        return this
     end
 
     function private:haveCode(_code)
@@ -86,7 +97,7 @@ function class:new(_command, _default, _minmax)
         local productCodes = private:getCodes()
         table.insert(productCodes, name)
         private:setCodes(productCodes)
-        return public
+        return this
     end
 
     function private:deleteCode(code)
@@ -97,58 +108,70 @@ function class:new(_command, _default, _minmax)
             end
         end
         private:setCodes(productCodes)
-        return public
+        return this
     end
 
     function private:toggleCode(code)
         for _, productCode in ipairs(private:getCodes()) do
             if code == productCode then
                 private:deleteCode(code)
-                return public
+                return this
             end
         end
         private:addCode(code)
-        return public
+        return this
+    end
+
+    -- EXTRACTS
+
+    function this:extractNameFromDialog(text)
+        return _sh.helper
+        :trim((_sh.helper
+        :explode('\n', _sh.helper
+        :removeColors(text))[1])
+        :gsub(_sh.message:get('system_regex_gsub_dialog_text_item_match_item'),'')
+        :gsub(_sh.message:get('system_regex_gsub_dialog_text_item_match_bottle'),'')
+        :gsub(_sh.message:get('system_regex_gsub_dialog_text_item_match_accessory'),''))
+    end
+
+    function this:extractNameFromDialog(text)
+        return _sh.helper
+        :trim((_sh.helper
+        :explode('\n', _sh.helper
+        :removeColors(text))[1])
+        :gsub(_sh.message:get('system_regex_gsub_dialog_text_item_match_item'),'')
+        :gsub(_sh.message:get('system_regex_gsub_dialog_text_item_match_bottle'),'')
+        :gsub(_sh.message:get('system_regex_gsub_dialog_text_item_match_accessory'),''))
     end
 
     -- INITS
 
     function private:init()
-        private:initCommands()
-        private:initThreads()
-        private:initEvents()
+        if _sh[private.name] ~= nil then
+            return _sh[private.name]
+        end
+        private:initCommands():initThreads():initEvents()
+        return this
     end
 
     function private:initCommands()
-        private.commandManager:add('active', public.toggleActive)
-        private.commandManager:add('add', public.toggleAdd)
-        private.commandManager:add('time', function (time)
+        private.commandManager
+        :add('active', this.toggleActive)
+        :add('add', this.toggleAdd)
+        :add('time', function (time)
             private:setTime(_sh.helper:getNumber(time))
         end)
+        return private
     end
 
     function private:initThreads()
         _sh.threadManager:add(
             nil,
             function ()
-                while true do wait(0)
-                    if public:isActive() and not public:isAdd() and not _sh.swipe:isSwipe() then
-                        local products = {}
-                        for _, product in ipairs(_sh.productManager:getProducts()) do
-                            if not product:isScanned() then
-                                table.insert(products, product)
-                            end
-                        end
-                        if #products > 0 then
-                            private:setScanning(true)
-                            for _, product in ipairs(products) do
-                                if product:isExist() and public:isActive() and private:haveCode(product:getCode()) then
-                                    product:scan()
-                                    wait(private:getTime())
-                                end
-                            end
-                            private:setScanning(false)
-                        end
+                while true do wait(50)
+                    private.border = private.border - 1
+                    if private.border <= 0 then
+                        private.border = 10
                     end
                 end
             end
@@ -157,7 +180,7 @@ function class:new(_command, _default, _minmax)
             nil,
             function ()
                 while true do wait(0)
-                    if public:isActive() and _sh.player:isShoping() and not _sh.swipe:isSwipe() then
+                    if this:isActive() and _sh.player:isShoping() and not _sh.swipe:isSwipe() then
                         for _, product in ipairs(_sh.productManager:getProducts()) do
                             if not product:isScanned() and private:haveCode(product:getCode()) then
                                 _sh.boxManager:push(
@@ -179,21 +202,41 @@ function class:new(_command, _default, _minmax)
         _sh.threadManager:add(
             nil,
             function ()
-                while true do wait(50)
-                    private.border = private.border - 1
-                    if private.border <= 0 then
-                        private.border = 10
+                while true do wait(0)
+                    if this:isActive() and not this:isAdd() and not _sh.swipe:isSwipe() then
+                        local products = {}
+                        for _, product in ipairs(_sh.productManager:getProducts()) do
+                            if not product:isScanned() then
+                                table.insert(products, product)
+                            end
+                        end
+                        if #products > 0 then
+                            for _, product in ipairs(products) do
+                                if this:isActive()
+                                and not product:isDelete()
+                                and private:haveCode(product:getCode())
+                                and sampTextdrawIsExists(product:getTextdraw():getId())
+                                then
+                                    private:setScanningProduct(product)
+                                    product:delete()
+                                    sampSendClickTextdraw(product:getTextdraw():getId())
+                                    wait(private:getTime())
+                                end
+                            end
+                            private:setScanningProduct(nil)
+                        end
                     end
                 end
             end
         )
+        return private
     end
 
     function private:initEvents()
         _sh.eventManager:add(
             'onClickProduct',
             function (product)
-                if _sh.player:isShoping() and public:isActive() and public:isAdd() then
+                if this:isActive() and this:isAdd() and _sh.player:isShoping() then
                     private:toggleCode(product:getCode())
                     return false
                 end
@@ -201,23 +244,37 @@ function class:new(_command, _default, _minmax)
             1
         )
         _sh.eventManager:add(
-            'onShowDialog',
-            function (dialogId, _, _, _, _, text)
-                if public:isScanning() then
-                    for _, product in ipairs(_sh.productManager:getProducts()) do
-                        if product:isScanning() then
-                            product:scanDialogName(dialogId, text)
-                            _sh.dialogManager:close()
-                            return false
-                        end
-                    end
+            'onShowDialogBuyProduct',
+            function (_, _, _, _, _, text)
+                local product = private:getScanningProduct()
+                if product ~= nil then
+                    _sh.chat:push(this:extractNameFromDialog(text))
+                    _sh.productManager:createProduct(
+                        this:extractNameFromDialog(text),
+                        product:getCode(),
+                        product:getPrice(),
+                        product:getTextdraw()
+                    )
+                    private:setScanningProduct(nil)
+                    _sh.dialogManager:close()
+                    return false
                 end
             end,
             1000
         )
+        _sh.eventManager:add(
+            'onShowDialogListBuyProduct',
+            function (id)
+                if this:isScanning() then
+                    _sh.dialogManager:send(id, 1, 0)
+                    return false
+                end
+            end,
+            1000
+        )
+        return private
     end
 
-    private:init()
-    return public
+    return private:init()
 end
 return class

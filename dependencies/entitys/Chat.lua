@@ -1,34 +1,34 @@
 local class = {}
 function class:new()
-    local public = {}
+    local this = {}
     local private = {
         ['prefix'] = '',
         ['postfix'] = '',
         ['color'] = _sh.color:get('white'),
     }
 
-    function public:addPrefix(prefix)
+    function this:addPrefix(prefix)
         private.prefix = prefix
-        return public
+        return this
     end
 
-    function public:addPostfix(postfix)
+    function this:addPostfix(postfix)
         private.postfix = postfix
-        return public
+        return this
     end
 
-    function public:setColor(color)
+    function this:setColor(color)
         private.color = color
-        return public
+        return this
     end
 
-    function public:push(message)
+    function this:push(message)
         if message ~= nil then
             message = private.prefix .. message .. private.postfix
             sampAddChatMessage(message, '0xff' .. private.color)
         end
     end
 
-    return public
+    return this
 end
 return class

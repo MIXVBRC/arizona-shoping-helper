@@ -1,7 +1,8 @@
 local class = {}
-function class:new(_command, _default)
-    local public = {}
+function class:new(_name, _default)
+    local this = {}
     local private = {
+        ['name'] = _name,
         ['edit'] = false,
         ['product'] = {
             ['textdraw'] = nil,
@@ -9,8 +10,9 @@ function class:new(_command, _default)
             ['needCount'] = false,
             ['editType'] = 'add',
         },
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_command),
+        ['products'] = {},
+        ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
+        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
     }
 
     -- ACTIVE
@@ -21,7 +23,7 @@ function class:new(_command, _default)
 
     function private:toggleActive()
         private.configManager:set('active', not private:isActive())
-        return public
+        return this
     end
 
     -- EDIT
@@ -32,7 +34,7 @@ function class:new(_command, _default)
 
     function private:setEdit(bool)
         private.edit = bool
-        return public
+        return this
     end
 
     -- PRODUCT
@@ -48,12 +50,12 @@ function class:new(_command, _default)
             ['needCount'] = needCount,
             ['editType'] = editType,
         }
-        return public
+        return this
     end
 
     function private:clearProduct()
         private:setProduct(nil, 1, false, 'add')
-        return public
+        return this
     end
 
     -- PRODUCTP RICES
@@ -64,7 +66,7 @@ function class:new(_command, _default)
 
     function private:setProductPrices(prices)
         private.configManager:set('prices', prices or {})
-        return public
+        return this
     end
 
     function private:getProductPrice(code)
@@ -75,19 +77,89 @@ function class:new(_command, _default)
         local prices = private:getProductPrices()
         prices[code] = price
         private:setProductPrices(prices)
-        return public
+        return this
+    end
+
+    -- PRODUCTS
+
+    function this:getProducts()
+        return private.products
+    end
+
+    function private:setProducts(products)
+        private.products = products
+        return this
+    end
+
+    function private:changeProduct(name, price, count)
+        for _, product in ipairs(this:getProducts()) do
+            if name == product.name then
+                if price ~= nil and price > 0 then
+                    product.price = price
+                end
+                product.count = product.count + count
+                if product.count <= 0 then
+                    private:deleteProduct(name)
+                end
+                return this
+            end
+        end
+        if count > 0 then
+            table.insert(private.products, {
+                ['name'] = name,
+                ['price'] = price,
+                ['count'] = count,
+            })
+        end
+        return this
+    end
+
+    function private:deleteProduct(name)
+        local products = {}
+        for _, product in ipairs(this:getProducts()) do
+            if name ~= product.name then
+                table.insert(products, product)
+            end
+        end
+        private:setProducts(products)
+        return this
+    end
+
+    -- LOGIC
+
+    function private:getStatusProducts()
+        if #this:getProducts() > 0 then
+            local globalPrice = 0
+            for _, product in ipairs(this:getProducts()) do
+                local fullPrice = product.price * product.count
+                _sh.chat:push(_sh.helper:implode(' | ', {
+                    product.name,
+                    product.count,
+                    _sh.helper:formatPrice(product.price),
+                    _sh.helper:formatPrice(fullPrice),
+                }))
+                globalPrice = globalPrice + fullPrice
+            end
+            _sh.chat:push(_sh.helper:formatPrice(globalPrice))
+        end
     end
 
     -- INITS
 
     function private:init()
-        private:initCommands()
-        private:initEvents()
+        if _sh[private.name] ~= nil then
+            return _sh[private.name]
+        end
+        private:initCommands():initEvents()
+        return this
     end
 
     function private:initCommands()
-        private.commandManager:add('active', private.toggleActive)
-        private.commandManager:add('clear', private.setProductPrices)
+        private.commandManager
+        :add('active', private.toggleActive)
+        :add('clear', private.setProductPrices)
+        :add('status', private.getStatusProducts)
+        return private
     end
 
     function private:initEvents()
@@ -137,7 +209,7 @@ function class:new(_command, _default)
                             if price ~= nil and not isKeyDown(VK_SHIFT) then
                                 local input = price
                                 if product.needCount and product.count ~= nil then
-                                    input =  _sh.helper:implode(',', {product.count,price})
+                                    input =  _sh.helper:implode(',', {product.count, price})
                                     _sh.chat:push(_sh.message:get('message_trade_add_product_count', {
                                         name,
                                         product.count,
@@ -149,6 +221,7 @@ function class:new(_command, _default)
                                         _sh.helper:formatPrice(price),
                                     }))
                                 end
+                                private:changeProduct(name, price, product.count)
                                 _sh.dialogManager:send(dialogId, 1, 0, input)
                                 private:clearProduct()
                             else
@@ -174,6 +247,7 @@ function class:new(_command, _default)
                             end
                             return false
                         elseif product.editType == 'delete' then
+                            -- local name = _sh.chat:push(_sh.scan:extractNameFromDialog(text))
                             _sh.dialogManager:send(dialogId, 1)
                             return false
                         end
@@ -182,9 +256,34 @@ function class:new(_command, _default)
             end,
             1000
         )
+        -- _sh.eventManager:add(
+        --     'onShowDialogRemoveSaleProduct',
+        --     function ()
+        --         _sh.dialogManager:close()
+        --         private:setEdit(true)
+        --         _sh.dialogManager:show(
+        --             _sh.message:get('message_trade_dialog_title'),
+        --             name,
+        --             _sh.message:get('message_trade_dialog_button_yes'),
+        --             _sh.message:get('message_trade_dialog_button_no'),
+        --             1,
+        --             function (button, _, input)
+        --                 private:setEdit(false)
+        --                 if button == 1 then
+        --                     input = _sh.helper:getNumber(input)
+        --                     private:addProductPrice(name, input)
+        --                     sampSendClickTextdraw(product.textdraw:getId())
+        --                 else
+        --                     private:clearProduct()
+        --                 end
+        --             end
+        --         )
+        --     end,
+        --     1
+        -- )
+        return private
     end
 
-    private:init()
-    return public
+    return private:init()
 end
 return class

@@ -1,11 +1,11 @@
 local class = {}
 function class:new()
-    local public = {}
+    local this = {}
     local private = {
         ['cache'] = _sh.dependencies.cache:new(),
     }
 
-    function public:get(name, height, flags)
+    function this:get(name, height, flags)
         local cacheKey = _sh.helper:md5(name .. '-' .. height .. '-' .. flags)
         local font = private.cache:get(cacheKey)
         if font == nil then
@@ -15,6 +15,6 @@ function class:new()
         return font
     end
 
-    return public
+    return this
 end
 return class

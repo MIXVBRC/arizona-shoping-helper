@@ -1,141 +1,71 @@
 local class = {}
 function class:new(_name, _code, _price, _textdraw)
-    local public = {}
+    local this = {}
     local private = {
         ['name'] = _name,
         ['code'] = _code,
         ['price'] = _price,
         ['textdraw'] = _textdraw,
-        ['scanning'] = false,
-        ['scanned'] = false,
-        ['exist'] = true,
-        ['dialogIds'] = {
-            3082,
-            26541,
-        },
-        ['prefixes'] = {
-            'Скин: ',
-        },
+        ['delete'] = false,
     }
 
     -- PARAMS
 
-    function public:getName()
+    function this:getName()
         return private.name
     end
 
-    function private:setName(name)
-        private.name = name
-        return public
-    end
-
-    function public:getCode()
+    function this:getCode()
         return private.code
     end
 
-    function public:getPrice()
+    function this:isScanned()
+        if this:getName() ~= nil then
+            return true
+        end
+        return false
+    end
+
+    function this:getSign()
+        if this:isScanned() then
+            return this:getName()
+        end
+        return this:getCode()
+    end
+
+    function this:getPrice()
         return private.price
     end
 
-    function public:getTextdraw()
+    function this:getTextdraw()
         return private.textdraw
     end
 
-    function public:isScanning()
-        return private.scanning
+    function this:isDelete()
+        return private.delete
     end
 
-    function private:setScanning(bool)
-        private.scanning = bool
-        return public
+    function this:delete()
+        private.delete = true
+        return this
     end
-
-    function public:isScanned()
-        return private.scanned
-    end
-
-    function private:setScanned(bool)
-        private.scanned = bool
-        return public
-    end
-
-    function private:getDialogIds()
-        return private.dialogIds
-    end
-
-    function private:getPrefixes()
-        return private.prefixes
-    end
-
-    function public:isExist()
-        return private.exist
-    end
-
-    -- LOGIC
-
-    function public:delete()
-        private.exist = false
-        _sh.eventManager:trigger('onDeleteProduct', public)
-    end
-
-    function public:scan()
-        if not public:isScanned() and sampTextdrawIsExists(public:getTextdraw():getId()) then
-            private:setScanning(true)
-            sampSendClickTextdraw(public:getTextdraw():getId())
-        end
-        return public
-    end
-
-    function public:scanDialogName(dialogId, text)
-        for _, _dialogId in ipairs(private:getDialogIds()) do
-            if dialogId == _dialogId then
-                local name = private:extractName(text)
-                if name ~= nil then
-                    private:setName(name)
-                    private:setScanned(true)
-                end
-                break
-            end
-        end
-        private:setScanning(false)
-    end
-
-    function private:extractName(text)
-        local prefix = ''
-        local result = nil
-        local exploded = _sh.helper:explode('\n', text:gsub('{......}', ''))[1]
-        for _, _prefix in ipairs(private:getPrefixes()) do
-            if exploded:find(_prefix) then
-                prefix = _prefix
-                break
-            end
-        end
-        local array = _sh.helper:explode(':', exploded)
-        result = _sh.helper:implode(':', array, 2, #array)
-        if result == nil or result == '' then
-            array = _sh.helper:explode(' ', exploded)
-            result = _sh.helper:implode(' ', array, 4, #array)
-        end
-        return prefix .. _sh.helper:trim(result)
-    end
-
-    -- INITS
 
     function private:init()
-        private:initThrades()
+        private:initThreads()
+        return this
     end
 
-    function private:initThrades()
+    function private:initThreads()
         _sh.threadManager:add(
             nil,
             function ()
-                while sampTextdrawIsExists(public:getTextdraw():getId()) do wait(0) end
-                public:delete()
+                while sampTextdrawIsExists(this:getTextdraw():getId()) do wait(0) end
+                this:delete()
             end
         )
+        return private
     end
 
-    private:init()
-    return public
+    return private:init()
 end
 return class

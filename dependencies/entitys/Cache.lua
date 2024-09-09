@@ -1,6 +1,6 @@
 local class = {}
 function class:new()
-    local public = {}
+    local this = {}
     local private = {
         ['time'] = 86400,
         ['cache'] = {},
@@ -10,7 +10,7 @@ function class:new()
         return os.clock() < time
     end
 
-    function public:add(name, data, time)
+    function this:add(name, data, time)
         time = time or private.time
         if data ~= nil then
             private.cache[name] = {
@@ -20,26 +20,26 @@ function class:new()
         end
     end
 
-    function public:get(name)
+    function this:get(name)
         local cache = private.cache[name]
         if cache ~= nil then
             if private:checkTime(cache.time) then
                 return cache.data
             end
         end
-        public:clear(name)
+        this:clear(name)
         return nil
     end
 
-    function public:clear(name)
+    function this:clear(name)
         if name ~= nil then
             private.cache[name] = nil
         else
             private.cache = {}
         end
-        return public
+        return this
     end
 
-    return public
+    return this
 end
 return class

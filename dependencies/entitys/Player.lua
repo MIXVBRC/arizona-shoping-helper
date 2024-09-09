@@ -1,13 +1,13 @@
 local class = {}
 function class:new()
-    local public = {}
+    local this = {}
     local private = {
         ['shoping'] = false,
         ['admining'] = false,
         ['cache'] = _sh.dependencies.cache:new(),
     }
 
-    function public:getName()
+    function this:getName()
         local name = private.cache:get('name')
         if name == nil then
             name = sampGetPlayerNickname(select(2, sampGetPlayerIdByCharHandle(playerPed)))
@@ -16,7 +16,7 @@ function class:new()
         return name
     end
 
-    function public:getPosition()
+    function this:getPosition()
         local x, y, z = getCharCoordinates(playerPed)
         return {
             ['x'] = x,
@@ -25,34 +25,34 @@ function class:new()
         }
     end
 
-    function public:getX()
-        return public:getPosition().x
+    function this:getX()
+        return this:getPosition().x
     end
 
-    function public:getY()
-        return public:getPosition().y
+    function this:getY()
+        return this:getPosition().y
     end
 
-    function public:getZ()
-        return public:getPosition().z
+    function this:getZ()
+        return this:getPosition().z
     end
 
-    function public:isShoping()
+    function this:isShoping()
         return private.shoping
     end
 
     function private:setShoping(bool)
         private.shoping = bool
-        return public
+        return this
     end
 
-    function public:isAdmining()
+    function this:isAdmining()
         return private.admining
     end
 
     function private:setAdmining(bool)
         private.admining = bool
-        return public
+        return this
     end
 
     function private:init()
@@ -70,7 +70,7 @@ function class:new()
                         text = _sh.helper:textDecode(textdraw:getText())
                         private.cache:add(cacheKey, text)
                     end
-                    if not public:isShoping() and text == _sh.message:get('system_shop_shoping_textdraw') then
+                    if not this:isShoping() and text == _sh.message:get('system_shop_shoping_textdraw') then
                         private:setShoping(true)
                         _sh.threadManager:add(
                             nil,
@@ -79,7 +79,7 @@ function class:new()
                             end
                         )
                     end
-                    if not public:isAdmining() and text == _sh.message:get('system_shop_admining_textdraw') then
+                    if not this:isAdmining() and text == _sh.message:get('system_shop_admining_textdraw') then
                         private:setAdmining(true)
                         _sh.threadManager:add(
                             nil,
@@ -99,8 +99,8 @@ function class:new()
                     function ()
                         while _sh.dialogManager:isOpened() do wait(1000)
                             local shop = _sh.shopManager:getNearby()
-                            if shop ~= nil and shop:getPlayer() == public:getName() then
-                                local id = _sh.helper:getNumber(title:match(_sh.message:get('system_regex_dialog_shop_id_match')))
+                            if shop ~= nil and shop:getPlayer() == this:getName() then
+                                local id = _sh.helper:getNumber(title:match(_sh.message:get('system_regex_match_dialog_title_shop_id')))
                                 _sh.eventManager:trigger('onEnterShopAdmining', shop, id)
                                 return
                             end
@@ -112,7 +112,7 @@ function class:new()
     end
 
     private:init()
-    return public
+    return this
 end
 
 return class

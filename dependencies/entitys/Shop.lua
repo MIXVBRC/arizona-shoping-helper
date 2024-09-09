@@ -1,6 +1,6 @@
 local class = {}
 function class:new(_x, _y, _z, _title, _admin)
-    local public = {}
+    local this = {}
     local private = {
         ['id'] = nil,
         ['position'] = {
@@ -14,88 +14,88 @@ function class:new(_x, _y, _z, _title, _admin)
         ['admin'] = _admin,
     }
 
-    function public:getId()
+    function this:getId()
         return private.id
     end
 
     function private:setId(id)
         private.id = id
-        return public
+        return this
     end
 
-    function public:getPosition()
+    function this:getPosition()
         return private.position
     end
 
-    function public:getX()
-        return public:getPosition().x
+    function this:getX()
+        return this:getPosition().x
     end
 
-    function public:getY()
-        return public:getPosition().y
+    function this:getY()
+        return this:getPosition().y
     end
 
-    function public:getZ()
-        return public:getPosition().z
+    function this:getZ()
+        return this:getPosition().z
     end
 
     function private:setPosition(position)
         private.position = position
-        return public
+        return this
     end
 
-    function public:getPlayer()
-        if public:getTitle() ~= nil then
-            return public:getTitle():getPlayer()
+    function this:getPlayer()
+        if this:getTitle() ~= nil then
+            return this:getTitle():getPlayer()
         end
         return 'none'
     end
 
-    function public:getMod()
-        if public:getTitle() ~= nil then
-            return public:getTitle():getMod()
+    function this:getMod()
+        if this:getTitle() ~= nil then
+            return this:getTitle():getMod()
         end
         return _sh.message:get('system_shop_empty')
     end
 
-    function public:isEmpty()
+    function this:isEmpty()
         return private.empty
     end
 
     function private:setEmpty(bool)
         private.empty = bool
-        return public
+        return this
     end
 
-    function public:isCentral()
+    function this:isCentral()
         return private.central
     end
 
     function private:setCentral(bool)
         private.central = bool
-        return public
+        return this
     end
 
-    function public:getTitle()
+    function this:getTitle()
         return private.title
     end
 
-    function public:getAdmin()
+    function this:getAdmin()
         return private.admin
     end
 
     function private:init()
-        private:setPosition(_sh.helper:normalizePosition(public:getX(), public:getY(), public:getZ()))
-        private:setId(_sh.helper:md5(public:getPlayer()..public:getX()..public:getY()..public:getZ()))
-        if public:getTitle() ~= nil then
+        private:setPosition(_sh.helper:normalizePosition(this:getX(), this:getY(), this:getZ()))
+        private:setId(_sh.helper:md5(this:getPlayer()..this:getX()..this:getY()..this:getZ()))
+        if this:getTitle() ~= nil then
             private:setEmpty(false)
         end
-        local cacheKey = 'shop_' .. _sh.helper:md5(public:getX()..public:getY()..public:getZ())
+        local cacheKey = 'shop_' .. _sh.helper:md5(this:getX()..this:getY()..this:getZ())
         if _sh.cache:get(cacheKey) == nil then
             for _, object in ipairs(_sh.helper:getObjectsByIds(_sh.shopManager:getCentralModelIds())) do
                 local _, objectX, objectY, objectZ = getObjectCoordinates(object)
                 local distance = getDistanceBetweenCoords3d(
-                    public:getX(), public:getY(), public:getZ(),
+                    this:getX(), this:getY(), this:getZ(),
                     objectX, objectY, objectZ
                 )
                 if distance < 3 then
@@ -109,6 +109,6 @@ function class:new(_x, _y, _z, _title, _admin)
     end
 
     private:init()
-    return public
+    return this
 end
 return class

@@ -1,6 +1,6 @@
 local class = {}
 function class:new()
-    local public = {}
+    local this = {}
     local private = {
         ['textdraws'] = {},
         ['idLinks'] = {},
@@ -9,17 +9,17 @@ function class:new()
 
     -- TEXTDRAWS
 
-    function public:getTextdraws()
+    function this:getTextdraws()
         return private.textdraws or {}
     end
 
     function private:setTextdraws(textdraws)
         private.textdraws = textdraws or {}
-        return public
+        return this
     end
 
-    function public:getTextdrawById(id)
-        for _, textdraw in ipairs(public:getTextdraws()) do
+    function this:getTextdrawById(id)
+        for _, textdraw in ipairs(this:getTextdraws()) do
             if id == textdraw:getId() then
                 return textdraw
             end
@@ -35,7 +35,7 @@ function class:new()
                 _sh.eventManager:trigger('onDeleteÑlickableTextdraw', textdraw)
             end
         end
-        return public
+        return this
     end
 
     -- INITS
@@ -62,8 +62,8 @@ function class:new()
                 )
                 local textdraws = {}
                 local deleteTextdraws = {}
-                if #public:getTextdraws() > 0 then
-                    for _, textdraw in ipairs(public:getTextdraws()) do
+                if #this:getTextdraws() > 0 then
+                    for _, textdraw in ipairs(this:getTextdraws()) do
                         if newTextdraw:getId() == textdraw:getId()
                         or (newTextdraw:getX() == textdraw:getX() and newTextdraw:getY() == textdraw:getY())
                         then
@@ -92,7 +92,7 @@ function class:new()
         _sh.eventManager:add(
             'onTextDrawSetString',
             function (textdrawId, text)
-                for _, textdraw in ipairs(public:getTextdraws()) do
+                for _, textdraw in ipairs(this:getTextdraws()) do
                     if textdrawId ~= textdraw:getId() then
                         for _, childTextdraw in ipairs(textdraw:getChilds()) do
                             if textdrawId == childTextdraw:getId() then
@@ -120,7 +120,7 @@ function class:new()
                 while true do wait(0)
                     local textdraws = {}
                     local deleteTextdraws = {}
-                    for _, textdraw in ipairs(public:getTextdraws()) do
+                    for _, textdraw in ipairs(this:getTextdraws()) do
                         if sampTextdrawIsExists(textdraw:getId()) then
                             table.insert(textdraws, textdraw)
                         else
@@ -137,6 +137,6 @@ function class:new()
     end
 
     private:init()
-    return public
+    return this
 end
 return class

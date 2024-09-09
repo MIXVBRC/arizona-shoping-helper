@@ -1,19 +1,19 @@
 local class = {}
 function class:new(_colors)
-    local public = {}
+    local this = {}
     local private = {
         ['colors'] = _colors
     }
 
-    function public:get(name)
+    function this:get(name)
         return private.colors[name] or private.colors['white']
     end
 
-    function public:getAll()
+    function this:getAll()
         return private.colors
     end
 
-    function public:getByNum(num)
+    function this:getByNum(num)
         if num > 255 then
             num = 255
         elseif num < 0 then
@@ -26,19 +26,19 @@ function class:new(_colors)
         return result
     end
 
-    function public:getRGB(r, g, b)
-        return public:getByNum(r) .. public:getByNum(g) .. public:getByNum(b)
+    function this:getRGB(r, g, b)
+        return this:getByNum(r) .. this:getByNum(g) .. this:getByNum(b)
     end
 
-    function public:getAlpha(num)
+    function this:getAlpha(num)
         if num > 100 then
             num = 100
         elseif num < 0 then
             num = 0
         end
-        return '0x' .. public:getByNum(255 / 100 * num)
+        return '0x' .. this:getByNum(255 / 100 * num)
     end
 
-    return public
+    return this
 end
 return class

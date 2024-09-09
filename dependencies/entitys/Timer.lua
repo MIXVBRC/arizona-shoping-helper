@@ -1,24 +1,24 @@
 local class = {}
 function class:new()
-    local public = {}
+    local this = {}
     local private = {
         ['time'] = 0,
     }
 
     function private:setTime(time)
         private.time = time
-        return public
+        return this
     end
 
     function private:getTime()
         return private.time
     end
 
-    function public:start()
+    function this:start()
         private:setTime(os.clock())
     end
 
-    function public:stop()
+    function this:stop()
         local time = 0
         if private:getTime() > 0 then
             time = os.clock() - private:getTime()
@@ -27,6 +27,6 @@ function class:new()
         return time
     end
 
-    return public
+    return this
 end
 return class

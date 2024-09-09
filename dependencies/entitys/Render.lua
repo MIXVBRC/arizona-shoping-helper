@@ -1,6 +1,6 @@
 local class = {}
 function class:new()
-    local public = {}
+    local this = {}
     local private = {
         ['renders'] = {},
     }
@@ -13,7 +13,7 @@ function class:new()
 
     function private:setRenders(renders)
         private.renders = renders
-        return public
+        return this
     end
 
     -- LOGICK
@@ -23,22 +23,22 @@ function class:new()
             ['name'] = name,
             ['params'] = {...},
         })
-        return public
+        return this
     end
 
-    function public:pushPoint(...)
+    function this:pushPoint(...)
         private:push('point', ...)
     end
 
-    function public:pushLine(...)
+    function this:pushLine(...)
         private:push('line', ...)
     end
 
-    function public:pushBox(...)
+    function this:pushBox(...)
         private:push('box', ...)
     end
 
-    function public:pushText(...)
+    function this:pushText(...)
         private:push('text', ...)
     end
 
@@ -79,6 +79,6 @@ function class:new()
     end
 
     private:init()
-    return public
+    return this
 end
 return class

@@ -1,6 +1,6 @@
 local class = {}
 function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _height)
-    local public = {}
+    local this = {}
     local private = {
         ['id'] = _id,
         ['model'] = _model,
@@ -23,143 +23,143 @@ function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _hei
 
     -- ID
 
-    function public:getId()
+    function this:getId()
         return private.id
     end
 
     -- MODEL
 
-    function public:getModel()
+    function this:getModel()
         return private.model
     end
 
     -- TEXT
 
-    function public:getText()
+    function this:getText()
         return private.text
     end
 
     -- COLOR
 
-    function public:getColor()
+    function this:getColor()
         return private.color
     end
 
     -- CODE
 
-    function public:getCode()
+    function this:getCode()
         return private.code
     end
 
     -- SELECTABLE
 
-    function public:isSelectable()
+    function this:isSelectable()
         return private.selectable
     end
 
     -- POSITION
 
-    function public:getPosition()
+    function this:getPosition()
         return private.position
     end
 
-    function public:getX()
-        return public:getPosition().x
+    function this:getX()
+        return this:getPosition().x
     end
 
-    function public:getY()
-        return public:getPosition().y
+    function this:getY()
+        return this:getPosition().y
     end
 
     function private:setX(x)
         private.position.x = x
-        return public
+        return this
     end
 
     function private:setY(y)
         private.position.y = y
-        return public
+        return this
     end
 
     -- SIZE
 
-    function public:getSize()
+    function this:getSize()
         return private.size
     end
 
-    function public:getWidth()
-        return public:getSize().width
+    function this:getWidth()
+        return this:getSize().width
     end
 
-    function public:getHeight()
-        return public:getSize().height
+    function this:getHeight()
+        return this:getSize().height
     end
 
     function private:setWidth(width)
-        public:getSize().width = width
-        return public
+        this:getSize().width = width
+        return this
     end
 
     function private:setHeight(height)
-        public:getSize().height = height
-        return public
+        this:getSize().height = height
+        return this
     end
 
     -- TIME
 
-    function public:getTime()
+    function this:getTime()
         return private.time
     end
 
     -- CLILDS
 
-    function public:getChilds()
+    function this:getChilds()
         return private.childs
     end
 
-    function public:addChild(textdraw)
-        textdraw:setParent(public)
+    function this:addChild(textdraw)
+        textdraw:setParent(this)
         table.insert(private.childs, textdraw)
-        return public
+        return this
     end
 
     -- PAREND
 
-    function public:getParent()
+    function this:getParent()
         return private.parent
     end
 
-    function public:setParent(textdraw)
+    function this:setParent(textdraw)
         private.parent = textdraw
         private:setX(textdraw:getX() + 1)
         private:setY(textdraw:getY() + 1)
         private:setWidth(textdraw:getWidth() - 2)
         private:setHeight(textdraw:getHeight() - 2)
-        return public
+        return this
     end
 
     -- LOGIC
 
-    function public:setData(data)
+    function this:setData(data)
         if data ~= nil then
-            _sh.eventManager:trigger('onBeforeChangeTextdraw', public, data)
+            _sh.eventManager:trigger('onBeforeChangeTextdraw', this, data)
             for name, value in pairs(data) do
                 private[name] = value
             end
-            _sh.eventManager:trigger('onAfterChangeTextdraw', public, data)
+            _sh.eventManager:trigger('onAfterChangeTextdraw', this, data)
         end
-        return public
+        return this
     end
 
     -- INITS
 
     function private:init()
-        private.position.x, private.position.y = convertGameScreenCoordsToWindowScreenCoords(public:getX(), public:getY())
-        private.size.width, private.size.height = convertGameScreenCoordsToWindowScreenCoords(public:getWidth(), public:getHeight())
+        private.position.x, private.position.y = convertGameScreenCoordsToWindowScreenCoords(this:getX(), this:getY())
+        private.size.width, private.size.height = convertGameScreenCoordsToWindowScreenCoords(this:getWidth(), this:getHeight())
         if private.selectable == 1 then private.selectable = true else private.selectable = false end
     end
 
     private:init()
-    return public
+    return this
 end
 return class

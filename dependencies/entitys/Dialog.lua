@@ -1,6 +1,6 @@
 local class = {}
 function class:new(_id, _title, _text, _submitButtonText, _closeButtonText, _dialogType, _execute)
-    local public = {}
+    local this = {}
     local private = {
         ['id'] = _id,
         ['title'] = _title,
@@ -11,31 +11,31 @@ function class:new(_id, _title, _text, _submitButtonText, _closeButtonText, _dia
         ['execute'] = _execute,
     }
 
-    function public:getId()
+    function this:getId()
         return private.id
     end
 
-    function public:getTitle()
+    function this:getTitle()
         return private.title
     end
 
-    function public:getText()
+    function this:getText()
         return private.text
     end
 
-    function public:getSubmitButtonText()
+    function this:getSubmitButtonText()
         return private.submitButtonText
     end
 
-    function public:getCloseButtonText()
+    function this:getCloseButtonText()
         return private.closeButtonText
     end
 
-    function public:getDialogType()
+    function this:getDialogType()
         return private.dialogType
     end
 
-    function public:getExecute()
+    function this:getExecute()
         return private.execute
     end
 
@@ -46,13 +46,13 @@ function class:new(_id, _title, _text, _submitButtonText, _closeButtonText, _dia
 
     function private:initDialog()
         local text = ''
-        if public:getDialogType() == 0 or public:getDialogType() == 1 or public:getDialogType() == 3 then
-            text = public:getText()
-        elseif public:getDialogType() == 2 then
-            text = _sh.helper:implode('\n', public:getText())
+        if this:getDialogType() == 0 or this:getDialogType() == 1 or this:getDialogType() == 3 then
+            text = this:getText()
+        elseif this:getDialogType() == 2 then
+            text = _sh.helper:implode('\n', this:getText())
         else
             text = ''
-            for _, value in ipairs(public:getText()) do
+            for _, value in ipairs(this:getText()) do
                 if text == '' then
                     text = _sh.helper:implode('\t', value)
                 else
@@ -64,12 +64,12 @@ function class:new(_id, _title, _text, _submitButtonText, _closeButtonText, _dia
             text = ''
         end
         sampShowDialog(
-            public:getId(),
-            public:getTitle(),
+            this:getId(),
+            this:getTitle(),
             text,
-            public:getSubmitButtonText(),
-            public:getCloseButtonText(),
-            public:getDialogType()
+            this:getSubmitButtonText(),
+            this:getCloseButtonText(),
+            this:getDialogType()
         )
     end
 
@@ -78,9 +78,9 @@ function class:new(_id, _title, _text, _submitButtonText, _closeButtonText, _dia
             nil,
             function ()
                 while true do wait(0)
-                    local result, button, list, input = sampHasDialogRespond(public:getId())
+                    local result, button, list, input = sampHasDialogRespond(this:getId())
                     if result then
-                        public:getExecute()(button, list, input)
+                        this:getExecute()(button, list, input)
                         return
                     end
                 end
@@ -89,6 +89,6 @@ function class:new(_id, _title, _text, _submitButtonText, _closeButtonText, _dia
     end
 
     private:init()
-    return public
+    return this
 end
 return class

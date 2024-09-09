@@ -1,6 +1,6 @@
 local class = {}
 function class:new(_text, _x, _y, _z)
-    local public = {}
+    local this = {}
     local private = {
         ['text'] = _text or '',
         ['player'] = 'none',
@@ -12,50 +12,50 @@ function class:new(_text, _x, _y, _z)
         },
     }
 
-    function public:getText()
+    function this:getText()
         return private.text
     end
 
-    function public:getPlayer()
+    function this:getPlayer()
         return private.player
     end
 
     function private:setPlayer(player)
         private.player = player
-        return public
+        return this
     end
 
-    function public:getMod()
+    function this:getMod()
         return private.mod
     end
 
     function private:setMod(mod)
         private.mod = mod
-        return public
+        return this
     end
 
-    function public:getPosition()
+    function this:getPosition()
         return private.position
     end
 
-    function public:getX()
-        return public:getPosition().x
+    function this:getX()
+        return this:getPosition().x
     end
 
-    function public:getY()
-        return public:getPosition().y
+    function this:getY()
+        return this:getPosition().y
     end
 
-    function public:getZ()
-        return public:getPosition().z
+    function this:getZ()
+        return this:getPosition().z
     end
 
     function private:init()
-        private:setPlayer(public:getText():match('^(.+)%s{......}.+{......}.+$'))
-        private:setMod(public:getText():match('^.+{......}(.+){......}.+$'))
+        private:setPlayer(this:getText():match('^(.+)%s{......}.+{......}.+$'))
+        private:setMod(this:getText():match('^.+{......}(.+){......}.+$'))
     end
 
     private:init()
-    return public
+    return this
 end
 return class

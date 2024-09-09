@@ -1,6 +1,6 @@
 local class = {}
 function class:new(_lang, _name, _default)
-    local public = {}
+    local this = {}
     local private = {
         ['lang'] = _lang,
         ['config'] = _sh.dependencies.config:new(_name, _default),
@@ -10,9 +10,9 @@ function class:new(_lang, _name, _default)
         return private.lang
     end
 
-    function public:setLang(lang)
+    function this:setLang(lang)
         private.lang = lang
-        return public
+        return this
     end
 
     function private:replaceString(text, replacements)
@@ -32,7 +32,7 @@ function class:new(_lang, _name, _default)
         return text
     end
 
-    function public:get(name, replacements)
+    function this:get(name, replacements)
         local result = private.config:get(private:getLang(), name)
         if result ~= nil then
             result = private:replaceString(result, replacements)
@@ -41,6 +41,6 @@ function class:new(_lang, _name, _default)
         return result or ''
     end
 
-    return public
+    return this
 end
 return class

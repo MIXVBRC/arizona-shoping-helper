@@ -1,10 +1,11 @@
 local class = {}
-function class:new(_command, _default, _minmax)
-    local public = {}
+function class:new(_name, _default, _minmax)
+    local this = {}
     local private = {
+        ['name'] = _name,
         ['minmax'] = _sh.dependencies.minMax:new(_minmax),
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_command),
+        ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
+        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
     }
 
     -- ACTIVE
@@ -15,7 +16,7 @@ function class:new(_command, _default, _minmax)
 
     function private:toggleActive()
         private.configManager:set('active', not private:isActive())
-        return public
+        return this
     end
 
     -- ALPHA
@@ -26,7 +27,7 @@ function class:new(_command, _default, _minmax)
 
     function private:setAlpha(alpha)
         private.configManager:set('alpha', private.minmax:get(alpha, 'alpha'))
-        return public
+        return this
     end
 
     -- WIRK
@@ -51,15 +52,20 @@ function class:new(_command, _default, _minmax)
     -- INITS
 
     function private:init()
-        private:initCommands()
-        private:initThreads()
+        if _sh[private.name] ~= nil then
+            return _sh[private.name]
+        end
+        private:initCommands():initThreads()
+        return this
     end
 
     function private:initCommands()
-        private.commandManager:add('active', private.toggleActive)
-        private.commandManager:add('alpha', function (alpha)
+        private.commandManager
+        :add('active', private.toggleActive)
+        :add('alpha', function (alpha)
             private:setAlpha(_sh.helper:getNumber(alpha))
         end)
+        return private
     end
 
     function private:initThreads()
@@ -73,9 +79,9 @@ function class:new(_command, _default, _minmax)
                 end
             end
         )
+        return private
     end
 
-    private:init()
-    return public
+    return private:init()
 end
 return class

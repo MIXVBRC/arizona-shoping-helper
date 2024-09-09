@@ -1,6 +1,6 @@
 local class = {}
 function class:new()
-    local public = {}
+    local this = {}
     local private = {
         ['boxes'] = {},
     }
@@ -13,7 +13,7 @@ function class:new()
 
     function private:setBoxes(boxes)
         private.boxes = boxes
-        return public
+        return this
     end
 
     function private:getBox(code)
@@ -22,12 +22,12 @@ function class:new()
 
     function private:addBox(box)
         private.boxes[box.code] = box
-        return public
+        return this
     end
 
     -- LOGIC
 
-    function public:push(x, y, width, height, background, borderWidth, borderColor, sort)
+    function this:push(x, y, width, height, background, borderWidth, borderColor, sort)
         local box = {
             ['code'] = _sh.helper:md5(x..y..width..height),
             ['x'] = x,
@@ -73,6 +73,6 @@ function class:new()
     end
 
     private:init()
-    return public
+    return this
 end
 return class

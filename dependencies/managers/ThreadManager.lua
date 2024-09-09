@@ -1,11 +1,11 @@
 local class = {}
 function class:new()
-    local public = {}
+    local this = {}
     local private = {
         ['threads'] = {},
     }
 
-    function public:add(name, _function)
+    function this:add(name, _function)
         if name ~= nil and name ~= '' then
             table.insert(private.threads, {
                 ['name'] = name,
@@ -14,10 +14,10 @@ function class:new()
         else
             lua_thread.create(_function)
         end
-        return public
+        return this
     end
 
-    function public:run(name)
+    function this:run(name)
         if name ~= nil then
             for _, thread in ipairs(private.threads) do
                 if name == thread.name then
@@ -25,18 +25,18 @@ function class:new()
                 end
             end
         end
-        return public
+        return this
     end
 
-    function public:stop(name)
+    function this:stop(name)
         for _, thread in ipairs(private.threads) do
             if name == thread.name then
                 thread.thread:terminate()
             end
         end
-        return public
+        return this
     end
 
-    return public
+    return this
 end
 return class

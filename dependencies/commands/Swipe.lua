@@ -1,15 +1,16 @@
 local class = {}
-function class:new(_command, _default)
-    local public = {}
+function class:new(_name, _default)
+    local this = {}
     local private = {
+        ['name'] = _name,
         ['button'] = nil,
         ['swipe'] = true,
         ['mods'] = {
             'buy',
             'sale',
         },
-        ['configManager'] = _sh.dependencies.configManager:new(_command, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_command),
+        ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
+        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
     }
 
     -- ACTIVE
@@ -20,7 +21,7 @@ function class:new(_command, _default)
 
     function private:toggleActive()
         private.configManager:set('active', not private:isActive())
-        return public
+        return this
     end
 
     -- BUTTON
@@ -31,7 +32,7 @@ function class:new(_command, _default)
 
     function private:setButton(button)
         private.button = button
-        return public
+        return this
     end
 
     -- MOD
@@ -47,12 +48,12 @@ function class:new(_command, _default)
                 break
             end
         end
-        return public
+        return this
     end
 
     -- SWIPE
 
-    function public:isSwipe()
+    function this:isSwipe()
         if private:isActive() then
             return private.swipe
         end
@@ -61,32 +62,24 @@ function class:new(_command, _default)
 
     function private:setSwipe(bool)
         private.swipe = bool
-        return public
+        return this
     end
 
     -- INITS
 
     function private:init()
-        private:initCommands()
-        private:initEvents()
-        private:initThreads()
+        if _sh[private.name] ~= nil then
+            return _sh[private.name]
+        end
+        private:initCommands():initThreads():initEvents()
+        return this
     end
 
     function private:initCommands()
-        private.commandManager:add('active', private.toggleActive)
-        private.commandManager:add('mod', private.switchMod)
-    end
-
-    function private:initEvents()
-        _sh.eventManager:add(
-            'onVisitShop',
-            function (_, mod, textdraw)
-                private:setButton({
-                    ['mod'] = mod,
-                    ['textdraw'] = textdraw,
-                })
-            end
-        )
+        private.commandManager
+        :add('active', private.toggleActive)
+        :add('mod', private.switchMod)
+        return private
     end
 
     function private:initThreads()
@@ -110,9 +103,22 @@ function class:new(_command, _default)
                 end
             end
         )
+        return private
     end
 
-    private:init()
-    return public
+    function private:initEvents()
+        _sh.eventManager:add(
+            'onVisitShop',
+            function (_, mod, textdraw)
+                private:setButton({
+                    ['mod'] = mod,
+                    ['textdraw'] = textdraw,
+                })
+            end
+        )
+        return private
+    end
+
+    return private:init()
 end
 return class

@@ -1,6 +1,6 @@
 local class = {}
 function class:new()
-    local public = {}
+    local this = {}
     local private = {
         ['color'] = _sh.color:get('white'),
         ['alpha'] = _sh.color:getAlpha(100),
@@ -10,21 +10,21 @@ function class:new()
         return private.color
     end
 
-    function public:setColor(color)
+    function this:setColor(color)
         private.color = color
-        return public
+        return this
     end
 
     function private:getAlpha()
         return private.alpha
     end
 
-    function public:setAlpha(alpha)
+    function this:setAlpha(alpha)
         private.alpha = alpha
-        return public
+        return this
     end
 
-    function public:render()
+    function this:render()
         local _, x, y, z, _, _ = convert3DCoordsToScreenEx(_sh.player:getX(), _sh.player:getY(), _sh.player:getZ() - 1)
         if z > 0 then
             _sh.render:pushLine(x, y, x, y - 50, 3, private:getAlpha() .. private:getColor())
@@ -32,6 +32,6 @@ function class:new()
         end
     end
 
-    return public
+    return this
 end
 return class
