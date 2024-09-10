@@ -70,7 +70,7 @@ function class:new()
                         text = _sh.helper:textDecode(textdraw:getText())
                         private.cache:add(cacheKey, text)
                     end
-                    if not this:isShoping() and text == _sh.message:get('system_shop_shoping_textdraw') then
+                    if not this:isShoping() and text == _sh.message:get('system_textdraw_shop_shoping') then
                         private:setShoping(true)
                         _sh.threadManager:add(
                             nil,
@@ -79,7 +79,7 @@ function class:new()
                             end
                         )
                     end
-                    if not this:isAdmining() and text == _sh.message:get('system_shop_admining_textdraw') then
+                    if not this:isAdmining() and text == _sh.message:get('system_textdraw_shop_admining') then
                         private:setAdmining(true)
                         _sh.threadManager:add(
                             nil,

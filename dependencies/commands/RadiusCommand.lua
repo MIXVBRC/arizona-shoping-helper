@@ -6,10 +6,15 @@ function class:new(_name, _default, _minmax)
         ['radius'] = 5,
         ['minmax'] = _sh.dependencies.minMax:new(_minmax),
         ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
         ['lowPoint'] = _sh.dependencies.lowPoint:new(),
         ['cache'] = _sh.dependencies.cache:new(),
     }
+
+    -- NAME
+
+    function private:getName()
+        return private.name
+    end
 
     -- ACTIVE
 
@@ -213,12 +218,12 @@ function class:new(_name, _default, _minmax)
     end
 
     function private:initCommands()
-        private.commandManager
-        :add('active', private.toggleActive)
-        :add('polygons', function (polygons)
+        _sh.commandManager
+        :add({private:getName(), 'active'}, private.toggleActive)
+        :add({private:getName(), 'polygons'}, function (polygons)
             private:setPolygons(_sh.helper:getNumber(polygons))
         end)
-        :add('distance', function (distance)
+        :add({private:getName(), 'distance'}, function (distance)
             private:setDistance(_sh.helper:getNumber(distance))
         end)
         return private

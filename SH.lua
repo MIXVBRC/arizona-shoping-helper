@@ -61,141 +61,6 @@ local this = {
             ['args'] = {},
         },
         {
-            ['name'] = 'circleManager',
-            ['entity'] = 'dependencies.managers.CircleManager',
-            ['init'] = false,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'shop',
-            ['entity'] = 'dependencies.entitys.Shop',
-            ['init'] = false,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'minMax',
-            ['entity'] = 'dependencies.entitys.MinMax',
-            ['init'] = false,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'configManager',
-            ['entity'] = 'dependencies.managers.ConfigManager',
-            ['init'] = false,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'commandManager',
-            ['entity'] = 'dependencies.managers.CommandManager',
-            ['init'] = true,
-            ['args'] = {
-                'active',
-            },
-        },
-        {
-            ['name'] = 'color',
-            ['entity'] = 'dependencies.entitys.Color',
-            ['init'] = true,
-            ['args'] = {
-                {
-                    ['red'] = '992e2e',
-                    ['green'] = '3cc23c',
-                    ['blue'] = '42bdb5',
-                    ['orange'] = 'ffd700',
-                    ['white'] = 'ffffff',
-                    ['black'] = '000000',
-                }
-            },
-        },
-        {
-            ['name'] = 'chat',
-            ['entity'] = 'dependencies.entitys.Chat',
-            ['init'] = true,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'lowPoint',
-            ['entity'] = 'dependencies.entitys.LowPoint',
-            ['init'] = false,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'eventManager',
-            ['entity'] = 'dependencies.managers.EventManager',
-            ['init'] = true,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'dialogManager',
-            ['entity'] = 'dependencies.managers.DialogManager',
-            ['init'] = true,
-            ['args'] = {
-                777,
-            },
-        },
-        {
-            ['name'] = 'dialog',
-            ['entity'] = 'dependencies.entitys.Dialog',
-            ['init'] = false,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'threadManager',
-            ['entity'] = 'dependencies.managers.ThreadManager',
-            ['init'] = true,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'textdraw',
-            ['entity'] = 'dependencies.entitys.Textdraw',
-            ['init'] = false,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'product',
-            ['entity'] = 'dependencies.entitys.Product',
-            ['init'] = false,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'productManager',
-            ['entity'] = 'dependencies.managers.ProductManager',
-            ['init'] = true,
-            ['args'] = {
-                'productManager',
-            },
-        },
-        {
-            ['name'] = 'textdrawManager',
-            ['entity'] = 'dependencies.managers.TextdrawManager',
-            ['init'] = true,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'exception',
-            ['entity'] = 'dependencies.entitys.Exception',
-            ['init'] = false,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'error',
-            ['entity'] = 'dependencies.entitys.Error',
-            ['init'] = false,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'render',
-            ['entity'] = 'dependencies.entitys.Render',
-            ['init'] = true,
-            ['args'] = {},
-        },
-        {
-            ['name'] = 'font',
-            ['entity'] = 'dependencies.entitys.Font',
-            ['init'] = true,
-            ['args'] = {},
-        },
-        {
             ['name'] = 'helper',
             ['entity'] = 'dependencies.entitys.Helper',
             ['init'] = true,
@@ -357,10 +222,10 @@ local this = {
                 'ShopingHelper_langs',
                 {
                     ['rus'] = {
-                        ['system_shop_mod_buy'] = 'ПРОДАЖА',
-                        ['system_shop_mod_sale'] = 'СКУПКА',
-                        ['system_shop_shoping_textdraw'] = 'МАГАЗИН',
-                        ['system_shop_admining_textdraw'] = 'НА ПРОДАЖЕ',
+                        ['system_textdraw_shop_mod_buy'] = 'ПРОДАЖА',
+                        ['system_textdraw_shop_mod_sale'] = 'СКУПКА',
+                        ['system_textdraw_shop_shoping'] = 'МАГАЗИН',
+                        ['system_textdraw_shop_admining'] = 'НА ПРОДАЖЕ',
 
                         ['system_shop_edit'] = 'редактирует',
                         ['system_shop'] = 'Лавка',
@@ -371,12 +236,17 @@ local this = {
                         ['system_shop_product_management'] = 'Управления товарами.',
 
                         ['system_regex_find_dialog_title_shop_id'] = '^Лавка №%d+$',
-                        ['system_regex_match_dialog_title_shop_id'] = '^Лавка №(%d+)$',
                         ['system_regex_find_dialog_title_buy_product'] = '^Покупка предмета$',
                         ['system_regex_find_dialog_title_remove_sale'] = '^Снятие с продажи$',
+                        ['system_regex_find_dialog_title_ad_submitting'] = '^Подача объявления$',
+                        ['system_regex_find_dialog_title_select_radio_station'] = '^Выберите радиостанцию$',
+                        ['system_regex_find_dialog_title_ad_submitting_confirmation'] = '^Подача объявления | Подтверждение$',
+                        ['system_regex_find_dialog_text_sale_product'] = '^Введите цену за товар.+$',
+                        ['system_regex_find_dialog_text_sale_product_count'] = '^Введите количество и цену за один товар.+$',
                         ['system_regex_gsub_dialog_text_item_match_item'] = 'Предмет: ',
                         ['system_regex_gsub_dialog_text_item_match_bottle'] = 'Эликсир: ',
                         ['system_regex_gsub_dialog_text_item_match_accessory'] = 'Аксессуар: ',
+                        ['system_regex_match_dialog_title_shop_id'] = '^Лавка №(%d+)$',
 
                         ['message_ad_push'] = '/findilavka #1# #2#',
                         ['message_ad_push_central_market'] = '/findilavka #1# (ЦР) #2#',
@@ -388,16 +258,163 @@ local this = {
                         ['message_trade_add_product_count'] = '{green}#1# {blue}#2# {white}выставлен за {green}#3#',
                         ['message_trade_add_product'] = '{green}#1# {white}выставлен за {green}#2#',
 
-                        ['message_trade_dialog_title'] = '{orange}Введите цену за предмет',
-                        ['message_trade_dialog_button_yes'] = '{green}Добавить',
-                        ['message_trade_dialog_button_no'] = '{red}Отмена',
+                        ['message_dialog_title_enter_price'] = '{orange}Введите цену',
+                        ['message_dialog_title_enter_price_zero'] = '{orange}Введите цену ( 0 - удалить )',
 
-                        ['message_pricer_dialog_title'] = '{orange}Введите цену ( 0 - удалить )',
-                        ['message_pricer_dialog_button_yes'] = '{green}Готово',
-                        ['message_pricer_dialog_button_no'] = '{red}Отмена',
+                        ['message_dialog_button_ready'] = '{green}Готово',
+                        ['message_dialog_button_add'] = '{green}Добавить',
+                        ['message_dialog_button_cancel'] = '{red}Отмена',
+
+                        ['message_activated'] = '#1# {red}активирован',
+                        ['message_deactivated'] = '#1# {red}деактивирован',
+
+                        ['message_command_name_ad'] = 'Свайпер',
+                        ['message_command_name_radius'] = 'Радиус лавок',
+                        ['message_command_name_pricer'] = 'Указание цен',
+                        ['message_command_name_hiding'] = 'Затемнение товаров',
+                        ['message_command_name_scan'] = 'Сканирование товаров',
+                        ['message_command_name_select'] = 'Выделение товаров',
+                        ['message_command_name_swiper'] = 'Реклама лавки',
+                        ['message_command_name_trade'] = 'Выставление по клику',
+                        ['message_command_name_visit'] = 'Послещенные лавки',
                     }
                 }
             },
+        },
+        {
+            ['name'] = 'circleManager',
+            ['entity'] = 'dependencies.managers.CircleManager',
+            ['init'] = false,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'shop',
+            ['entity'] = 'dependencies.entitys.Shop',
+            ['init'] = false,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'minMax',
+            ['entity'] = 'dependencies.entitys.MinMax',
+            ['init'] = false,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'configManager',
+            ['entity'] = 'dependencies.managers.ConfigManager',
+            ['init'] = false,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'commandManager',
+            ['entity'] = 'dependencies.managers.CommandManager',
+            ['init'] = true,
+            ['args'] = {
+                'active',
+            },
+        },
+        {
+            ['name'] = 'color',
+            ['entity'] = 'dependencies.entitys.Color',
+            ['init'] = true,
+            ['args'] = {
+                {
+                    ['red'] = '992e2e',
+                    ['green'] = '3cc23c',
+                    ['blue'] = '42bdb5',
+                    ['orange'] = 'ffd700',
+                    ['white'] = 'ffffff',
+                    ['black'] = '000000',
+                }
+            },
+        },
+        {
+            ['name'] = 'chat',
+            ['entity'] = 'dependencies.entitys.Chat',
+            ['init'] = true,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'lowPoint',
+            ['entity'] = 'dependencies.entitys.LowPoint',
+            ['init'] = false,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'eventManager',
+            ['entity'] = 'dependencies.managers.EventManager',
+            ['init'] = true,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'dialogManager',
+            ['entity'] = 'dependencies.managers.DialogManager',
+            ['init'] = true,
+            ['args'] = {
+                777,
+            },
+        },
+        {
+            ['name'] = 'dialog',
+            ['entity'] = 'dependencies.entitys.Dialog',
+            ['init'] = false,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'threadManager',
+            ['entity'] = 'dependencies.managers.ThreadManager',
+            ['init'] = true,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'textdraw',
+            ['entity'] = 'dependencies.entitys.Textdraw',
+            ['init'] = false,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'product',
+            ['entity'] = 'dependencies.entitys.Product',
+            ['init'] = false,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'productManager',
+            ['entity'] = 'dependencies.managers.ProductManager',
+            ['init'] = true,
+            ['args'] = {
+                'productManager',
+            },
+        },
+        {
+            ['name'] = 'textdrawManager',
+            ['entity'] = 'dependencies.managers.TextdrawManager',
+            ['init'] = true,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'exception',
+            ['entity'] = 'dependencies.entitys.Exception',
+            ['init'] = false,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'error',
+            ['entity'] = 'dependencies.entitys.Error',
+            ['init'] = false,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'render',
+            ['entity'] = 'dependencies.entitys.Render',
+            ['init'] = true,
+            ['args'] = {},
+        },
+        {
+            ['name'] = 'font',
+            ['entity'] = 'dependencies.entitys.Font',
+            ['init'] = true,
+            ['args'] = {},
         },
         {
             ['name'] = 'player',
@@ -437,7 +454,7 @@ local this = {
         },
         {
             ['name'] = 'swipe',
-            ['entity'] = 'dependencies.commands.Swipe',
+            ['entity'] = 'dependencies.commands.SwipeCommand',
             ['init'] = true,
             ['args'] = {
                 'swipe',
@@ -449,7 +466,7 @@ local this = {
         },
         {
             ['name'] = 'hiding',
-            ['entity'] = 'dependencies.commands.Hiding',
+            ['entity'] = 'dependencies.commands.HidingCommand',
             ['init'] = true,
             ['args'] = {
                 'hiding',
@@ -467,7 +484,7 @@ local this = {
         },
         {
             ['name'] = 'scan',
-            ['entity'] = 'dependencies.commands.Scan',
+            ['entity'] = 'dependencies.commands.ScanCommand',
             ['init'] = true,
             ['args'] = {
                 'scan',
@@ -486,7 +503,7 @@ local this = {
         },
         {
             ['name'] = 'radius',
-            ['entity'] = 'dependencies.commands.Radius',
+            ['entity'] = 'dependencies.commands.RadiusCommand',
             ['init'] = true,
             ['args'] = {
                 'radius',
@@ -514,7 +531,7 @@ local this = {
         },
         {
             ['name'] = 'visit',
-            ['entity'] = 'dependencies.commands.Visit',
+            ['entity'] = 'dependencies.commands.VisitCommand',
             ['init'] = true,
             ['args'] = {
                 'visit',
@@ -579,7 +596,7 @@ local this = {
         },
         {
             ['name'] = 'select',
-            ['entity'] = 'dependencies.commands.Select',
+            ['entity'] = 'dependencies.commands.SelectCommand',
             ['init'] = true,
             ['args'] = {
                 'select',
@@ -604,7 +621,7 @@ local this = {
         },
         {
             ['name'] = 'trade',
-            ['entity'] = 'dependencies.commands.Trade',
+            ['entity'] = 'dependencies.commands.TradeCommand',
             ['init'] = true,
             ['args'] = {
                 'trade',
@@ -615,7 +632,7 @@ local this = {
         },
         {
             ['name'] = 'pricer',
-            ['entity'] = 'dependencies.commands.Pricer',
+            ['entity'] = 'dependencies.commands.PricerCommand',
             ['init'] = true,
             ['args'] = {
                 'pricer',
@@ -639,14 +656,14 @@ local this = {
         },
         {
             ['name'] = 'ad',
-            ['entity'] = 'dependencies.commands.Ad',
+            ['entity'] = 'dependencies.commands.AdCommand',
             ['init'] = true,
             ['args'] = {
                 'ad',
                 {
                     ['active'] = false,
                     ['message'] = '',
-                    ['time'] = 15,
+                    ['time'] = 10,
                     ['pushAt'] = 0,
                     ['chats'] = {
                         {
@@ -654,7 +671,15 @@ local this = {
                             ['active'] = false,
                         },
                         {
-                            ['name'] = 's',
+                            ['name'] = 'ad',
+                            ['active'] = false,
+                        },
+                        {
+                            ['name'] = 'fam',
+                            ['active'] = false,
+                        },
+                        {
+                            ['name'] = 'al',
                             ['active'] = false,
                         },
                     }
@@ -688,7 +713,7 @@ end
 function main()
     while not isSampAvailable() do wait(0) end
     this:init()
-    -- for _, command in ipairs(_sh.commands) do
-    --     _sh.chat:push(command.command)
-    -- end
+    for _, command in ipairs(_sh.commands) do
+        _sh.chat:push(command.command)
+    end
 end

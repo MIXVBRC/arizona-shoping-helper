@@ -5,6 +5,96 @@ function class:new(_customDialogId)
         ['customDialogId'] = _customDialogId,
         ['opened'] = false,
         ['openedId'] = nil,
+        ['dialogEvents'] = {
+            {
+                ['name'] = 'onShowDialogShopAdmining',
+                ['style'] = 2,
+                ['regexp'] = {
+                    ['title'] = _sh.message:get('system_regex_find_dialog_title_shop_id'),
+                    ['text'] = '',
+                },
+            },
+            {
+                ['name'] = 'onShowDialogBuyProduct',
+                ['style'] = 0,
+                ['regexp'] = {
+                    ['title'] = _sh.message:get('system_regex_find_dialog_title_buy_product'),
+                    ['text'] = '',
+                },
+            },
+            {
+                ['name'] = 'onShowDialogBuyProductCount',
+                ['style'] = 1,
+                ['regexp'] = {
+                    ['title'] = _sh.message:get('system_regex_find_dialog_title_buy_product'),
+                    ['text'] = '',
+                },
+            },
+            {
+                ['name'] = 'onShowDialogBuyProductList',
+                ['style'] = 2,
+                ['regexp'] = {
+                    ['title'] = _sh.message:get('system_regex_find_dialog_title_buy_product'),
+                    ['text'] = '',
+                },
+            },
+            {
+                ['name'] = 'onShowDialogRemoveSaleProduct',
+                ['style'] = 0,
+                ['regexp'] = {
+                    ['title'] = _sh.message:get('system_regex_find_dialog_title_remove_sale'),
+                    ['text'] = '',
+                },
+            },
+            {
+                ['name'] = 'onShowDialogAdSubmittingEnterMessage',
+                ['style'] = 1,
+                ['regexp'] = {
+                    ['title'] = _sh.message:get('system_regex_find_dialog_title_ad_submitting'),
+                    ['text'] = '',
+                },
+            },
+            {
+                ['name'] = 'onShowDialogAdSelectType',
+                ['style'] = 5,
+                ['regexp'] = {
+                    ['title'] = _sh.message:get('system_regex_find_dialog_title_ad_submitting'),
+                    ['text'] = '',
+                },
+            },
+            {
+                ['name'] = 'onShowDialogAdSelectRadioStation',
+                ['style'] = 5,
+                ['regexp'] = {
+                    ['title'] = _sh.message:get('system_regex_find_dialog_title_select_radio_station'),
+                    ['text'] = '',
+                },
+            },
+            {
+                ['name'] = 'onShowDialogAdConfirmation',
+                ['style'] = 0,
+                ['regexp'] = {
+                    ['title'] = _sh.message:get('system_regex_find_dialog_title_ad_submitting_confirmation'),
+                    ['text'] = '',
+                },
+            },
+            {
+                ['name'] = 'onShowDialogSaleProduct',
+                ['style'] = 1,
+                ['regexp'] = {
+                    ['title'] = '',
+                    ['text'] = _sh.message:get('system_regex_find_dialog_text_sale_product'),
+                },
+            },
+            {
+                ['name'] = 'onShowDialogSaleProductCount',
+                ['style'] = 1,
+                ['regexp'] = {
+                    ['title'] = '',
+                    ['text'] = _sh.message:get('system_regex_find_dialog_text_sale_product_count'),
+                },
+            },
+        }
     }
 
     function private:getCustomDialogId()
@@ -27,6 +117,10 @@ function class:new(_customDialogId)
     function private:setOpenedId(id)
         private.openedId = id
         return this
+    end
+
+    function private:getDialogEvents()
+        return private.dialogEvents
     end
 
     -- LOGIC
@@ -85,17 +179,12 @@ function class:new(_customDialogId)
                 button2 = _sh.helper:removeColors(button2)
                 text = _sh.helper:removeColors(text)
                 title = _sh.helper:removeColors(title)
-                if title:find(_sh.message:get('system_regex_find_dialog_title_shop_id')) then
-                    return _sh.eventManager:trigger('onShowDialogShopAdmining', id, style, title, button1, button2, text)
-                elseif title:find(_sh.message:get('system_regex_find_dialog_title_buy_product')) then
-                    if style == 0 or style == 1 then
-                        _sh.chat:push(_sh.scan:extractNameFromDialog(text))
-                        return _sh.eventManager:trigger('onShowDialogBuyProduct', id, style, title, button1, button2, text)
-                    elseif style == 2 then
-                        return _sh.eventManager:trigger('onShowDialogListBuyProduct', id, style, title, button1, button2, text)
+                for _, event in ipairs(private:getDialogEvents()) do
+                    if style == event.style
+                    and ((event.regexp.title ~= '' and title:find(event.regexp.title)) or (event.regexp.text ~= '' and text:find(event.regexp.text)))
+                    then
+                        return _sh.eventManager:trigger(event.name, id, style, title, button1, button2, text)
                     end
-                elseif title:find(_sh.message:get('system_regex_find_dialog_title_remove_sale')) then
-                    return _sh.eventManager:trigger('onShowDialogRemoveSaleProduct', id, style, title, button1, button2, text)
                 end
             end,
             1

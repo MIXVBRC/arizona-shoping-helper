@@ -5,8 +5,8 @@ function class:new(_centralModelIds)
         ['shops'] = {},
         ['mod'] = 'sell',
         ['mods'] = {
-            [_sh.message:get('system_shop_mod_sale')] = 'sale',
-            [_sh.message:get('system_shop_mod_buy')] = 'buy',
+            [_sh.message:get('system_textdraw_shop_mod_sale')] = 'sale',
+            [_sh.message:get('system_textdraw_shop_mod_buy')] = 'buy',
         },
         ['centralModelIds'] = _centralModelIds or {},
         ['cache'] = _sh.dependencies.cache:new(),

@@ -1,22 +1,19 @@
 local class = {}
-function class:new(_prefix)
+function class:new()
     local this = {}
-    local private = {
-        ['prefix'] = _prefix,
-    }
 
     function this:getCommandName(_name)
         if type(_name) == 'table' then
             _name = _sh.helper:implode('-', _name)
         end
-        return _sh.helper:implode('-', {_sh.script.command, private.prefix, _name})
+        return _sh.helper:implode('-', {_sh.script.command, _name})
     end
 
     function this:getCommandMessageName(_name)
         if type(_name) == 'table' then
             _name = _sh.helper:implode('_', _name)
         end
-        return 'command_' .. _sh.helper:implode('_', {_sh.script.command, private.prefix, _name}) .. '_description'
+        return 'command_' .. _sh.helper:implode('_', {_sh.script.command, _name}) .. '_description'
     end
 
     function this:add(_name, _function)

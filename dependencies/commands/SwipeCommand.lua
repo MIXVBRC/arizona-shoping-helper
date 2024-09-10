@@ -10,8 +10,13 @@ function class:new(_name, _default)
             'sale',
         },
         ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
     }
+
+    -- NAME
+
+    function private:getName()
+        return private.name
+    end
 
     -- ACTIVE
 
@@ -76,9 +81,9 @@ function class:new(_name, _default)
     end
 
     function private:initCommands()
-        private.commandManager
-        :add('active', private.toggleActive)
-        :add('mod', private.switchMod)
+        _sh.commandManager
+        :add({private:getName(), 'active'}, private.toggleActive)
+        :add({private:getName(), 'mod'}, private.switchMod)
         return private
     end
 

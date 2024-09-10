@@ -5,8 +5,13 @@ function class:new(_name, _default, _minmax)
         ['name'] = _name,
         ['minmax'] = _sh.dependencies.minMax:new(_minmax),
         ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
     }
+
+    -- NAME
+
+    function private:getName()
+        return private.name
+    end
 
     -- ACTIVE
 
@@ -167,13 +172,13 @@ function class:new(_name, _default, _minmax)
     end
 
     function private:initCommands()
-        private.commandManager
-        :add('active', this.toggleActive)
-        :add('add', this.toggleAdd)
-        :add('border', function (border)
+        _sh.commandManager
+        :add({private:getName(), 'active'}, this.toggleActive)
+        :add({private:getName(), 'add'}, this.toggleAdd)
+        :add({private:getName(), 'border'}, function (border)
             private:setBorder(_sh.helper:getNumber(border))
         end)
-        :add('commission', function (commission)
+        :add({private:getName(), 'commission'}, function (commission)
             private:setCommission(_sh.helper:getNumber(commission))
         end)
         return private
@@ -198,25 +203,23 @@ function class:new(_name, _default, _minmax)
             'onClickProduct',
             function (product)
                 if not _sh.scan:isScanning() and _sh.player:isShoping() and this:isActive() and this:isAdd() then
-                    local sign = product:getSign()
                     _sh.dialogManager:show(
-                        _sh.message:get('message_pricer_dialog_title'),
+                        _sh.message:get('message_dialog_title_enter_price_zero'),
                         product:getName(),
-                        _sh.message:get('message_pricer_dialog_button_yes'),
-                        _sh.message:get('message_pricer_dialog_button_no'),
+                        _sh.message:get('message_dialog_button_ready'),
+                        _sh.message:get('message_dialog_button_cancel'),
                         1,
                         function (button, _, input)
                             if button == 1 then
                                 input = _sh.helper:getNumber(input)
-                                local _product = private:getProduct(sign)
+                                local _product = private:getProduct(product:getSign())
                                 local mod = _sh.shopManager:getMod()
-                                _sh.chat:push(product:getTextdraw():getId())
                                 if _product ~= nil then
                                     _product.price[mod] = input
-                                    private:changeProduct(sign, _product)
+                                    private:changeProduct(product:getSign(), _product)
                                 else
                                     private:addProduct({
-                                        ['sign'] = sign,
+                                        ['sign'] = product:getSign(),
                                         ['price'] = {
                                             [mod] = input
                                         }

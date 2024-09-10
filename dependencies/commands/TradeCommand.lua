@@ -12,8 +12,13 @@ function class:new(_name, _default)
         },
         ['products'] = {},
         ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
     }
+
+    -- NAME
+
+    function private:getName()
+        return private.name
+    end
 
     -- ACTIVE
 
@@ -155,10 +160,10 @@ function class:new(_name, _default)
     end
 
     function private:initCommands()
-        private.commandManager
-        :add('active', private.toggleActive)
-        :add('clear', private.setProductPrices)
-        :add('status', private.getStatusProducts)
+        _sh.commandManager
+        :add({private:getName(), 'active'}, private.toggleActive)
+        :add({private:getName(), 'clear'}, private.setProductPrices)
+        :add({private:getName(), 'status'}, private.getStatusProducts)
         return private
     end
 
@@ -228,10 +233,10 @@ function class:new(_name, _default)
                                 _sh.dialogManager:close()
                                 private:setEdit(true)
                                 _sh.dialogManager:show(
-                                    _sh.message:get('message_trade_dialog_title'),
+                                    _sh.message:get('message_dialog_title_enter_price'),
                                     name,
-                                    _sh.message:get('message_trade_dialog_button_yes'),
-                                    _sh.message:get('message_trade_dialog_button_no'),
+                                    _sh.message:get('message_dialog_button_add'),
+                                    _sh.message:get('message_dialog_button_cancel'),
                                     1,
                                     function (button, _, input)
                                         private:setEdit(false)
@@ -256,31 +261,6 @@ function class:new(_name, _default)
             end,
             1000
         )
-        -- _sh.eventManager:add(
-        --     'onShowDialogRemoveSaleProduct',
-        --     function ()
-        --         _sh.dialogManager:close()
-        --         private:setEdit(true)
-        --         _sh.dialogManager:show(
-        --             _sh.message:get('message_trade_dialog_title'),
-        --             name,
-        --             _sh.message:get('message_trade_dialog_button_yes'),
-        --             _sh.message:get('message_trade_dialog_button_no'),
-        --             1,
-        --             function (button, _, input)
-        --                 private:setEdit(false)
-        --                 if button == 1 then
-        --                     input = _sh.helper:getNumber(input)
-        --                     private:addProductPrice(name, input)
-        --                     sampSendClickTextdraw(product.textdraw:getId())
-        --                 else
-        --                     private:clearProduct()
-        --                 end
-        --             end
-        --         )
-        --     end,
-        --     1
-        -- )
         return private
     end
 

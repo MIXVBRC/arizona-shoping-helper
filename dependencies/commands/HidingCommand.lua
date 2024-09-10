@@ -5,8 +5,13 @@ function class:new(_name, _default, _minmax)
         ['name'] = _name,
         ['minmax'] = _sh.dependencies.minMax:new(_minmax),
         ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
     }
+
+    -- NAME
+
+    function private:getName()
+        return private.name
+    end
 
     -- ACTIVE
 
@@ -60,9 +65,9 @@ function class:new(_name, _default, _minmax)
     end
 
     function private:initCommands()
-        private.commandManager
-        :add('active', private.toggleActive)
-        :add('alpha', function (alpha)
+        _sh.commandManager
+        :add({private:getName(), 'active'}, private.toggleActive)
+        :add({private:getName(), 'alpha'}, function (alpha)
             private:setAlpha(_sh.helper:getNumber(alpha))
         end)
         return private

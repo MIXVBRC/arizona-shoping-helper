@@ -5,8 +5,13 @@ function class:new(_name, _default, _minmax)
         ['name'] = _name,
         ['minmax'] = _sh.dependencies.minMax:new(_minmax),
         ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
     }
+
+    -- NAME
+
+    function private:getName()
+        return private.name
+    end
 
     -- ACTIVE
 
@@ -144,18 +149,18 @@ function class:new(_name, _default, _minmax)
     end
 
     function private:initCommands()
-        private.commandManager
-        :add('active', this.toggleActive)
-        :add('add', this.toggleAdd)
-        :add('border', function (border)
+        _sh.commandManager
+        :add({private:getName(), 'active'}, this.toggleActive)
+        :add({private:getName(), 'add'}, this.toggleAdd)
+        :add({private:getName(), 'border'}, function (border)
             private:setBorder(_sh.helper:getNumber(border))
         end)
-        :add('color', function (color)
+        :add({private:getName(), 'color'}, function (color)
             if color:find('^%w%w%w%w%w%w$') then
                 private:setColor(color)
             end
         end)
-        :add('alpha', function (border)
+        :add({private:getName(), 'alpha'}, function (border)
             private:setAlpha(_sh.helper:getNumber(border))
         end)
         return private

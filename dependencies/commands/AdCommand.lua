@@ -8,8 +8,20 @@ function class:new(_name, _default, _minmax)
         ['shop'] = nil,
         ['minmax'] = _sh.dependencies.minMax:new(_minmax),
         ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
     }
+
+    -- TODO: вместо 1 сообщения сделать возможность отправки нескольких сообщений в виде очереди (разнообразие)
+    -- TODO: сделать возможность шаблонизирования сообщения
+    -- TODO: добавить защиту от случайного пуша в чат рекламного сообщения, чтобы не дали мут
+    -- TODO: в DialogManager добавить события для диалогов VR и AD и остальных, если есть
+    -- TODO: для каждого чата сделать возможность персонального текста сообщения
+    -- TODO: добавить рекламу в AD, Семью, Альянс
+
+    -- NAME
+
+    function private:getName()
+        return private.name
+    end
 
     -- ACTIVE
 
@@ -152,33 +164,34 @@ function class:new(_name, _default, _minmax)
     end
 
     function private:initCommands()
-        private.commandManager
-        :add('active', private.toggleActive)
-        :add('message', function (message)
+        _sh.commandManager
+        :add({private:getName(), 'active'}, private.toggleActive)
+        :add({private:getName(), 'message'}, function (message)
             private:setMessage(message)
         end)
-        :add('time', function (time)
+        :add({private:getName(), 'time'}, function (time)
             time = _sh.helper:getNumber(time)
             if private:getPushAt() > 0 then
                 private:setPushAt(private:getPushAt() - (private:getTime() - time) * 60)
             end
             private:setTime(time)
         end)
-        :add('left', function ()
+        :add({private:getName(), 'left'}, function ()
             if not private:isActive() then
                 _sh.chat:push(_sh.message:get('message_ad_push_error_active'))
-            elseif private:getMessage() == '' then
-                _sh.chat:push(_sh.message:get('message_ad_push_error_message'))
-            elseif private:getId() == nil then
-                _sh.chat:push(_sh.message:get('message_ad_push_error_number'))
-            else
-                _sh.chat:push(_sh.message:get('message_ad_next_push_time', {
-                    private:getRemainingTime()
-                }))
             end
+            if private:getMessage() == '' then
+                _sh.chat:push(_sh.message:get('message_ad_push_error_message'))
+            end
+            if private:getId() == nil then
+                _sh.chat:push(_sh.message:get('message_ad_push_error_number'))
+            end
+            _sh.chat:push(_sh.message:get('message_ad_next_push_time', {
+                private:getRemainingTime()
+            }))
         end)
         for _, chat in ipairs(private:getChats()) do
-            private.commandManager:add({'active', chat.name}, function ()
+            _sh.commandManager:add({private:getName(), 'active', chat.name}, function ()
                 private:toggleChat(chat.name)
             end)
         end
@@ -229,22 +242,21 @@ function class:new(_name, _default, _minmax)
                                     if chat.active then
                                         private:setPushing(true)
                                         sampProcessChatInput(_sh.helper:implode(' ', {'/'..chat.name, message}))
-                                        wait(1000)
+                                        wait(500)
                                     end
                                 end
-                                private:setPushAt(os.time() + private:getTime() * 60)
-                                private:setPushing(false)
-                                _sh.chat:push(_sh.message:get('message_ad_next_push_time', {
-                                    private:getRemainingTime()
-                                }))
                             else
                                 if private:getMessage() == '' then
                                     _sh.chat:push(_sh.message:get('message_ad_push_error_message'))
                                 elseif private:getId() == nil then
                                     _sh.chat:push(_sh.message:get('message_ad_push_error_number'))
                                 end
-                                private:setActive(false)
                             end
+                            private:setPushAt(os.time() + private:getTime() * 60)
+                            _sh.chat:push(_sh.message:get('message_ad_next_push_time', {
+                                private:getRemainingTime()
+                            }))
+                            private:setPushing(false)
                         end
                     end
                 end

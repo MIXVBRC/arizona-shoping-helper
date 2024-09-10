@@ -8,8 +8,13 @@ function class:new(_name, _default, _minmax)
         ['border'] = 1,
         ['minmax'] = _sh.dependencies.minMax:new(_minmax),
         ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
     }
+
+    -- NAME
+
+    function private:getName()
+        return private.name
+    end
 
     -- ACTIVE
 
@@ -134,15 +139,15 @@ function class:new(_name, _default, _minmax)
         :gsub(_sh.message:get('system_regex_gsub_dialog_text_item_match_accessory'),''))
     end
 
-    function this:extractNameFromDialog(text)
-        return _sh.helper
-        :trim((_sh.helper
-        :explode('\n', _sh.helper
-        :removeColors(text))[1])
-        :gsub(_sh.message:get('system_regex_gsub_dialog_text_item_match_item'),'')
-        :gsub(_sh.message:get('system_regex_gsub_dialog_text_item_match_bottle'),'')
-        :gsub(_sh.message:get('system_regex_gsub_dialog_text_item_match_accessory'),''))
-    end
+    -- function this:extractNameFromDialog(text)
+    --     return _sh.helper
+    --     :trim((_sh.helper
+    --     :explode('\n', _sh.helper
+    --     :removeColors(text))[1])
+    --     :gsub(_sh.message:get('system_regex_gsub_dialog_text_item_match_item'),'')
+    --     :gsub(_sh.message:get('system_regex_gsub_dialog_text_item_match_bottle'),'')
+    --     :gsub(_sh.message:get('system_regex_gsub_dialog_text_item_match_accessory'),''))
+    -- end
 
     -- INITS
 
@@ -155,10 +160,10 @@ function class:new(_name, _default, _minmax)
     end
 
     function private:initCommands()
-        private.commandManager
-        :add('active', this.toggleActive)
-        :add('add', this.toggleAdd)
-        :add('time', function (time)
+        _sh.commandManager
+        :add({private:getName(), 'active'}, this.toggleActive)
+        :add({private:getName(), 'add'}, this.toggleAdd)
+        :add({private:getName(), 'time'}, function (time)
             private:setTime(_sh.helper:getNumber(time))
         end)
         return private
@@ -263,7 +268,7 @@ function class:new(_name, _default, _minmax)
             1000
         )
         _sh.eventManager:add(
-            'onShowDialogListBuyProduct',
+            'onShowDialogBuyProductList',
             function (id)
                 if this:isScanning() then
                     _sh.dialogManager:send(id, 1, 0)

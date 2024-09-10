@@ -7,9 +7,14 @@ function class:new(_name, _default, _minmax)
         ['checkTime'] = 60,
         ['minmax'] = _sh.dependencies.minMax:new(_minmax),
         ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
-        ['commandManager'] = _sh.dependencies.commandManager:new(_name),
         ['cache'] = _sh.dependencies.cache:new(),
     }
+
+    -- NAME
+
+    function private:getName()
+        return private.name
+    end
 
     -- ACTIVE
 
@@ -260,13 +265,13 @@ function class:new(_name, _default, _minmax)
     end
 
     function private:initCommands()
-        private.commandManager
-        :add('active', private.toggleActive)
-        :add('clear', private.clearShops)
-        :add('distance', function (distance)
+        _sh.commandManager
+        :add({private:getName(), 'active'}, private.toggleActive)
+        :add({private:getName(), 'clear'}, private.clearShops)
+        :add({private:getName(), 'distance'}, function (distance)
             private:setDistance(_sh.helper:getNumber(distance))
         end)
-        :add('time', function (time)
+        :add({private:getName(), 'time'}, function (time)
             time = _sh.helper:getNumber(time)
             local differenceTime = private:getTime() - time
             local shops = private:getShops()
@@ -279,7 +284,7 @@ function class:new(_name, _default, _minmax)
             private:setShops(shops)
             private:setTime(time)
         end)
-        :add('select', function (text)
+        :add({private:getName(), 'select'}, function (text)
             local lastShopId = private:getLastShopId()
             if lastShopId ~= nil then
                 local shop = private:getShop(lastShopId)
@@ -299,7 +304,7 @@ function class:new(_name, _default, _minmax)
             end
         end)
         for _, hiding in ipairs(private:getHidings()) do
-            private.commandManager:add({'active', hiding.name}, function ()
+            _sh.commandManager:add({private:getName(), 'active', hiding.name}, function ()
                 private:toggleHiding(hiding.name)
             end)
         end
