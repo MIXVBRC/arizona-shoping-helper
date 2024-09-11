@@ -1,5 +1,5 @@
 local this = {}
-function this:new(base, _minmax)
+function this:new(_base, _minmax)
     local class = {}
     local private = {
         ['minmax'] = _minmax,

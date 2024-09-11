@@ -1,5 +1,5 @@
 local class = {}
-function class:new(base, _name, _default)
+function class:new(_base, _name, _default)
     local this = {}
     local private = {
         ['name'] = _name,
@@ -9,7 +9,7 @@ function class:new(base, _name, _default)
             'buy',
             'sale',
         },
-        ['configManager'] = base:getObject('configManager'):new(base, _name, _default),
+        ['configManager'] = _base:getNewClass('configManager', _name, _default),
     }
 
     -- NAME
@@ -73,27 +73,28 @@ function class:new(base, _name, _default)
     -- INITS
 
     function private:init()
-        if base:getClass(private:getName()) ~= nil then
-            return base:getClass(private:getName())
+        if _base:getClass(private:getName()) ~= nil then
+            return _base:getClass(private:getName())
         end
         private:initCommands():initThreads():initEvents()
         return this
     end
 
     function private:initCommands()
-        base:getClass('commandManager')
+        _base:getClass('commandManager')
         :add({private:getName(), 'active'}, private.toggleActive)
         :add({private:getName(), 'mod'}, private.switchMod)
         return private
     end
 
     function private:initThreads()
-        base:getClass('threadManager'):add(
+        _base:getClass('threadManager')
+        :add(
             nil,
             function ()
                 while true do wait(0)
                     if private:isActive() then
-                        if base:getClass('playerManager'):isShoping() then
+                        if _base:getClass('playerManager'):isShoping() then
                             local button = private:getButton()
                             if button ~= nil and button.mod ~= private:getMod() and button.textdraw:getParent() ~= nil then
                                 sampSendClickTextdraw(button.textdraw:getParent():getId())
@@ -112,7 +113,8 @@ function class:new(base, _name, _default)
     end
 
     function private:initEvents()
-        base:getClass('eventManager'):add(
+        _base:getClass('eventManager')
+        :add(
             'onVisitShop',
             function (_, mod, textdraw)
                 private:setButton({

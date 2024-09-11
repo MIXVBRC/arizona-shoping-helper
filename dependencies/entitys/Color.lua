@@ -1,5 +1,5 @@
 local class = {}
-function class:new(base, _colors)
+function class:new(_base, _colors)
     local this = {}
     local private = {
         ['colors'] = _colors

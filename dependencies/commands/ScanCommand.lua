@@ -1,13 +1,13 @@
 local class = {}
-function class:new(base, _name, _default, _minmax)
+function class:new(_base, _name, _default, _minmax)
     local this = {}
     local private = {
         ['name'] = _name,
         ['scanning'] = false,
         ['scanningProduct'] = nil,
         ['border'] = 1,
-        ['minmax'] = base:getObject('minMax'):new(base, _minmax),
-        ['configManager'] = base:getObject('configManager'):new(base, _name, _default),
+        ['minmax'] = _base:getNewClass('minMax', _minmax),
+        ['configManager'] = _base:getNewClass('configManager', _name, _default),
     }
 
     -- NAME
@@ -36,11 +36,11 @@ function class:new(base, _name, _default, _minmax)
     function this:toggleAdd()
         private.configManager:set('add', not this:isAdd())
         if this:isAdd() then
-            if base:getClass('select') ~= nil and base:getClass('select'):isAdd() then
-                base:getClass('select'):toggleAdd()
+            if _base:getClass('select') ~= nil and _base:getClass('select'):isAdd() then
+                _base:getClass('select'):toggleAdd()
             end
-            if base:getClass('pricer') ~= nil and base:getClass('pricer'):isAdd() then
-                base:getClass('pricer'):toggleAdd()
+            if _base:getClass('pricer') ~= nil and _base:getClass('pricer'):isAdd() then
+                _base:getClass('pricer'):toggleAdd()
             end
         end
         return this
@@ -130,47 +130,48 @@ function class:new(base, _name, _default, _minmax)
     -- EXTRACTS
 
     function this:extractNameFromDialog(text)
-        return base:getClass('helper')
-        :trim((base:getClass('helper')
-        :explode('\n', base:getClass('helper')
+        return _base:getClass('helper')
+        :trim((_base:getClass('helper')
+        :explode('\n', _base:getClass('helper')
         :removeColors(text))[1])
-        :gsub(base:getClass('message'):get('system_regex_gsub_dialog_text_item_match_item'),'')
-        :gsub(base:getClass('message'):get('system_regex_gsub_dialog_text_item_match_bottle'),'')
-        :gsub(base:getClass('message'):get('system_regex_gsub_dialog_text_item_match_accessory'),''))
+        :gsub(_base:getClass('message'):get('system_regex_gsub_dialog_text_item_match_item'),'')
+        :gsub(_base:getClass('message'):get('system_regex_gsub_dialog_text_item_match_bottle'),'')
+        :gsub(_base:getClass('message'):get('system_regex_gsub_dialog_text_item_match_accessory'),''))
     end
 
     -- function this:extractNameFromDialog(text)
-    --     return base:getClass('helper')
-    --     :trim((base:getClass('helper')
-    --     :explode('\n', base:getClass('helper')
+    --     return _base:getClass('helper')
+    --     :trim((_base:getClass('helper')
+    --     :explode('\n', _base:getClass('helper')
     --     :removeColors(text))[1])
-    --     :gsub(base:getClass('message'):get('system_regex_gsub_dialog_text_item_match_item'),'')
-    --     :gsub(base:getClass('message'):get('system_regex_gsub_dialog_text_item_match_bottle'),'')
-    --     :gsub(base:getClass('message'):get('system_regex_gsub_dialog_text_item_match_accessory'),''))
+    --     :gsub(_base:getClass('message'):get('system_regex_gsub_dialog_text_item_match_item'),'')
+    --     :gsub(_base:getClass('message'):get('system_regex_gsub_dialog_text_item_match_bottle'),'')
+    --     :gsub(_base:getClass('message'):get('system_regex_gsub_dialog_text_item_match_accessory'),''))
     -- end
 
     -- INITS
 
     function private:init()
-        if base:getClass(private:getName()) ~= nil then
-            return base:getClass(private:getName())
+        if _base:getClass(private:getName()) ~= nil then
+            return _base:getClass(private:getName())
         end
         private:initCommands():initThreads():initEvents()
         return this
     end
 
     function private:initCommands()
-        base:getClass('commandManager')
+        _base:getClass('commandManager')
         :add({private:getName(), 'active'}, this.toggleActive)
         :add({private:getName(), 'add'}, this.toggleAdd)
         :add({private:getName(), 'time'}, function (time)
-            private:setTime(base:getClass('helper'):getNumber(time))
+            private:setTime(_base:getClass('helper'):getNumber(time))
         end)
         return private
     end
 
     function private:initThreads()
-        base:getClass('threadManager'):add(
+        _base:getClass('threadManager')
+        :add(
             nil,
             function ()
                 while true do wait(50)
@@ -185,17 +186,17 @@ function class:new(base, _name, _default, _minmax)
             nil,
             function ()
                 while true do wait(0)
-                    if this:isActive() and base:getClass('playerManager'):isShoping() and not base:getClass('swipe'):isSwipe() then
-                        for _, product in ipairs(base:getClass('productManager'):getProducts()) do
+                    if this:isActive() and _base:getClass('playerManager'):isShoping() and not _base:getClass('swipe'):isSwipe() then
+                        for _, product in ipairs(_base:getClass('productManager'):getProducts()) do
                             if not product:isScanned() and private:haveCode(product:getCode()) then
-                                base:getClass('boxManager'):push(
+                                _base:getClass('boxManager'):push(
                                     product:getTextdraw():getX(),
                                     product:getTextdraw():getY(),
                                     product:getTextdraw():getWidth(),
                                     product:getTextdraw():getHeight(),
                                     '0x00000000',
                                     private.border,
-                                    base:getClass('color'):getAlpha(50)..'ffffff',
+                                    _base:getClass('color'):getAlpha(50)..'ffffff',
                                     1
                                 )
                             end
@@ -208,9 +209,9 @@ function class:new(base, _name, _default, _minmax)
             nil,
             function ()
                 while true do wait(0)
-                    if this:isActive() and not this:isAdd() and not base:getClass('swipe'):isSwipe() then
+                    if this:isActive() and not this:isAdd() and not _base:getClass('swipe'):isSwipe() then
                         local products = {}
-                        for _, product in ipairs(base:getClass('productManager'):getProducts()) do
+                        for _, product in ipairs(_base:getClass('productManager'):getProducts()) do
                             if not product:isScanned() then
                                 table.insert(products, product)
                             end
@@ -238,10 +239,11 @@ function class:new(base, _name, _default, _minmax)
     end
 
     function private:initEvents()
-        base:getClass('eventManager'):add(
+        _base:getClass('eventManager')
+        :add(
             'onClickProduct',
             function (product)
-                if this:isActive() and this:isAdd() and base:getClass('playerManager'):isShoping() then
+                if this:isActive() and this:isAdd() and _base:getClass('playerManager'):isShoping() then
                     private:toggleCode(product:getCode())
                     return false
                 end
@@ -253,15 +255,15 @@ function class:new(base, _name, _default, _minmax)
             function (_, _, _, _, _, text)
                 local product = private:getScanningProduct()
                 if product ~= nil then
-                    base:getClass('chat'):push(this:extractNameFromDialog(text))
-                    base:getClass('productManager'):createProduct(
+                    _base:getClass('chat'):push(this:extractNameFromDialog(text))
+                    _base:getClass('productManager'):createProduct(
                         this:extractNameFromDialog(text),
                         product:getCode(),
                         product:getPrice(),
                         product:getTextdraw()
                     )
                     private:setScanningProduct(nil)
-                    base:getClass('dialogManager'):close()
+                    _base:getClass('dialogManager'):close()
                     return false
                 end
             end,
@@ -271,7 +273,7 @@ function class:new(base, _name, _default, _minmax)
             'onShowDialogBuyProductList',
             function (id)
                 if this:isScanning() then
-                    base:getClass('dialogManager'):send(id, 1, 0)
+                    _base:getClass('dialogManager'):send(id, 1, 0)
                     return false
                 end
             end,

@@ -1,5 +1,5 @@
 local class = {}
-function class:new(base, _symbols)
+function class:new(_base, _symbols)
     local this = {}
     local private = {
         ['symbols'] = _symbols or {},
@@ -20,23 +20,23 @@ function class:new(base, _symbols)
     end
 
     function this:md5(string)
-        return base:getObject('md5').sumhexa(string)
+        return _base:getObject('md5').sumhexa(string)
     end
 
     function this:jsonDecode(json)
-        return base:getObject('json').decode(json)
+        return _base:getObject('json').decode(json)
     end
 
     function this:jsonEncode(array)
-        return base:getObject('json').encode(array)
+        return _base:getObject('json').encode(array)
     end
 
     function this:iniLoad(default, name)
-        return base:getObject('ini').load(default, name)
+        return _base:getObject('ini').load(default, name)
     end
 
     function this:iniSave(data, name)
-        base:getObject('ini').save(data, name)
+        _base:getObject('ini').save(data, name)
         return this
     end
 
@@ -47,7 +47,7 @@ function class:new(base, _symbols)
                 table.insert(result, private.symbols.decode[symbol] or symbol)
             end
         )
-        return base:getClass('helper'):implode('', result)
+        return _base:getClass('helper'):implode('', result)
     end
 
     function this:textEncode(text)
@@ -57,7 +57,7 @@ function class:new(base, _symbols)
                 table.insert(result, private.symbols.encode[symbol] or symbol)
             end
         )
-        return base:getClass('helper'):implode('', result)
+        return _base:getClass('helper'):implode('', result)
     end
 
     function this:getObjectsByIds(ids)
@@ -136,11 +136,11 @@ function class:new(base, _symbols)
     end
 
     function this:distanceToPlayer2d(_x, _y)
-        return getDistanceBetweenCoords2d(base:getClass('playerManager'):getX(), base:getClass('playerManager'):getY(), _x, _y)
+        return getDistanceBetweenCoords2d(_base:getClass('playerManager'):getX(), _base:getClass('playerManager'):getY(), _x, _y)
     end
 
     function this:distanceToPlayer3d(_x, _y, _z)
-        return getDistanceBetweenCoords3d(base:getClass('playerManager'):getX(), base:getClass('playerManager'):getY(), base:getClass('playerManager'):getZ(), _x, _y, _z)
+        return getDistanceBetweenCoords3d(_base:getClass('playerManager'):getX(), _base:getClass('playerManager'):getY(), _base:getClass('playerManager'):getZ(), _x, _y, _z)
     end
 
     function this:explode(separator, text)

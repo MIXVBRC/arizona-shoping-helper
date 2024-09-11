@@ -1,10 +1,10 @@
 local class = {}
-function class:new(base)
+function class:new(_base)
     local this = {}
     local private = {
         ['prefix'] = '',
         ['postfix'] = '',
-        ['color'] = base:getClass('color'):get('white'),
+        ['color'] = _base:getClass('color'):get('white'),
     }
 
     function this:addPrefix(prefix)

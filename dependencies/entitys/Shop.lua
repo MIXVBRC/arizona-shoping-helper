@@ -1,5 +1,5 @@
 local class = {}
-function class:new(base, _x, _y, _z, _title, _admin)
+function class:new(_base, _x, _y, _z, _title, _admin)
     local this = {}
     local private = {
         ['id'] = nil,
@@ -55,7 +55,7 @@ function class:new(base, _x, _y, _z, _title, _admin)
         if this:getTitle() ~= nil then
             return this:getTitle():getMod()
         end
-        return base:getClass('message'):get('system_shop_empty')
+        return _base:getClass('message'):get('system_shop_empty')
     end
 
     function this:isEmpty()
@@ -85,14 +85,14 @@ function class:new(base, _x, _y, _z, _title, _admin)
     end
 
     function private:init()
-        private:setPosition(base:getClass('helper'):normalizePosition(this:getX(), this:getY(), this:getZ()))
-        private:setId(base:getClass('helper'):md5(this:getPlayer()..this:getX()..this:getY()..this:getZ()))
+        private:setPosition(_base:getClass('helper'):normalizePosition(this:getX(), this:getY(), this:getZ()))
+        private:setId(_base:getClass('helper'):md5(this:getPlayer()..this:getX()..this:getY()..this:getZ()))
         if this:getTitle() ~= nil then
             private:setEmpty(false)
         end
-        local cacheKey = 'shop_' .. base:getClass('helper'):md5(this:getX()..this:getY()..this:getZ())
-        if _sh.cache:get(cacheKey) == nil then
-            for _, object in ipairs(base:getClass('helper'):getObjectsByIds(base:getClass('shopManager'):getCentralModelIds())) do
+        local cacheKey = 'shop_' .. _base:getClass('helper'):md5(this:getX()..this:getY()..this:getZ())
+        if _base:getClass('cache'):get(cacheKey) == nil then
+            for _, object in ipairs(_base:getClass('helper'):getObjectsByIds(_base:getClass('shopManager'):getCentralModelIds())) do
                 local _, objectX, objectY, objectZ = getObjectCoordinates(object)
                 local distance = getDistanceBetweenCoords3d(
                     this:getX(), this:getY(), this:getZ(),
@@ -100,7 +100,7 @@ function class:new(base, _x, _y, _z, _title, _admin)
                 )
                 if distance < 3 then
                     private:setCentral(true)
-                    _sh.cache:add(cacheKey, true)
+                    _base:getClass('cache'):add(cacheKey, true)
                 end
             end
         else

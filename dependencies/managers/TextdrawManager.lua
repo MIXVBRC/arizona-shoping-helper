@@ -1,5 +1,5 @@
 local class = {}
-function class:new(base)
+function class:new(_base)
     local this = {}
     local private = {
         ['textdraws'] = {},
@@ -32,7 +32,7 @@ function class:new(base)
     function private:pushDeleteTextdrawsEvent(textdraws)
         if #textdraws > 0 then
             for _, textdraw in ipairs(textdraws) do
-                base:getClass('eventManager'):trigger('onDeleteÑlickableTextdraw', textdraw)
+                _base:getClass('eventManager'):trigger('onDeleteÑlickableTextdraw', textdraw)
             end
         end
         return this
@@ -46,11 +46,11 @@ function class:new(base)
     end
 
     function private:initEvents()
-        base:getClass('eventManager'):add(
+        _base:getClass('eventManager')
+        :add(
             'onShowTextDraw',
             function (id, data)
-                local newTextdraw = base:getObject('textdraw'):new(
-                    base,
+                local newTextdraw = _base:getNewClass('textdraw',
                     id,
                     data.modelId,
                     data.text,
@@ -77,7 +77,7 @@ function class:new(base)
                             and textdraw:getY() + textdraw:getHeight() > newTextdraw:getY()
                             then
                                 textdraw:addChild(newTextdraw)
-                                base:getClass('eventManager'):trigger('onTextdrawAddChild', textdraw, newTextdraw)
+                                _base:getClass('eventManager'):trigger('onTextdrawAddChild', textdraw, newTextdraw)
                             end
                         end
                     end
@@ -87,10 +87,10 @@ function class:new(base)
                 end
                 private:pushDeleteTextdrawsEvent(deleteTextdraws)
                 private:setTextdraws(textdraws)
-                base:getClass('eventManager'):trigger('onCreateTextdraw', newTextdraw)
+                _base:getClass('eventManager'):trigger('onCreateTextdraw', newTextdraw)
             end
         )
-        base:getClass('eventManager'):add(
+        :add(
             'onTextDrawSetString',
             function (textdrawId, text)
                 for _, textdraw in ipairs(this:getTextdraws()) do
@@ -115,7 +115,8 @@ function class:new(base)
     end
 
     function private:initThreads()
-        base:getClass('threadManager'):add(
+        _base:getClass('threadManager')
+        :add(
             nil,
             function ()
                 while true do wait(0)

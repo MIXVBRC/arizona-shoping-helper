@@ -1,5 +1,5 @@
 local class = {}
-function class:new(base, _name)
+function class:new(_base, _name)
     local this = {}
     local private = {
         ['name'] = _name,
@@ -45,15 +45,14 @@ function class:new(base, _name)
 
     function this:createProduct(name, code, price, textdraw)
         if code ~= nil and price ~= nil and textdraw ~= nil then
-            local product = base:getObject('product'):new(
-                base,
+            local product = _base:getNewClass('product',
                 name,
                 code,
                 price,
                 textdraw
             )
             private:addProduct(product)
-            base:getClass('eventManager'):trigger('onCreateProduct', product)
+            _base:getClass('eventManager'):trigger('onCreateProduct', product)
         end
         return this
     end
@@ -69,10 +68,10 @@ function class:new(base, _name)
             ['textdraw'] = textdraw,
         }
         for _, childTextdraw in ipairs(textdraw:getChilds()) do
-            if base:getClass('helper'):isPrice(childTextdraw:getText()) then
-                params.price = base:getClass('helper'):extractPrice(childTextdraw:getText())
+            if _base:getClass('helper'):isPrice(childTextdraw:getText()) then
+                params.price = _base:getClass('helper'):extractPrice(childTextdraw:getText())
             else
-                params.code = base:getClass('helper'):md5(params.code .. childTextdraw:getCode())
+                params.code = _base:getClass('helper'):md5(params.code .. childTextdraw:getCode())
             end
         end
         this:createProduct(nil, params.code, params.price, params.textdraw)
@@ -81,20 +80,21 @@ function class:new(base, _name)
     -- INITS
 
     function private:init()
-        if base:getClass(private:getName()) ~= nil then
-            return base:getClass(private:getName())
+        if _base:getClass(private:getName()) ~= nil then
+            return _base:getClass(private:getName())
         end
         private:initEvents():initThrades()
         return this
     end
 
     function private:initEvents()
-        base:getClass('eventManager'):add(
+        _base:getClass('eventManager')
+        :add(
             'onTextdrawAddChild',
             function (textdraw)
-                if base:getClass('playerManager'):isShoping() then
+                if _base:getClass('playerManager'):isShoping() then
                     for _, childTextdraw in ipairs(textdraw:getChilds()) do
-                        if base:getClass('helper'):isPrice(childTextdraw:getText()) then
+                        if _base:getClass('helper'):isPrice(childTextdraw:getText()) then
                             private:checkOrCreate(textdraw)
                             return
                         end
@@ -102,7 +102,7 @@ function class:new(base, _name)
                 end
             end
         )
-        base:getClass('eventManager'):add(
+        :add(
             'onDelete—lickableTextdraw',
             function (textdraw)
                 local products = {}
@@ -116,12 +116,12 @@ function class:new(base, _name)
                 private:setProducts(products)
             end
         )
-        base:getClass('eventManager'):add(
+        :add(
             'onSendClickTextDraw',
             function (id)
                 for _, product in ipairs(this:getProducts()) do
                     if id == product:getTextdraw():getId() then
-                        return base:getClass('eventManager'):trigger('onClickProduct', product)
+                        return _base:getClass('eventManager'):trigger('onClickProduct', product)
                     end
                 end
             end
@@ -130,7 +130,8 @@ function class:new(base, _name)
     end
 
     function private:initThrades()
-        base:getClass('threadManager'):add(
+        _base:getClass('threadManager')
+        :add(
             nil,
             function ()
                 while true do wait(0)
@@ -139,7 +140,7 @@ function class:new(base, _name)
                     for _, product in ipairs(this:getProducts()) do
                         if product:isDelete() then
                             table.insert(delete, product)
-                            base:getClass('eventManager'):trigger('onDeleteProduct', product)
+                            _base:getClass('eventManager'):trigger('onDeleteProduct', product)
                         else
                             table.insert(products, product)
                         end

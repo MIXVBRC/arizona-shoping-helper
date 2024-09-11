@@ -1,9 +1,9 @@
 local class = {}
-function class:new(base)
+function class:new(_base)
     local this = {}
     local private = {
-        ['color'] = base:getClass('color'):get('white'),
-        ['alpha'] = base:getClass('color'):getAlpha(100),
+        ['color'] = _base:getClass('color'):get('white'),
+        ['alpha'] = _base:getClass('color'):getAlpha(100),
     }
 
     function private:getColor()
@@ -25,10 +25,10 @@ function class:new(base)
     end
 
     function this:render()
-        local _, x, y, z, _, _ = convert3DCoordsToScreenEx(base:getClass('playerManager'):getX(), base:getClass('playerManager'):getY(), base:getClass('playerManager'):getZ() - 1)
+        local _, x, y, z, _, _ = convert3DCoordsToScreenEx(_base:getClass('playerManager'):getX(), _base:getClass('playerManager'):getY(), _base:getClass('playerManager'):getZ() - 1)
         if z > 0 then
-            base:getClass('render'):pushLine(x, y, x, y - 50, 3, private:getAlpha() .. private:getColor())
-            base:getClass('render'):pushPoint(x, y - 10, 20, 20, 3, 180, private:getAlpha() .. private:getColor())
+            _base:getClass('render'):pushLine(x, y, x, y - 50, 3, private:getAlpha() .. private:getColor())
+            _base:getClass('render'):pushPoint(x, y - 10, 20, 20, 3, 180, private:getAlpha() .. private:getColor())
         end
     end
 

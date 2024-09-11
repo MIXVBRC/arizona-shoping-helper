@@ -1,5 +1,5 @@
 local class = {}
-function class:new(base, _text, _x, _y, _z)
+function class:new(_base, _text, _x, _y, _z)
     local this = {}
     local private = {
         ['text'] = _text,

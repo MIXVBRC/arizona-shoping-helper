@@ -1,10 +1,10 @@
-local class = {}
-function class:new(base, _name, _default, _minmax)
-    local this = {}
+local this = {}
+function this:new(_base, _name, _default, _minmax)
+    local class = {}
     local private = {
         ['name'] = _name,
-        ['minmax'] = base:getObject('minMax'):new(base, _minmax),
-        ['configManager'] = base:getObject('configManager'):new(base, _name, _default),
+        ['minmax'] = _base:getNewClass('minMax', _minmax),
+        ['configManager'] = _base:getNewClass('configManager', _name, _default),
     }
 
     -- NAME
@@ -21,7 +21,7 @@ function class:new(base, _name, _default, _minmax)
 
     function private:toggleActive()
         private.configManager:set('active', not private:isActive())
-        return this
+        return class
     end
 
     -- ALPHA
@@ -32,42 +32,43 @@ function class:new(base, _name, _default, _minmax)
 
     function private:setAlpha(alpha)
         private.configManager:set('alpha', private.minmax:get(alpha, 'alpha'))
-        return this
+        return class
     end
 
     -- INITS
 
     function private:init()
-        if base:getClass(private:getName()) ~= nil then
-            return base:getClass(private:getName())
+        if _base:getClass(private:getName()) ~= nil then
+            return _base:getClass(private:getName())
         end
         private:initCommands():initThreads()
-        return this
+        return class
     end
 
     function private:initCommands()
-        base:getClass('commandManager')
+        _base:getClass('commandManager')
         :add({private:getName(), 'active'}, private.toggleActive)
         :add({private:getName(), 'alpha'}, function (alpha)
-            private:setAlpha(base:getClass('helper'):getNumber(alpha))
+            private:setAlpha(_base:getClass('helper'):getNumber(alpha))
         end)
         return private
     end
 
     function private:initThreads()
-        base:getClass('threadManager'):add(
+        _base:getClass('threadManager')
+        :add(
             nil,
             function ()
                 while true do wait(0)
                     if private:isActive() then
-                        if base:getClass('playerManager'):isShoping() and not base:getClass('dialogManager'):isOpened() and not base:getClass('swipe'):isSwipe() then
-                            for _, product in ipairs(base:getClass('productManager'):getProducts()) do
-                                base:getClass('boxManager'):push(
+                        if _base:getClass('playerManager'):isShoping() and not _base:getClass('dialogManager'):isOpened() and not _base:getClass('swipe'):isSwipe() then
+                            for _, product in ipairs(_base:getClass('productManager'):getProducts()) do
+                                _base:getClass('boxManager'):push(
                                     product:getTextdraw():getX(),
                                     product:getTextdraw():getY(),
                                     product:getTextdraw():getWidth(),
                                     product:getTextdraw():getHeight(),
-                                    base:getClass('color'):getAlpha(private:getAlpha()) .. '1f1f1f',
+                                    _base:getClass('color'):getAlpha(private:getAlpha()) .. '1f1f1f',
                                     0,
                                     '0x00000000',
                                     10
@@ -83,4 +84,4 @@ function class:new(base, _name, _default, _minmax)
 
     return private:init()
 end
-return class
+return this

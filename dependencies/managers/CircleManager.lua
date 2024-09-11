@@ -1,5 +1,5 @@
 local class = {}
-function class:new(base)
+function class:new(_base)
     local this = {}
     local private = {
         ['circles'] = {},
@@ -15,7 +15,7 @@ function class:new(base)
     end
 
     function this:create(x, y, z, radius, polygons)
-        table.insert(private.circles, base:getObject('circle'):new(base, x, y, z, radius, polygons))
+        table.insert(private.circles, _base:getNewClass('circle', x, y, z, radius, polygons))
         return this
     end
 

@@ -1,13 +1,13 @@
 local class = {}
-function class:new(base, _name, _default, _minmax)
+function class:new(_base, _name, _default, _minmax)
     local this = {}
     local private = {
         ['name'] = _name,
         ['radius'] = 5,
-        ['minmax'] = base:getObject('minMax'):new(base, _minmax),
-        ['configManager'] = base:getObject('configManager'):new(base, _name, _default),
-        ['lowPoint'] = base:getObject('lowPoint'):new(base),
-        ['cache'] = base:getObject('cache'):new(base),
+        ['minmax'] = _base:getNewClass('minMax', _minmax),
+        ['configManager'] = _base:getNewClass('configManager', _name, _default),
+        ['lowPoint'] = _base:getNewClass('lowPoint'),
+        ['cache'] = _base:getNewClass('cache'),
     }
 
     -- NAME
@@ -69,9 +69,9 @@ function class:new(base, _name, _default, _minmax)
 
     function private:getShops()
         local shops = {}
-        for _, shop in ipairs(base:getClass('shopManager'):getShops()) do
+        for _, shop in ipairs(_base:getClass('shopManager'):getShops()) do
             if not shop:isCentral() then
-                local distance = base:getClass('helper'):distanceToPlayer2d(shop:getX(), shop:getY())
+                local distance = _base:getClass('helper'):distanceToPlayer2d(shop:getX(), shop:getY())
                 if distance < private:getDistance() then
                     table.insert(shops, shop)
                 end
@@ -100,10 +100,9 @@ function class:new(base, _name, _default, _minmax)
 
     function private:getOmitPoint(point)
         local newPoint = point
-        local position = base:getClass('helper'):omitPosition(point:getX(), point:getY(), point:getZ(), 5)
+        local position = _base:getClass('helper'):omitPosition(point:getX(), point:getY(), point:getZ(), 5)
         if math.abs(point:getZ() - position.z) < 2 then
-            newPoint = base:getObject('point'):new(
-                base,
+            newPoint = _base:getNewClass( 'point',
                 point:getX(),
                 point:getY(),
                 position.z
@@ -146,16 +145,16 @@ function class:new(base, _name, _default, _minmax)
                 for _, segment in ipairs(segments) do
                     local pointA = segment[1]
                     local pointB = segment[2]
-                    local distance = base:getClass('helper'):distanceToPlayer3d(
+                    local distance = _base:getClass('helper'):distanceToPlayer3d(
                         ( pointB:getX() + pointA:getX() ) / 2,
                         ( pointB:getY() + pointA:getY() ) / 2,
                         ( pointB:getZ() + pointA:getZ() ) / 2
                     )
-                    local alpha = base:getClass('color'):getAlpha(100 - math.floor(distance * 100 / (private:getDistance() - 10)))
+                    local alpha = _base:getClass('color'):getAlpha(100 - math.floor(distance * 100 / (private:getDistance() - 10)))
                     local _, aX, aY, aZ, _, _ = convert3DCoordsToScreenEx(pointA:getX(), pointA:getY(), pointA:getZ())
                     local _, bX, bY, bZ, _, _ = convert3DCoordsToScreenEx(pointB:getX(), pointB:getY(), pointB:getZ())
                     if aZ > 0 and bZ > 0 then
-                        base:getClass('render'):pushLine(aX, aY, bX, bY, 1, alpha .. private:getColor('circle'))
+                        _base:getClass('render'):pushLine(aX, aY, bX, bY, 1, alpha .. private:getColor('circle'))
                     end
                 end
             end
@@ -172,11 +171,11 @@ function class:new(base, _name, _default, _minmax)
             for _, shop in ipairs(shops) do
                 cacheName = cacheName .. shop:getId()
             end
-            cacheName = base:getClass('helper'):md5(cacheName)
+            cacheName = _base:getClass('helper'):md5(cacheName)
             local points = private.cache:get('points_'..cacheName)
             if points == nil then
                 points = {}
-                local circleManager = base:getObject('circleManager'):new(base)
+                local circleManager = _base:getNewClass('circleManager')
                 for _, circle in ipairs(private:getCircles(shops)) do
                     circleManager:create(
                         circle.position.x,
@@ -199,10 +198,10 @@ function class:new(base, _name, _default, _minmax)
             private.cache:add('segments', segments, 1)
         end
         private:drawSegments(segments)
-        local shop = base:getClass('shopManager'):getNearby()
+        local shop = _base:getClass('shopManager'):getNearby()
         if shop ~= nil and not shop:isCentral() then
             if shop:getAdmin() ~= nil then
-                local distance = base:getClass('helper'):distanceToPlayer2d(shop:getAdmin():getX(), shop:getAdmin():getY())
+                local distance = _base:getClass('helper'):distanceToPlayer2d(shop:getAdmin():getX(), shop:getAdmin():getY())
                 if distance < 6 then
                     private.lowPoint:setColor(private:getColor('green'))
                     if distance <= private:getRadius() then
@@ -217,31 +216,32 @@ function class:new(base, _name, _default, _minmax)
     -- INITS
 
     function private:init()
-        if base:getClass(private:getName()) ~= nil then
-            return base:getClass(private:getName())
+        if _base:getClass(private:getName()) ~= nil then
+            return _base:getClass(private:getName())
         end
         private:initCommands():initThreads()
         return this
     end
 
     function private:initCommands()
-        base:getClass('commandManager')
+        _base:getClass('commandManager')
         :add({private:getName(), 'active'}, private.toggleActive)
         :add({private:getName(), 'polygons'}, function (polygons)
-            private:setPolygons(base:getClass('helper'):getNumber(polygons))
+            private:setPolygons(_base:getClass('helper'):getNumber(polygons))
         end)
         :add({private:getName(), 'distance'}, function (distance)
-            private:setDistance(base:getClass('helper'):getNumber(distance))
+            private:setDistance(_base:getClass('helper'):getNumber(distance))
         end)
         return private
     end
 
     function private:initThreads()
-        base:getClass('threadManager'):add(
+        _base:getClass('threadManager')
+        :add(
             nil,
             function ()
                 while true do wait(0)
-                    if private:isActive() and not base:getClass('playerManager'):isShoping() and not base:getClass('playerManager'):isAdmining() then
+                    if private:isActive() and not _base:getClass('playerManager'):isShoping() and not _base:getClass('playerManager'):isAdmining() then
                         private:work()
                     end
                 end

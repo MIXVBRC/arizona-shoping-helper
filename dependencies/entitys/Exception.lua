@@ -1,12 +1,12 @@
 local class = {}
-function class:new(base, _message)
+function class:new(_base, _message)
     local this = {}
     local private = {
         ['message'] = _message
     }
 
     function private:init()
-        base:getObject('error'):new(base, private.message)
+        _base:getNewClass('error', private.message)
         error(private.message, 4)
     end
 

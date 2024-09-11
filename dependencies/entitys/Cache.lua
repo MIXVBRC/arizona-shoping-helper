@@ -1,5 +1,5 @@
 local class = {}
-function class:new(base)
+function class:new()
     local this = {}
     local private = {
         ['time'] = 86400,

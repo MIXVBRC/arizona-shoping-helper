@@ -1,5 +1,5 @@
 local this = {}
-function this:new(base)
+function this:new(_base)
     local class = {}
     local private = {
         ['triggers'] = {},
@@ -31,7 +31,7 @@ function this:new(base)
     end
 
     function private:init()
-        local events = base:getObject('events')
+        local events = _base:getObject('events')
         function events.onShowTextDraw(...)
             return class:trigger('onShowTextDraw', ...)
         end

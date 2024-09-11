@@ -10,59 +10,46 @@ local data = {
             -- LIBRARIES
         
             {
-                ['name'] = 'moownloader',
+                ['name'] = 'moonloader',
                 ['path'] = 'moonloader',
+                ['sort'] = 1000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
                 ['name'] = 'md5',
                 ['path'] = 'md5',
+                ['sort'] = 1000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
                 ['name'] = 'ini',
                 ['path'] = 'inicfg',
+                ['sort'] = 1000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
                 ['name'] = 'json',
                 ['path'] = 'dkjson',
+                ['sort'] = 1000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
                 ['name'] = 'events',
                 ['path'] = 'lib.samp.events',
+                ['sort'] = 1000,
                 ['init'] = false,
                 ['args'] = {},
             },
         
             -- ENTITYS
-        
-            {
-                ['name'] = 'cache',
-                ['path'] = 'dependencies.entitys.Cache',
-                ['init'] = true,
-                ['args'] = {},
-            },
-            {
-                ['name'] = 'point',
-                ['path'] = 'dependencies.entitys.Point',
-                ['init'] = false,
-                ['args'] = {},
-            },
-            {
-                ['name'] = 'circle',
-                ['path'] = 'dependencies.entitys.Circle',
-                ['init'] = false,
-                ['args'] = {},
-            },
             {
                 ['name'] = 'helper',
                 ['path'] = 'dependencies.entitys.Helper',
+                ['sort'] = 2000,
                 ['init'] = true,
                 ['args'] = {
                     {
@@ -205,8 +192,30 @@ local data = {
                 },
             },
             {
+                ['name'] = 'cache',
+                ['path'] = 'dependencies.entitys.Cache',
+                ['sort'] = 2000,
+                ['init'] = true,
+                ['args'] = {},
+            },
+            {
+                ['name'] = 'point',
+                ['path'] = 'dependencies.entitys.Point',
+                ['sort'] = 2000,
+                ['init'] = false,
+                ['args'] = {},
+            },
+            {
+                ['name'] = 'circle',
+                ['path'] = 'dependencies.entitys.Circle',
+                ['sort'] = 2000,
+                ['init'] = false,
+                ['args'] = {},
+            },
+            {
                 ['name'] = 'config',
                 ['path'] = 'dependencies.entitys.Config',
+                ['sort'] = 2000,
                 ['init'] = true,
                 ['args'] = {
                     'ShopingHelper_base',
@@ -216,6 +225,7 @@ local data = {
             {
                 ['name'] = 'message',
                 ['path'] = 'dependencies.entitys.Message',
+                ['sort'] = 2000,
                 ['init'] = true,
                 ['args'] = {
                     'rus',
@@ -284,18 +294,21 @@ local data = {
             {
                 ['name'] = 'shop',
                 ['path'] = 'dependencies.entitys.Shop',
+                ['sort'] = 2000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
                 ['name'] = 'minMax',
                 ['path'] = 'dependencies.entitys.MinMax',
+                ['sort'] = 2000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
                 ['name'] = 'color',
                 ['path'] = 'dependencies.entitys.Color',
+                ['sort'] = 2000,
                 ['init'] = true,
                 ['args'] = {
                     {
@@ -311,69 +324,70 @@ local data = {
             {
                 ['name'] = 'chat',
                 ['path'] = 'dependencies.entitys.Chat',
+                ['sort'] = 2000,
                 ['init'] = true,
                 ['args'] = {},
             },
             {
                 ['name'] = 'lowPoint',
                 ['path'] = 'dependencies.entitys.LowPoint',
+                ['sort'] = 2000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
                 ['name'] = 'dialog',
                 ['path'] = 'dependencies.entitys.Dialog',
+                ['sort'] = 2000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
                 ['name'] = 'textdraw',
                 ['path'] = 'dependencies.entitys.Textdraw',
+                ['sort'] = 2000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
                 ['name'] = 'product',
                 ['path'] = 'dependencies.entitys.Product',
+                ['sort'] = 2000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
                 ['name'] = 'exception',
                 ['path'] = 'dependencies.entitys.Exception',
+                ['sort'] = 2000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
                 ['name'] = 'error',
                 ['path'] = 'dependencies.entitys.Error',
+                ['sort'] = 2000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
                 ['name'] = 'font',
                 ['path'] = 'dependencies.entitys.Font',
+                ['sort'] = 2000,
                 ['init'] = true,
                 ['args'] = {},
             },
             {
                 ['name'] = 'shopTitle',
                 ['path'] = 'dependencies.entitys.ShopTitle',
+                ['sort'] = 2000,
                 ['init'] = true,
                 ['args'] = {},
             },
             {
                 ['name'] = 'shopAdmin',
                 ['path'] = 'dependencies.entitys.ShopAdmin',
-                ['init'] = true,
-                ['args'] = {},
-            },
-            {
-                ['name'] = 'render',
-                ['path'] = 'dependencies.entitys.Render',
-                ['dependencies'] = {
-                    'threadManager',
-                },
+                ['sort'] = 2000,
                 ['init'] = true,
                 ['args'] = {},
             },
@@ -381,34 +395,23 @@ local data = {
             -- MANAGERS
         
             {
-                ['name'] = 'playerManager',
-                ['path'] = 'dependencies.managers.PlayerManager',
-                ['dependencies'] = {
-                    'threadManager',
-                    'eventManager',
-                    'dialogManager',
-                    'shopManager',
-                    'helper',
-                    'message',
-                },
-                ['init'] = true,
-                ['args'] = {},
-            },
-            {
                 ['name'] = 'circleManager',
                 ['path'] = 'dependencies.managers.CircleManager',
+                ['sort'] = 3000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
                 ['name'] = 'configManager',
                 ['path'] = 'dependencies.managers.ConfigManager',
+                ['sort'] = 3000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
                 ['name'] = 'commandManager',
                 ['path'] = 'dependencies.managers.CommandManager',
+                ['sort'] = 3000,
                 ['init'] = true,
                 ['args'] = {
                     'active',
@@ -417,12 +420,21 @@ local data = {
             {
                 ['name'] = 'eventManager',
                 ['path'] = 'dependencies.managers.EventManager',
+                ['sort'] = 3000,
+                ['init'] = true,
+                ['args'] = {},
+            },
+            {
+                ['name'] = 'playerManager',
+                ['path'] = 'dependencies.managers.PlayerManager',
+                ['sort'] = 3000,
                 ['init'] = true,
                 ['args'] = {},
             },
             {
                 ['name'] = 'dialogManager',
                 ['path'] = 'dependencies.managers.DialogManager',
+                ['sort'] = 3000,
                 ['init'] = true,
                 ['args'] = {
                     777,
@@ -431,12 +443,21 @@ local data = {
             {
                 ['name'] = 'threadManager',
                 ['path'] = 'dependencies.managers.ThreadManager',
+                ['sort'] = 3000,
+                ['init'] = true,
+                ['args'] = {},
+            },
+            {
+                ['name'] = 'render',
+                ['path'] = 'dependencies.entitys.Render',
+                ['sort'] = 3000,
                 ['init'] = true,
                 ['args'] = {},
             },
             {
                 ['name'] = 'productManager',
                 ['path'] = 'dependencies.managers.ProductManager',
+                ['sort'] = 3000,
                 ['init'] = true,
                 ['args'] = {
                     'productManager',
@@ -445,18 +466,21 @@ local data = {
             {
                 ['name'] = 'textdrawManager',
                 ['path'] = 'dependencies.managers.TextdrawManager',
+                ['sort'] = 3000,
                 ['init'] = true,
                 ['args'] = {},
             },
             {
                 ['name'] = 'boxManager',
                 ['path'] = 'dependencies.managers.BoxManager',
+                ['sort'] = 3000,
                 ['init'] = true,
                 ['args'] = {},
             },
             {
                 ['name'] = 'shopManager',
                 ['path'] = 'dependencies.managers.ShopManager',
+                ['sort'] = 3000,
                 ['init'] = true,
                 ['args'] = {
                     {
@@ -466,19 +490,13 @@ local data = {
                     }
                 },
             },
-        
+
             -- COMMANDS
-        
+
             {
                 ['name'] = 'swipe',
                 ['path'] = 'dependencies.commands.SwipeCommand',
-                ['dependencies'] = {
-                    'configManager',
-                    'threadManager',
-                    'eventManager',
-                    'playerManager',
-                    'commandManager',
-                },
+                ['sort'] = 4000,
                 ['init'] = true,
                 ['args'] = {
                     'swipe',
@@ -491,18 +509,7 @@ local data = {
             {
                 ['name'] = 'hiding',
                 ['path'] = 'dependencies.commands.HidingCommand',
-                ['dependencies'] = {
-                    'minMax',
-                    'configManager',
-                    'threadManager',
-                    'commandManager',
-                    'helper',
-                    'dialogManager',
-                    'swipe',
-                    'boxManager',
-                    'productManager',
-                    'color',
-                },
+                ['sort'] = 4000,
                 ['init'] = true,
                 ['args'] = {
                     'hiding',
@@ -521,14 +528,7 @@ local data = {
             {
                 ['name'] = 'scan',
                 ['path'] = 'dependencies.commands.ScanCommand',
-                ['dependencies'] = {
-                    'minMax',
-                    'configManager',
-                    'threadManager',
-                    'eventManager',
-                    'helper',
-                    'player',
-                },
+                ['sort'] = 4000,
                 ['init'] = true,
                 ['args'] = {
                     'scan',
@@ -548,17 +548,7 @@ local data = {
             {
                 ['name'] = 'radius',
                 ['path'] = 'dependencies.commands.RadiusCommand',
-                ['dependencies'] = {
-                    'minMax',
-                    'configManager',
-                    'lowPoint',
-                    'cache',
-                    'commandManager',
-                    'helper',
-                    'threadManager',
-                    'playerManager',
-                    'circleManager',
-                },
+                ['sort'] = 4000,
                 ['init'] = true,
                 ['args'] = {
                     'radius',
@@ -587,21 +577,7 @@ local data = {
             {
                 ['name'] = 'visit',
                 ['path'] = 'dependencies.commands.VisitCommand',
-                ['dependencies'] = {
-                    'minMax',
-                    'configManager',
-                    'cache',
-                    'commandManager',
-                    'helper',
-                    'threadManager',
-                    'playerManager',
-                    'eventManager',
-                    'shopManager',
-                    'message',
-                    'color',
-                    'render',
-                    'font',
-                },
+                ['sort'] = 4000,
                 ['init'] = true,
                 ['args'] = {
                     'visit',
@@ -667,21 +643,7 @@ local data = {
             {
                 ['name'] = 'select',
                 ['path'] = 'dependencies.commands.SelectCommand',
-                ['dependencies'] = {
-                    'minMax',
-                    'configManager',
-                    'commandManager',
-                    'helper',
-                    'threadManager',
-                    'eventManager',
-                    'scan',
-                    'playerManager',
-                    'dialogManager',
-                    'swipe',
-                    'productManager',
-                    'boxManager',
-                    'color',
-                },
+                ['sort'] = 4000,
                 ['init'] = true,
                 ['args'] = {
                     'select',
@@ -707,18 +669,7 @@ local data = {
             {
                 ['name'] = 'trade',
                 ['path'] = 'dependencies.commands.TradeCommand',
-                ['dependencies'] = {
-                    'configManager',
-                    'commandManager',
-                    'eventManager',
-                    'playerManager',
-                    'textdrawManager',
-                    'helper',
-                    'message',
-                    'chat',
-                    'dialogManager',
-                    'message',
-                },
+                ['sort'] = 4000,
                 ['init'] = true,
                 ['args'] = {
                     'trade',
@@ -730,6 +681,7 @@ local data = {
             {
                 ['name'] = 'pricer',
                 ['path'] = 'dependencies.commands.PricerCommand',
+                ['sort'] = 4000,
                 ['init'] = true,
                 ['args'] = {
                     'pricer',
@@ -754,6 +706,7 @@ local data = {
             {
                 ['name'] = 'ad',
                 ['path'] = 'dependencies.commands.AdCommand',
+                ['sort'] = 4000,
                 ['init'] = true,
                 ['args'] = {
                     'ad',
@@ -791,10 +744,10 @@ local data = {
         },
     }
 }
-local count = 1
-local this = {}
-function this:new(_name, _author, _version, _url, _command, _entities)
-    local class = {}
+
+local class = {}
+function class:new(_name, _author, _version, _url, _command, _entities)
+    local this = {}
     local private = {
         ['name'] = _name,
         ['author'] = _author or 'anonim',
@@ -804,85 +757,64 @@ function this:new(_name, _author, _version, _url, _command, _entities)
         ['entities'] = _entities,
         ['objects'] = {},
         ['classes'] = {},
-        ['commands'] = {},
     }
 
-    function class:getCommand()
+    -- COMMAND
+
+    function this:getCommand()
         return private.command
     end
 
-    function class:getCommands()
-        return private.commands
-    end
-
-    function class:addCommand(command)
-        table.insert(private.commands, command)
-        return class
-    end
+    -- ENTITIES
 
     function private:getEntities()
         return private.entities
     end
 
-    function private:getEntity(name)
-        for _, entity in ipairs(private:getEntities()) do
-            if name == entity.name then
-                return entity
-            end
-        end
-        return nil
-    end
+    -- OBJECTS
 
-    function class:getObject(name)
+    function this:getObject(name)
         return private.objects[name]
     end
 
-    function class:addObject(name, object)
+    function this:addObject(name, object)
         private.objects[name] = object
-        return class
+        return this
     end
 
-    function class:getClass(name)
-        count = count + 1
-        print(count)
-        if private.classes[name] == nil then
-            local entity = private:getEntity(name)
-            if entity ~= nil then
-                private:addClass(entity.name, private:getNewClass(entity.name, entity.args))
-            end
-        end
+    -- CLASSES
+
+    function this:getClass(name)
         return private.classes[name]
-    end
-
-    function private:getNewClass(name, args)
-        return class:getObject(name):new(class, table.unpack(args))
     end
 
     function private:addClass(name, _class)
         private.classes[name] = _class
-        return class
+        return this
     end
 
-    function class:getNewClass(name, args)
-        return this:getObject(name):new(class, table.unpack(args))
+    function this:getNewClass(name, ...)
+        return this:getObject(name):new(this, ...)
     end
+
+    -- INITS
 
     function private:init()
-        private:initObjects():initClasses()
-        return class
+        private:initObjects():initCommands()
+        return this
     end
 
     function private:initObjects()
         for _, entity in ipairs(private:getEntities()) do
-            class:addObject(entity.name, require(entity.path))
+            this:addObject(entity.name, require(entity.path))
         end
         return private
     end
 
-    function private:initClasses()
+    function private:initCommands()
         for _, entity in ipairs(private:getEntities()) do
             if entity.init then
-                private:addClass(entity.name, private:getNewClass(entity.name, entity.args))
+                private:addClass(entity.name, this:getNewClass(entity.name, table.unpack(entity.args)))
             end
         end
         return private
@@ -891,65 +823,10 @@ function this:new(_name, _author, _version, _url, _command, _entities)
     return private:init()
 end
 
--- function this:getDependencyByName(name)
---     for _, object in ipairs(this.objects) do
---         if name == object.name then
---             return object
---         end
---     end
---     return nil
--- end
-
--- local count = 0
--- function this:initDependency(object)
---     count = count + 1
---     if object.init then
---         if object.dependencies ~= nil then
---             for _, dependency in ipairs(object.dependencies) do
---                 this:initDependency(dependency)
---             end
---         end
---         if _G[this.name][object.name] == nil and _G[this.name].objects[object.name] ~= nil then
---             _G[this.name][object.name] = _G[this.name].objects[object.name]:new(table.unpack(object.args))
---         end
---     end
--- end
-
--- function this:initDependencies()
---     -- for _, object in pairs(this.objects) do
---     --     _sh.dependencies[object.name] = require(object.entity)
---     --     if object.init and _sh.dependencies[object.name] ~= nil then
---     --         _sh[object.name] = _sh.dependencies[object.name]:new(table.unpack(object.args))
---     --     end
---     -- end
-
---     for _, object in ipairs(this.objects) do
---         _G[this.name].objects[object.name] = require(object.entity)
---         if object.dependencies ~= nil then
---             for index, name in ipairs(object.dependencies) do
---                 object.dependencies[index] = this:getDependencyByName(name)
---             end
---         end
---     end
-
---     for _, object in pairs(this.objects) do
---         this:initDependency(object)
---     end
---     print(count)
--- end
-
--- function this:init()
---     _G[this.name] = this
---     this:initDependencies()
---     _G[this.name].chat:setColor(_G[this.name].color:get('orange'))
---     _G[this.name].chat:addPrefix('[' .. _G[this.name].script.name .. ']: ')
---     _G[this.name].chat:push('{' .. _G[this.name].color:get('white') .. '}' .. _G[this.name].script.name)
--- end
-
 function main()
     while not isSampAvailable() do wait(0) end
     for _, value in ipairs(data) do
-        local script = this:new(
+        local script = class:new(
             value.name,
             value.author,
             value.version,
