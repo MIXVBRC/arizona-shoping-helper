@@ -1,5 +1,5 @@
 local class = {}
-function class:new()
+function class:new(base)
     local this = {}
     local private = {
         ['boxes'] = {},
@@ -29,7 +29,7 @@ function class:new()
 
     function this:push(x, y, width, height, background, borderWidth, borderColor, sort)
         local box = {
-            ['code'] = _sh.helper:md5(x..y..width..height),
+            ['code'] = base:getClass('helper'):md5(x..y..width..height),
             ['x'] = x,
             ['y'] = y,
             ['width'] = width,
@@ -51,12 +51,12 @@ function class:new()
     end
 
     function private:initThreads()
-        _sh.threadManager:add(
+        base:getClass('threadManager'):add(
             nil,
             function ()
                 while true do wait(0)
                     for _, box in pairs(private:getBoxes()) do
-                        _sh.render:pushBox(
+                        base:getClass('render'):pushBox(
                             box.x,
                             box.y,
                             box.width,

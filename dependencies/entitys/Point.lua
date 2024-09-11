@@ -1,8 +1,8 @@
 local class = {}
-function class:new(_x, _y, _z, _angle)
+function class:new(base, _x, _y, _z, _angle)
     local this = {}
     local private = {
-        ['id'] = _sh.helper:md5((_x or 0)..(_y or 0)..(_z or 0)..(_angle or 0)),
+        ['id'] = base:getClass('helper'):md5((_x or 0)..(_y or 0)..(_z or 0)..(_angle or 0)),
         ['position'] = {
             ['x'] = _x or 0,
             ['y'] = _y or 0,

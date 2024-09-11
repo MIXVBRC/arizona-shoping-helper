@@ -1,15 +1,15 @@
 local class = {}
-function class:new(_centralModelIds)
+function class:new(base, _centralModelIds)
     local this = {}
     local private = {
         ['shops'] = {},
         ['mod'] = 'sell',
         ['mods'] = {
-            [_sh.message:get('system_textdraw_shop_mod_sale')] = 'sale',
-            [_sh.message:get('system_textdraw_shop_mod_buy')] = 'buy',
+            [base:getClass('message'):get('system_textdraw_shop_mod_sale')] = 'sale',
+            [base:getClass('message'):get('system_textdraw_shop_mod_buy')] = 'buy',
         },
         ['centralModelIds'] = _centralModelIds or {},
-        ['cache'] = _sh.dependencies.cache:new(),
+        ['cache'] = base:getObject('cache'):new(base),
     }
 
     -- SHOPS
@@ -61,7 +61,7 @@ function class:new(_centralModelIds)
             if shop:getAdmin() ~= nil then
                 x, y, z = shop:getAdmin():getX(), shop:getAdmin():getY(), shop:getAdmin():getZ()
             end
-            local distance = _sh.helper:distanceToPlayer3d(x, y, z)
+            local distance = base:getClass('helper'):distanceToPlayer3d(x, y, z)
             if minDistance == nil or distance < minDistance then
                 minDistance = distance
                 nearbyShop = shop
@@ -78,7 +78,7 @@ function class:new(_centralModelIds)
     end
 
     function private:initThreads()
-        _sh.threadManager:add(
+        base:getClass('threadManager'):add(
             nil,
             function ()
                 while true do wait(0)
@@ -87,23 +87,25 @@ function class:new(_centralModelIds)
                         local shops = {}
                         local titles = {}
                         local admins = {}
-                        for _, textId in ipairs(_sh.helper:getTextIds()) do
+                        for _, textId in ipairs(base:getClass('helper'):getTextIds()) do
                             local text, _, x, y, z, _, _, _, _ = sampGet3dTextInfoById(textId)
-                            if text == _sh.message:get('system_shop') then
+                            if text == base:getClass('message'):get('system_shop') then
                                 table.insert(shops, {
                                     ['x'] = x,
                                     ['y'] = y,
                                     ['z'] = z,
                                 })
                             elseif text:find('^%a+_%a+%s{......}.+{......}.+$') then
-                                table.insert(titles, _sh.dependencies.shopTitle:new(
+                                table.insert(titles, base:getObject('shopTitle'):new(
+                                    base,
                                     text,
                                     x,
                                     y,
                                     z
                                 ))
-                            elseif text:find('^' .. _sh.message:get('system_shop_product_management') .. '$') then
-                                table.insert(admins, _sh.dependencies.shopAdmin:new(
+                            elseif text:find('^' .. base:getClass('message'):get('system_shop_product_management') .. '$') then
+                                table.insert(admins, base:getObject('shopAdmin'):new(
+                                    base,
                                     text,
                                     x,
                                     y,
@@ -128,7 +130,8 @@ function class:new(_centralModelIds)
                                     end
                                 end
                             end
-                            private:addShop(_sh.dependencies.shop:new(
+                            private:addShop(base:getObject('shop'):new(
+                                base,
                                 shop.x,
                                 shop.y,
                                 shop.z,
@@ -144,14 +147,14 @@ function class:new(_centralModelIds)
     end
 
     function private:initEvents()
-        _sh.eventManager:add(
+        base:getClass('eventManager'):add(
             'onAfterChangeTextdraw',
             function (textdraw)
                 if textdraw:getText() ~= '' then
                     local cacheKey = 'text_'..textdraw:getText()
                     local text = private.cache:get(cacheKey)
                     if text == nil then
-                        text = _sh.helper:textDecode(textdraw:getText())
+                        text = base:getClass('helper'):textDecode(textdraw:getText())
                         private.cache:add(cacheKey, text)
                     end
                     local mod = private:getModByName(text)
@@ -159,7 +162,7 @@ function class:new(_centralModelIds)
                         private:setMod(mod)
                         local shop = this:getNearby()
                         if shop ~= nil then
-                            _sh.eventManager:trigger('onVisitShop', shop, mod, textdraw)
+                            base:getClass('eventManager'):trigger('onVisitShop', shop, mod, textdraw)
                         end
                     end
                 end

@@ -1,10 +1,10 @@
 local class = {}
-function class:new()
+function class:new(base)
     local this = {}
     local private = {
         ['shoping'] = false,
         ['admining'] = false,
-        ['cache'] = _sh.dependencies.cache:new(),
+        ['cache'] = base:getObject('cache'):new(base),
     }
 
     function this:getName()
@@ -60,28 +60,28 @@ function class:new()
     end
 
     function private:initEvents()
-        _sh.eventManager:add(
+        base:getClass('eventManager'):add(
             'onCreateTextdraw',
             function (textdraw)
                 if textdraw:getText() ~= '' then
                     local cacheKey = 'text_'..textdraw:getText()
                     local text = private.cache:get(cacheKey)
                     if text == nil then
-                        text = _sh.helper:textDecode(textdraw:getText())
+                        text = base:getClass('helper'):textDecode(textdraw:getText())
                         private.cache:add(cacheKey, text)
                     end
-                    if not this:isShoping() and text == _sh.message:get('system_textdraw_shop_shoping') then
+                    if not this:isShoping() and text == base:getClass('message'):get('system_textdraw_shop_shoping') then
                         private:setShoping(true)
-                        _sh.threadManager:add(
+                        base:getClass('threadManager'):add(
                             nil,
                             function () wait(0) while sampTextdrawIsExists(textdraw:getId()) do wait(0) end
                                 private:setShoping(false)
                             end
                         )
                     end
-                    if not this:isAdmining() and text == _sh.message:get('system_textdraw_shop_admining') then
+                    if not this:isAdmining() and text == base:getClass('message'):get('system_textdraw_shop_admining') then
                         private:setAdmining(true)
-                        _sh.threadManager:add(
+                        base:getClass('threadManager'):add(
                             nil,
                             function () wait(0) while sampTextdrawIsExists(textdraw:getId()) do wait(0) end
                                 private:setAdmining(false)
@@ -91,17 +91,17 @@ function class:new()
                 end
             end
         )
-        _sh.eventManager:add(
+        base:getClass('eventManager'):add(
             'onShowDialogShopAdmining',
             function (_, _, title)
-                _sh.threadManager:add(
+                base:getClass('threadManager'):add(
                     nil,
                     function ()
-                        while _sh.dialogManager:isOpened() do wait(1000)
-                            local shop = _sh.shopManager:getNearby()
+                        while base:getClass('dialogManager'):isOpened() do wait(1000)
+                            local shop = base:getClass('shopManager'):getNearby()
                             if shop ~= nil and shop:getPlayer() == this:getName() then
-                                local id = _sh.helper:getNumber(title:match(_sh.message:get('system_regex_match_dialog_title_shop_id')))
-                                _sh.eventManager:trigger('onEnterShopAdmining', shop, id)
+                                local id = base:getClass('helper'):getNumber(title:match(base:getClass('message'):get('system_regex_match_dialog_title_shop_id')))
+                                base:getClass('eventManager'):trigger('onEnterShopAdmining', shop, id)
                                 return
                             end
                         end

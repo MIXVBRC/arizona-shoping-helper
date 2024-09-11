@@ -1,5 +1,5 @@
 local class = {}
-function class:new(_name, _code, _price, _textdraw)
+function class:new(base, _name, _code, _price, _textdraw)
     local this = {}
     local private = {
         ['name'] = _name,
@@ -56,7 +56,7 @@ function class:new(_name, _code, _price, _textdraw)
     end
 
     function private:initThreads()
-        _sh.threadManager:add(
+        base:getClass('threadManager'):add(
             nil,
             function ()
                 while sampTextdrawIsExists(this:getTextdraw():getId()) do wait(0) end

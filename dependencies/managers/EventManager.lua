@@ -1,20 +1,21 @@
-local class = {}
-function class:new()
-    local this = {}
+local this = {}
+function this:new(base)
+    local class = {}
     local private = {
         ['triggers'] = {},
     }
 
-    function this:add(name, trigger, sort)
+    function class:add(name, trigger, sort)
         private.triggers[name] = private.triggers[name] or {}
         table.insert(private.triggers[name], {
             ['sort'] = sort or 100,
             ['entity'] = trigger,
         })
         table.sort(private.triggers[name], function (a, b) return a.sort < b.sort end)
+        return class
     end
 
-    function this:trigger(name, ...)
+    function class:trigger(name, ...)
         local result = nil
         local triggers = private.triggers[name]
         if triggers ~= nil then
@@ -30,24 +31,25 @@ function class:new()
     end
 
     function private:init()
-        function _sh.dependencies.events.onShowTextDraw(...)
-            return this:trigger('onShowTextDraw', ...)
+        local events = base:getObject('events')
+        function events.onShowTextDraw(...)
+            return class:trigger('onShowTextDraw', ...)
         end
-        function _sh.dependencies.events.onTextDrawSetString(...)
-            return this:trigger('onTextDrawSetString', ...)
+        function events.onTextDrawSetString(...)
+            return class:trigger('onTextDrawSetString', ...)
         end
-        function _sh.dependencies.events.onSendClickTextDraw(...)
-            return this:trigger('onSendClickTextDraw', ...)
+        function events.onSendClickTextDraw(...)
+            return class:trigger('onSendClickTextDraw', ...)
         end
-        function _sh.dependencies.events.onShowDialog(...)
-            return this:trigger('onShowDialog', ...)
+        function events.onShowDialog(...)
+            return class:trigger('onShowDialog', ...)
         end
-        function _sh.dependencies.events.onSendDialogResponse(...)
-            return this:trigger('onSendDialogResponse', ...)
+        function events.onSendDialogResponse(...)
+            return class:trigger('onSendDialogResponse', ...)
         end
     end
 
     private:init()
-    return this
+    return class
 end
-return class
+return this

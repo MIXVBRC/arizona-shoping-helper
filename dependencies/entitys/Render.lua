@@ -1,5 +1,5 @@
 local class = {}
-function class:new()
+function class:new(base)
     local this = {}
     local private = {
         ['renders'] = {},
@@ -68,7 +68,7 @@ function class:new()
     end
 
     function private:initThreads()
-        _sh.threadManager:add(
+        base:getClass('threadManager'):add(
             nil,
             function ()
                 while true do wait(0)

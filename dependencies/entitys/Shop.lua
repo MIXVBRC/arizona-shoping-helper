@@ -1,5 +1,5 @@
 local class = {}
-function class:new(_x, _y, _z, _title, _admin)
+function class:new(base, _x, _y, _z, _title, _admin)
     local this = {}
     local private = {
         ['id'] = nil,
@@ -55,7 +55,7 @@ function class:new(_x, _y, _z, _title, _admin)
         if this:getTitle() ~= nil then
             return this:getTitle():getMod()
         end
-        return _sh.message:get('system_shop_empty')
+        return base:getClass('message'):get('system_shop_empty')
     end
 
     function this:isEmpty()
@@ -85,14 +85,14 @@ function class:new(_x, _y, _z, _title, _admin)
     end
 
     function private:init()
-        private:setPosition(_sh.helper:normalizePosition(this:getX(), this:getY(), this:getZ()))
-        private:setId(_sh.helper:md5(this:getPlayer()..this:getX()..this:getY()..this:getZ()))
+        private:setPosition(base:getClass('helper'):normalizePosition(this:getX(), this:getY(), this:getZ()))
+        private:setId(base:getClass('helper'):md5(this:getPlayer()..this:getX()..this:getY()..this:getZ()))
         if this:getTitle() ~= nil then
             private:setEmpty(false)
         end
-        local cacheKey = 'shop_' .. _sh.helper:md5(this:getX()..this:getY()..this:getZ())
+        local cacheKey = 'shop_' .. base:getClass('helper'):md5(this:getX()..this:getY()..this:getZ())
         if _sh.cache:get(cacheKey) == nil then
-            for _, object in ipairs(_sh.helper:getObjectsByIds(_sh.shopManager:getCentralModelIds())) do
+            for _, object in ipairs(base:getClass('helper'):getObjectsByIds(base:getClass('shopManager'):getCentralModelIds())) do
                 local _, objectX, objectY, objectZ = getObjectCoordinates(object)
                 local distance = getDistanceBetweenCoords3d(
                     this:getX(), this:getY(), this:getZ(),

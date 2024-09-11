@@ -1,5 +1,5 @@
 local class = {}
-function class:new(_name, _default)
+function class:new(base, _name, _default)
     local this = {}
     local private = {
         ['name'] = _name,
@@ -9,7 +9,7 @@ function class:new(_name, _default)
             'buy',
             'sale',
         },
-        ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
+        ['configManager'] = base:getObject('configManager'):new(base, _name, _default),
     }
 
     -- NAME
@@ -73,27 +73,27 @@ function class:new(_name, _default)
     -- INITS
 
     function private:init()
-        if _sh[private.name] ~= nil then
-            return _sh[private.name]
+        if base:getClass(private:getName()) ~= nil then
+            return base:getClass(private:getName())
         end
         private:initCommands():initThreads():initEvents()
         return this
     end
 
     function private:initCommands()
-        _sh.commandManager
+        base:getClass('commandManager')
         :add({private:getName(), 'active'}, private.toggleActive)
         :add({private:getName(), 'mod'}, private.switchMod)
         return private
     end
 
     function private:initThreads()
-        _sh.threadManager:add(
+        base:getClass('threadManager'):add(
             nil,
             function ()
                 while true do wait(0)
                     if private:isActive() then
-                        if _sh.player:isShoping() then
+                        if base:getClass('playerManager'):isShoping() then
                             local button = private:getButton()
                             if button ~= nil and button.mod ~= private:getMod() and button.textdraw:getParent() ~= nil then
                                 sampSendClickTextdraw(button.textdraw:getParent():getId())
@@ -112,7 +112,7 @@ function class:new(_name, _default)
     end
 
     function private:initEvents()
-        _sh.eventManager:add(
+        base:getClass('eventManager'):add(
             'onVisitShop',
             function (_, mod, textdraw)
                 private:setButton({

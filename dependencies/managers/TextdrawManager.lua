@@ -1,5 +1,5 @@
 local class = {}
-function class:new()
+function class:new(base)
     local this = {}
     local private = {
         ['textdraws'] = {},
@@ -32,7 +32,7 @@ function class:new()
     function private:pushDeleteTextdrawsEvent(textdraws)
         if #textdraws > 0 then
             for _, textdraw in ipairs(textdraws) do
-                _sh.eventManager:trigger('onDeleteÑlickableTextdraw', textdraw)
+                base:getClass('eventManager'):trigger('onDeleteÑlickableTextdraw', textdraw)
             end
         end
         return this
@@ -46,10 +46,11 @@ function class:new()
     end
 
     function private:initEvents()
-        _sh.eventManager:add(
+        base:getClass('eventManager'):add(
             'onShowTextDraw',
             function (id, data)
-                local newTextdraw = _sh.dependencies.textdraw:new(
+                local newTextdraw = base:getObject('textdraw'):new(
+                    base,
                     id,
                     data.modelId,
                     data.text,
@@ -76,7 +77,7 @@ function class:new()
                             and textdraw:getY() + textdraw:getHeight() > newTextdraw:getY()
                             then
                                 textdraw:addChild(newTextdraw)
-                                _sh.eventManager:trigger('onTextdrawAddChild', textdraw, newTextdraw)
+                                base:getClass('eventManager'):trigger('onTextdrawAddChild', textdraw, newTextdraw)
                             end
                         end
                     end
@@ -86,10 +87,10 @@ function class:new()
                 end
                 private:pushDeleteTextdrawsEvent(deleteTextdraws)
                 private:setTextdraws(textdraws)
-                _sh.eventManager:trigger('onCreateTextdraw', newTextdraw)
+                base:getClass('eventManager'):trigger('onCreateTextdraw', newTextdraw)
             end
         )
-        _sh.eventManager:add(
+        base:getClass('eventManager'):add(
             'onTextDrawSetString',
             function (textdrawId, text)
                 for _, textdraw in ipairs(this:getTextdraws()) do
@@ -114,7 +115,7 @@ function class:new()
     end
 
     function private:initThreads()
-        _sh.threadManager:add(
+        base:getClass('threadManager'):add(
             nil,
             function ()
                 while true do wait(0)

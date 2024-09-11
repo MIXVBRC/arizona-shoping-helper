@@ -1,24 +1,24 @@
 local class = {}
-function class:new()
+function class:new(base)
     local this = {}
 
     function this:getCommandName(_name)
         if type(_name) == 'table' then
-            _name = _sh.helper:implode('-', _name)
+            _name = base:getClass('helper'):implode('-', _name)
         end
-        return _sh.helper:implode('-', {_sh.script.command, _name})
+        return base:getClass('helper'):implode('-', {base:getCommand(), _name})
     end
 
     function this:getCommandMessageName(_name)
         if type(_name) == 'table' then
-            _name = _sh.helper:implode('_', _name)
+            _name = base:getClass('helper'):implode('_', _name)
         end
-        return 'command_' .. _sh.helper:implode('_', {_sh.script.command, _name}) .. '_description'
+        return 'command_' .. base:getClass('helper'):implode('_', {base:getCommand(), _name}) .. '_description'
     end
 
     function this:add(_name, _function)
         local command = this:getCommandName(_name)
-        table.insert(_sh.commands, {
+        base:addCommand({
             ['command'] = command,
             ['message'] = this:getCommandMessageName(_name),
             ['_function'] = _function,

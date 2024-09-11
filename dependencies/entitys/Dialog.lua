@@ -1,5 +1,5 @@
 local class = {}
-function class:new(_id, _title, _text, _submitButtonText, _closeButtonText, _dialogType, _execute)
+function class:new(base, _id, _title, _text, _submitButtonText, _closeButtonText, _dialogType, _execute)
     local this = {}
     local private = {
         ['id'] = _id,
@@ -49,14 +49,14 @@ function class:new(_id, _title, _text, _submitButtonText, _closeButtonText, _dia
         if this:getDialogType() == 0 or this:getDialogType() == 1 or this:getDialogType() == 3 then
             text = this:getText()
         elseif this:getDialogType() == 2 then
-            text = _sh.helper:implode('\n', this:getText())
+            text = base:getClass('helper'):implode('\n', this:getText())
         else
             text = ''
             for _, value in ipairs(this:getText()) do
                 if text == '' then
-                    text = _sh.helper:implode('\t', value)
+                    text = base:getClass('helper'):implode('\t', value)
                 else
-                    text = text .. '\n' .. _sh.helper:implode('\t', value)
+                    text = text .. '\n' .. base:getClass('helper'):implode('\t', value)
                 end
             end
         end
@@ -74,7 +74,7 @@ function class:new(_id, _title, _text, _submitButtonText, _closeButtonText, _dia
     end
 
     function private:initThreads()
-        _sh.threadManager:add(
+        base:getClass('threadManager'):add(
             nil,
             function ()
                 while true do wait(0)

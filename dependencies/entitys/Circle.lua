@@ -1,8 +1,8 @@
 local class = {}
-function class:new(_x, _y, _z, _radius, _polygons)
+function class:new(base, _x, _y, _z, _radius, _polygons)
     local this = {}
     local private = {
-        ['id'] = _sh.helper:md5((_x or 0)..(_y or 0)..(_z or 0)..(_radius or 5)..(_polygons or 32)),
+        ['id'] = base:getClass('helper'):md5((_x or 0)..(_y or 0)..(_z or 0)..(_radius or 5)..(_polygons or 32)),
         ['position'] = {
             ['x'] = _x or 0,
             ['y'] = _y or 0,
@@ -58,11 +58,12 @@ function class:new(_x, _y, _z, _radius, _polygons)
     end
 
     function this:addPoint(x, y, z)
-        table.insert(private.points, _sh.dependencies.point:new(
+        table.insert(private.points, base:getObject('point'):new(
+            base,
             x,
             y,
             z,
-            _sh.helper:getAngle(x - this:getX(), y - this:getY())
+            base:getClass('helper'):getAngle(x - this:getX(), y - this:getY())
         ))
         private:sort()
     end

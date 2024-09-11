@@ -1,5 +1,5 @@
 local class = {}
-function class:new(_name, _default)
+function class:new(base, _name, _default)
     local this = {}
     local private = {
         ['name'] = (_name or 'config') .. '.ini',
@@ -58,7 +58,7 @@ function class:new(_name, _default)
             for name, value in pairs(values) do
                 if type(value) == 'table' then
                     private.data.json = private.data.json or {}
-                    private.data.json[private:getArrayDataName(title, name)] = _sh.helper:jsonEncode(value)
+                    private.data.json[private:getArrayDataName(title, name)] = base:getClass('helper'):jsonEncode(value)
                     private.data[title][name] = private:getArrayName()
                 end
             end
@@ -72,7 +72,7 @@ function class:new(_name, _default)
                 for name, value in pairs(values) do
                     private.data[title][name] = value
                     if value == private:getArrayName() then
-                        private.data[title][name] = _sh.helper:jsonDecode(private.data.json[private:getArrayDataName(title, name)] or '[]')
+                        private.data[title][name] = base:getClass('helper'):jsonDecode(private.data.json[private:getArrayDataName(title, name)] or '[]')
                     end
                 end
             end
@@ -81,14 +81,14 @@ function class:new(_name, _default)
 
     function private:load()
         private:collect()
-        private.data = _sh.helper:iniLoad(private.data, private:getName())
+        private.data = base:getClass('helper'):iniLoad(private.data, private:getName())
         private:disassemble()
         return this
     end
 
     function private:save()
         private:collect()
-        _sh.helper:iniSave(private.data, private:getName())
+        base:getClass('helper'):iniSave(private.data, private:getName())
         private:disassemble()
         return this
     end

@@ -1,10 +1,10 @@
 local class = {}
-function class:new(_name, _default, _minmax)
+function class:new(base, _name, _default, _minmax)
     local this = {}
     local private = {
         ['name'] = _name,
-        ['minmax'] = _sh.dependencies.minMax:new(_minmax),
-        ['configManager'] = _sh.dependencies.configManager:new(_name, _default),
+        ['minmax'] = base:getObject('minMax'):new(base, _minmax),
+        ['configManager'] = base:getObject('configManager'):new(base, _name, _default),
     }
 
     -- NAME
@@ -35,51 +35,45 @@ function class:new(_name, _default, _minmax)
         return this
     end
 
-    -- WIRK
-
-    function private:work()
-        if _sh.player:isShoping() and not _sh.dialogManager:isOpened() and not _sh.swipe:isSwipe() then
-            for _, product in ipairs(_sh.productManager:getProducts()) do
-                _sh.boxManager:push(
-                    product:getTextdraw():getX(),
-                    product:getTextdraw():getY(),
-                    product:getTextdraw():getWidth(),
-                    product:getTextdraw():getHeight(),
-                    _sh.color:getAlpha(private:getAlpha()) .. '1f1f1f',
-                    0,
-                    '0x00000000',
-                    10
-                )
-            end
-        end
-    end
-
     -- INITS
 
     function private:init()
-        if _sh[private.name] ~= nil then
-            return _sh[private.name]
+        if base:getClass(private:getName()) ~= nil then
+            return base:getClass(private:getName())
         end
         private:initCommands():initThreads()
         return this
     end
 
     function private:initCommands()
-        _sh.commandManager
+        base:getClass('commandManager')
         :add({private:getName(), 'active'}, private.toggleActive)
         :add({private:getName(), 'alpha'}, function (alpha)
-            private:setAlpha(_sh.helper:getNumber(alpha))
+            private:setAlpha(base:getClass('helper'):getNumber(alpha))
         end)
         return private
     end
 
     function private:initThreads()
-        _sh.threadManager:add(
+        base:getClass('threadManager'):add(
             nil,
             function ()
                 while true do wait(0)
                     if private:isActive() then
-                        private:work()
+                        if base:getClass('playerManager'):isShoping() and not base:getClass('dialogManager'):isOpened() and not base:getClass('swipe'):isSwipe() then
+                            for _, product in ipairs(base:getClass('productManager'):getProducts()) do
+                                base:getClass('boxManager'):push(
+                                    product:getTextdraw():getX(),
+                                    product:getTextdraw():getY(),
+                                    product:getTextdraw():getWidth(),
+                                    product:getTextdraw():getHeight(),
+                                    base:getClass('color'):getAlpha(private:getAlpha()) .. '1f1f1f',
+                                    0,
+                                    '0x00000000',
+                                    10
+                                )
+                            end
+                        end
                     end
                 end
             end

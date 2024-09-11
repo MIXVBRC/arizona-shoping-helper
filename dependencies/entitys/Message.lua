@@ -1,9 +1,9 @@
 local class = {}
-function class:new(_lang, _name, _default)
+function class:new(base, _lang, _name, _default)
     local this = {}
     local private = {
         ['lang'] = _lang,
-        ['config'] = _sh.dependencies.config:new(_name, _default),
+        ['config'] = base:getObject('config'):new(base, _name, _default),
     }
 
     function private:getLang()
@@ -26,7 +26,7 @@ function class:new(_lang, _name, _default)
 
     -- TODO: replase Color:getAll() to Color:get(color_name)
     function private:replaceColor(text)
-        for name, color in pairs(_sh.color:getAll()) do
+        for name, color in pairs(base:getClass('color'):getAll()) do
             text = text:gsub('{'..name..'}', '{'..color..'}')
         end
         return text

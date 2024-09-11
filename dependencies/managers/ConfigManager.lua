@@ -1,9 +1,9 @@
 local class = {}
-function class:new(_name, _default, _config)
+function class:new(base, _name, _default, _config)
     local this = {}
     local private = {
         ['name'] = _name,
-        ['config'] = _config or _sh.config,
+        ['config'] = _config or base:getClass('config'),
     }
 
     function private:getName()

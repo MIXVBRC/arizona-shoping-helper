@@ -1,12 +1,12 @@
 local class = {}
-function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _height)
+function class:new(base, _id, _model, _text, _color, _selectable, _x, _y, _width, _height)
     local this = {}
     local private = {
         ['id'] = _id,
         ['model'] = _model,
         ['text'] = _text,
         ['color'] = _color,
-        ['code'] = _sh.helper:md5(_model .. _text .. _color),
+        ['code'] = base:getClass('helper'):md5(_model .. _text .. _color),
         ['selectable'] = _selectable,
         ['position'] = {
             ['x'] = _x,
@@ -142,11 +142,11 @@ function class:new(_id, _model, _text, _color, _selectable, _x, _y, _width, _hei
 
     function this:setData(data)
         if data ~= nil then
-            _sh.eventManager:trigger('onBeforeChangeTextdraw', this, data)
+            base:getClass('eventManager'):trigger('onBeforeChangeTextdraw', this, data)
             for name, value in pairs(data) do
                 private[name] = value
             end
-            _sh.eventManager:trigger('onAfterChangeTextdraw', this, data)
+            base:getClass('eventManager'):trigger('onAfterChangeTextdraw', this, data)
         end
         return this
     end

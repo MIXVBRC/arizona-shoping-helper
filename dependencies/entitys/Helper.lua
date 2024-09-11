@@ -1,5 +1,5 @@
 local class = {}
-function class:new(_symbols)
+function class:new(base, _symbols)
     local this = {}
     local private = {
         ['symbols'] = _symbols or {},
@@ -20,23 +20,23 @@ function class:new(_symbols)
     end
 
     function this:md5(string)
-        return _sh.dependencies.md5.sumhexa(string)
+        return base:getObject('md5').sumhexa(string)
     end
 
     function this:jsonDecode(json)
-        return _sh.dependencies.json.decode(json)
+        return base:getObject('json').decode(json)
     end
 
     function this:jsonEncode(array)
-        return _sh.dependencies.json.encode(array)
+        return base:getObject('json').encode(array)
     end
 
     function this:iniLoad(default, name)
-        return _sh.dependencies.ini.load(default, name)
+        return base:getObject('ini').load(default, name)
     end
 
     function this:iniSave(data, name)
-        _sh.dependencies.ini.save(data, name)
+        base:getObject('ini').save(data, name)
         return this
     end
 
@@ -47,7 +47,7 @@ function class:new(_symbols)
                 table.insert(result, private.symbols.decode[symbol] or symbol)
             end
         )
-        return _sh.helper:implode('', result)
+        return base:getClass('helper'):implode('', result)
     end
 
     function this:textEncode(text)
@@ -57,7 +57,7 @@ function class:new(_symbols)
                 table.insert(result, private.symbols.encode[symbol] or symbol)
             end
         )
-        return _sh.helper:implode('', result)
+        return base:getClass('helper'):implode('', result)
     end
 
     function this:getObjectsByIds(ids)
@@ -136,11 +136,11 @@ function class:new(_symbols)
     end
 
     function this:distanceToPlayer2d(_x, _y)
-        return getDistanceBetweenCoords2d(_sh.player:getX(), _sh.player:getY(), _x, _y)
+        return getDistanceBetweenCoords2d(base:getClass('playerManager'):getX(), base:getClass('playerManager'):getY(), _x, _y)
     end
 
     function this:distanceToPlayer3d(_x, _y, _z)
-        return getDistanceBetweenCoords3d(_sh.player:getX(), _sh.player:getY(), _sh.player:getZ(), _x, _y, _z)
+        return getDistanceBetweenCoords3d(base:getClass('playerManager'):getX(), base:getClass('playerManager'):getY(), base:getClass('playerManager'):getZ(), _x, _y, _z)
     end
 
     function this:explode(separator, text)

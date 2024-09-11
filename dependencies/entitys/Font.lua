@@ -1,12 +1,12 @@
 local class = {}
-function class:new()
+function class:new(base)
     local this = {}
     local private = {
-        ['cache'] = _sh.dependencies.cache:new(),
+        ['cache'] = base:getObject('cache'):new(base),
     }
 
     function this:get(name, height, flags)
-        local cacheKey = _sh.helper:md5(name .. '-' .. height .. '-' .. flags)
+        local cacheKey = base:getClass('helper'):md5(name .. '-' .. height .. '-' .. flags)
         local font = private.cache:get(cacheKey)
         if font == nil then
             font = renderCreateFont(name, height, flags)

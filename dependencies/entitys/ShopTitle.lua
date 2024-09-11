@@ -1,10 +1,10 @@
 local class = {}
-function class:new(_text, _x, _y, _z)
+function class:new(base, _text, _x, _y, _z)
     local this = {}
     local private = {
         ['text'] = _text or '',
         ['player'] = 'none',
-        ['mod'] = _sh.message:get('system_shop_empty'),
+        ['mod'] = base:getClass('message'):get('system_shop_empty'),
         ['position'] = {
             ['x'] = _x or 0,
             ['y'] = _y or 0,
