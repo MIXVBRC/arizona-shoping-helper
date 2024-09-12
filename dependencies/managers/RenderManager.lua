@@ -41,26 +41,6 @@ function class:new(_base)
     function this:pushText(...)
         private:push('text', ...)
     end
-
-    -- WORK
-
-    function private:work()
-        if #private:getRenders() > 0 then
-            for _, render in ipairs(private:getRenders()) do
-                if render.name == 'point' then
-                    renderDrawPolygon(table.unpack(render.params))
-                elseif render.name == 'line' then
-                    renderDrawLine(table.unpack(render.params))
-                elseif render.name == 'box' then
-                    renderDrawBoxWithBorder(table.unpack(render.params))
-                elseif render.name == 'text' then
-                    renderFontDrawText(table.unpack(render.params))
-                end
-            end
-            private:setRenders({})
-        end
-    end
-
     -- INITS
 
     function private:init()
@@ -73,7 +53,20 @@ function class:new(_base)
             nil,
             function ()
                 while true do wait(0)
-                    private:work()
+                    if #private:getRenders() > 0 then
+                        for _, render in ipairs(private:getRenders()) do
+                            if render.name == 'point' then
+                                renderDrawPolygon(table.unpack(render.params))
+                            elseif render.name == 'line' then
+                                renderDrawLine(table.unpack(render.params))
+                            elseif render.name == 'box' then
+                                renderDrawBoxWithBorder(table.unpack(render.params))
+                            elseif render.name == 'text' then
+                                renderFontDrawText(table.unpack(render.params))
+                            end
+                        end
+                        private:setRenders({})
+                    end
                 end
             end
         )

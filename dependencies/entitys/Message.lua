@@ -3,7 +3,7 @@ function class:new(_base, _lang, _name, _default)
     local this = {}
     local private = {
         ['lang'] = _lang,
-        ['config'] = _base:getInit('config', _name, _default),
+        ['config'] = _base:getNew('config', _name, _default),
     }
 
     function private:getLang()

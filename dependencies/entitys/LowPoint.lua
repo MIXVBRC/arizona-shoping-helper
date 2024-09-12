@@ -27,8 +27,8 @@ function class:new(_base)
     function this:render()
         local _, x, y, z, _, _ = convert3DCoordsToScreenEx(_base:get('playerManager'):getX(), _base:get('playerManager'):getY(), _base:get('playerManager'):getZ() - 1)
         if z > 0 then
-            _base:get('render'):pushLine(x, y, x, y - 50, 3, private:getAlpha() .. private:getColor())
-            _base:get('render'):pushPoint(x, y - 10, 20, 20, 3, 180, private:getAlpha() .. private:getColor())
+            _base:get('renderManager'):pushLine(x, y, x, y - 50, 3, private:getAlpha() .. private:getColor())
+            _base:get('renderManager'):pushPoint(x, y - 10, 20, 20, 3, 180, private:getAlpha() .. private:getColor())
         end
     end
 

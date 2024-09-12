@@ -153,6 +153,10 @@ function class:new(_base, _symbols)
     end
 
     function this:implode(separator, array, from, to)
+        if array == nil then
+            array = separator
+            separator = ''
+        end
         from = from or 1
         to = to or #array
         for index, value in ipairs(array) do
@@ -222,6 +226,34 @@ function class:new(_base, _symbols)
 
     function this:removeColors(text)
         return tostring(text:gsub('{%w%w%w%w%w%w}', ''))
+    end
+
+    function this:extractNameFromDialog(text)
+        return this
+        :trim((this
+        :explode('\n', this
+        :removeColors(text))[1])
+        :gsub(_base:get('message'):get('system_regex_gsub_dialog_text_item_match_item'),'')
+        :gsub(_base:get('message'):get('system_regex_gsub_dialog_text_item_match_bottle'),'')
+        :gsub(_base:get('message'):get('system_regex_gsub_dialog_text_item_match_accessory'),''))
+    end
+
+    function this:extractCountFromDialog(text)
+        local explode = this:explode('\n', this:removeColors(text))
+        for index = #explode, 1, -1 do
+            if explode[index]:find(_base:get('message'):get('system_regex_find_dialog_text_buy_product_count')) then
+                return this:getNumber(explode[index]:match(_base:get('message'):get('system_regex_match_dialog_text_buy_product_count')))
+            end
+        end
+    end
+
+    function this:extractEnoughCountFromDialog(text)
+        local explode = this:explode('\n', this:removeColors(text))
+        for index = #explode, 1, -1 do
+            if explode[index]:find(_base:get('message'):get('system_regex_find_dialog_text_buy_product_enough_count')) then
+                return this:getNumber(explode[index]:match(_base:get('message'):get('system_regex_match_dialog_text_buy_product_enough_count')))
+            end
+        end
     end
 
     return this

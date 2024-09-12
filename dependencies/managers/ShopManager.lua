@@ -9,7 +9,7 @@ function class:new(_base, _centralModelIds)
             [_base:get('message'):get('system_textdraw_shop_mod_buy')] = 'buy',
         },
         ['centralModelIds'] = _centralModelIds or {},
-        ['cache'] = _base:getInit('cache'),
+        ['cache'] = _base:getNew('cache'),
     }
 
     -- SHOPS
@@ -99,14 +99,14 @@ function class:new(_base, _centralModelIds)
                                     ['z'] = z,
                                 })
                             elseif text:find('^%a+_%a+%s{......}.+{......}.+$') then
-                                table.insert(titles, _base:getInit('shopTitle',
+                                table.insert(titles, _base:getNew('shopTitle',
                                     text,
                                     x,
                                     y,
                                     z
                                 ))
                             elseif text:find('^' .. _base:get('message'):get('system_shop_product_management') .. '$') then
-                                table.insert(admins, _base:getInit('shopAdmin',
+                                table.insert(admins, _base:getNew('shopAdmin',
                                     text,
                                     x,
                                     y,
@@ -131,7 +131,7 @@ function class:new(_base, _centralModelIds)
                                     end
                                 end
                             end
-                            private:addShop(_base:getInit('shop',
+                            private:addShop(_base:getNew('shop',
                                 shop.x,
                                 shop.y,
                                 shop.z,

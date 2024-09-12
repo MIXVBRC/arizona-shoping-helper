@@ -50,7 +50,7 @@ function class:new(_base)
         :add(
             'onShowTextDraw',
             function (id, data)
-                local newTextdraw = _base:getInit('textdraw',
+                local newTextdraw = _base:getNew('textdraw',
                     id,
                     data.modelId,
                     data.text,

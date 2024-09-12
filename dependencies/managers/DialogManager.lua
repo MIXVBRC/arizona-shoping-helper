@@ -31,6 +31,22 @@ function class:new(_base, _customDialogId)
                 },
             },
             {
+                ['name'] = 'onShowDialogSaleProduct',
+                ['style'] = 0,
+                ['regexp'] = {
+                    ['title'] = _base:get('message'):get('system_regex_find_dialog_title_sale_product'),
+                    ['text'] = '',
+                },
+            },
+            {
+                ['name'] = 'onShowDialogSaleProductCount',
+                ['style'] = 1,
+                ['regexp'] = {
+                    ['title'] = _base:get('message'):get('system_regex_find_dialog_title_sale_product'),
+                    ['text'] = '',
+                },
+            },
+            {
                 ['name'] = 'onShowDialogBuyProductList',
                 ['style'] = 2,
                 ['regexp'] = {
@@ -148,9 +164,10 @@ function class:new(_base, _customDialogId)
     end
 
     function this:show(title, text, submitButtonText, closeButtonText, dialogType, execute)
+        execute = execute or function () end
         private:setOpened(true)
         private:setOpenedId(private:getCustomDialogId())
-        _base:getInit('dialog',
+        _base:getNew('dialog',
             private:getCustomDialogId(),
             title,
             text,

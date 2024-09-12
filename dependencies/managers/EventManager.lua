@@ -2,8 +2,13 @@ local this = {}
 function this:new(_base)
     local class = {}
     local private = {
+        ['base'] = 'onEvent',
         ['triggers'] = {},
     }
+
+    function private:getBaseEvent()
+        return private.base
+    end
 
     function class:add(name, trigger, sort)
         private.triggers[name] = private.triggers[name] or {}
@@ -18,6 +23,12 @@ function this:new(_base)
     function class:trigger(name, ...)
         local result = nil
         local triggers = private.triggers[name]
+        if name ~= private:getBaseEvent() then
+            result = class:trigger(private:getBaseEvent(), name, ...)
+            if result ~= nil then
+                return result
+            end
+        end
         if triggers ~= nil then
             for _, trigger in ipairs(triggers) do
                 if type(trigger.entity) == 'function' then

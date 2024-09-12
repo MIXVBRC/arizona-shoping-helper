@@ -6,8 +6,8 @@ function this:new(_base, _name, _default, _minmax)
         ['pushing'] = false,
         ['id'] = nil,
         ['shop'] = nil,
-        ['minmax'] = _base:getInit('minMax', _minmax),
-        ['config'] = _base:getInit('configManager', _name, _default),
+        ['minmax'] = _base:getNew('minMax', _minmax),
+        ['config'] = _base:getNew('configManager', _name, _default),
     }
 
     -- TODO: вместо 1 сообщения сделать возможность отправки нескольких сообщений в виде очереди (разнообразие)

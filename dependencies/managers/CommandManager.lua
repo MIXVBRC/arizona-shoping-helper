@@ -5,7 +5,7 @@ function class:new(_base)
         ['commands'] = {}
     }
 
-    function private:getCommands()
+    function this:getCommands()
         return private.commands
     end
 

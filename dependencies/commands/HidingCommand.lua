@@ -3,8 +3,8 @@ function this:new(_base, _name, _default, _minmax)
     local class = {}
     local private = {
         ['name'] = _name,
-        ['minmax'] = _base:getInit('minMax', _minmax),
-        ['config'] = _base:getInit('configManager', _name, _default),
+        ['minmax'] = _base:getNew('minMax', _minmax),
+        ['config'] = _base:getNew('configManager', _name, _default),
     }
 
     -- NAME
@@ -61,7 +61,7 @@ function this:new(_base, _name, _default, _minmax)
             function ()
                 while true do wait(0)
                     if private:isActive() then
-                        if _base:get('playerManager'):isShoping() and not _base:get('dialogManager'):isOpened() and not _base:get('swipe'):isSwipe() then
+                        if _base:get('playerManager'):isShoping() and not _base:get('dialogManager'):isOpened() then
                             for _, product in ipairs(_base:get('productManager'):getProducts()) do
                                 _base:get('boxManager'):push(
                                     product:getTextdraw():getX(),

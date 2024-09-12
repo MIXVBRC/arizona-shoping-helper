@@ -4,10 +4,10 @@ function class:new(_base, _name, _default, _minmax)
     local private = {
         ['name'] = _name,
         ['radius'] = 5,
-        ['minmax'] = _base:getInit('minMax', _minmax),
-        ['config'] = _base:getInit('configManager', _name, _default),
-        ['lowPoint'] = _base:getInit('lowPoint'),
-        ['cache'] = _base:getInit('cache'),
+        ['minmax'] = _base:getNew('minMax', _minmax),
+        ['config'] = _base:getNew('configManager', _name, _default),
+        ['lowPoint'] = _base:getNew('lowPoint'),
+        ['cache'] = _base:getNew('cache'),
     }
 
     -- NAME
@@ -113,7 +113,7 @@ function class:new(_base, _name, _default, _minmax)
         local newPoint = point
         local position = _base:get('helper'):omitPosition(point:getX(), point:getY(), point:getZ(), 5)
         if math.abs(point:getZ() - position.z) < 2 then
-            newPoint = _base:getInit( 'point',
+            newPoint = _base:getNew( 'point',
                 point:getX(),
                 point:getY(),
                 position.z
@@ -165,7 +165,7 @@ function class:new(_base, _name, _default, _minmax)
                     local _, aX, aY, aZ, _, _ = convert3DCoordsToScreenEx(pointA:getX(), pointA:getY(), pointA:getZ())
                     local _, bX, bY, bZ, _, _ = convert3DCoordsToScreenEx(pointB:getX(), pointB:getY(), pointB:getZ())
                     if aZ > 0 and bZ > 0 then
-                        _base:get('render'):pushLine(aX, aY, bX, bY, 1, alpha .. private:getColor('circle'))
+                        _base:get('renderManager'):pushLine(aX, aY, bX, bY, 1, alpha .. private:getColor('circle'))
                     end
                 end
             end
@@ -186,7 +186,7 @@ function class:new(_base, _name, _default, _minmax)
             local points = private.cache:get('points_'..cacheName)
             if points == nil then
                 points = {}
-                local circleManager = _base:getInit('circleManager')
+                local circleManager = _base:getNew('circleManager')
                 for _, circle in ipairs(private:getCircles(shops)) do
                     circleManager:create(
                         circle.position.x,

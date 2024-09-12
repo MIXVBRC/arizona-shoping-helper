@@ -4,10 +4,10 @@ function class:new(_base, _name, _default, _minmax)
     local private = {
         ['name'] = _name,
         ['scanning'] = false,
-        ['product'] = nil,
-        ['border'] = 1,
-        ['minmax'] = _base:getInit('minMax', _minmax),
-        ['config'] = _base:getInit('configManager', _name, _default),
+        ['border'] = 10,
+        ['products'] = {},
+        ['minmax'] = _base:getNew('minMax', _minmax),
+        ['config'] = _base:getNew('configManager', _name, _default),
     }
 
     -- NAME
@@ -74,11 +74,11 @@ function class:new(_base, _name, _default, _minmax)
     -- SCANNING PRODUCT
 
     function private:getScanningProduct()
-        return private.product
+        return private.products
     end
 
     function private:setScanningProduct(product)
-        private.product = product
+        private.products = product
         return this
     end
 
@@ -131,65 +131,6 @@ function class:new(_base, _name, _default, _minmax)
         return this
     end
 
-    -- EXTRACTS
-
-    function this:extractNameFromDialog(text)
-        return _base:get('helper')
-        :trim((_base:get('helper')
-        :explode('\n', _base:get('helper')
-        :removeColors(text))[1])
-        :gsub(_base:get('message'):get('system_regex_gsub_dialog_text_item_match_item'),'')
-        :gsub(_base:get('message'):get('system_regex_gsub_dialog_text_item_match_bottle'),'')
-        :gsub(_base:get('message'):get('system_regex_gsub_dialog_text_item_match_accessory'),''))
-    end
-
-    function this:extractCountFromDialog(text)
-        local explode = _base:get('helper'):explode('\n', _base:get('helper'):removeColors(text))
-        for index = #explode, 1, -1 do
-            if explode[index]:find(_base:get('message'):get('system_regex_find_dialog_text_buy_product_count')) then
-                return _base:get('helper'):getNumber(explode[index]:match(_base:get('message'):get('system_regex_match_dialog_text_buy_product_count')))
-            end
-        end
-    end
-
-    function this:extractEnoughCountFromDialog(text)
-        local explode = _base:get('helper'):explode('\n', _base:get('helper'):removeColors(text))
-        for index = #explode, 1, -1 do
-            if explode[index]:find(_base:get('message'):get('system_regex_find_dialog_text_buy_product_enough_count')) then
-                return _base:get('helper'):getNumber(explode[index]:match(_base:get('message'):get('system_regex_match_dialog_text_buy_product_enough_count')))
-            end
-        end
-    end
-
-    function this:scan(product)
-        if not this:isScanning() then
-            private:setScanningProduct(product)
-        end
-    end
-
-    -- WORK
-
-    function private:work(text)
-        if this:isScanning() then
-            local product = private:getScanningProduct()
-            if product ~= nil then
-                product:delete()
-                product = _base:get('productManager'):createProduct(
-                    this:extractNameFromDialog(text),
-                    product:getCode(),
-                    product:getPrice(),
-                    this:extractCountFromDialog(text),
-                    product:getTextdraw()
-                )
-                private:setScanningProduct(nil)
-                _base:get('dialogManager'):close()
-                _base:get('eventManager'):trigger('onScanProduct', product)
-                return false
-            end
-        end
-        private:setScanningProduct(nil)
-    end
-
     -- INITS
 
     function private:init()
@@ -218,6 +159,20 @@ function class:new(_base, _name, _default, _minmax)
         :add(
             nil,
             function ()
+                while true do wait(0)
+                    if this:isActive() and _base:get('playerManager'):isShoping() then
+                        for _, product in ipairs(_base:get('productManager'):getProducts()) do
+                            if not product:isScanned() and private:haveCode(product:getCode()) then
+                                product:scan(private:getTime())
+                            end
+                        end
+                    end
+                end
+            end
+        )
+        :add(
+            nil,
+            function ()
                 while true do wait(50)
                     private.border = private.border - 1
                     if private.border <= 0 then
@@ -226,34 +181,24 @@ function class:new(_base, _name, _default, _minmax)
                 end
             end
         )
-        _base:get('threadManager')
         :add(
             nil,
             function ()
                 while true do wait(0)
-                    if not _base:get('dialogManager'):isOpened() then
+                    if not _base:get('dialogManager'):isOpened() and _base:get('playerManager'):isShoping() then
                         for _, product in ipairs(_base:get('productManager'):getProducts()) do
+                            local haveCode = private:haveCode(product:getCode())
                             if product:isScanned() then
-                                _base:get('render'):pushText(
-                                    _base:get('font'):get('Arial', 12, 0),
+                                _base:get('textManager'):push(
+                                    _base:get('font'):get('Arial', 8, 0),
                                     'S',
                                     product:getTextdraw():getX() + product:getTextdraw():getWidth() - 15,
-                                    product:getTextdraw():getY() + 3,
-                                    _base:get('color'):getAlpha(100) .. _base:get('color'):get('blue')
+                                    product:getTextdraw():getY() + 5,
+                                    _base:get('color'):getAlpha(100) .. _base:get('color'):get('blue'),
+                                    5
                                 )
                             end
-                        end
-                    end
-                end
-            end
-        )
-        :add(
-            nil,
-            function ()
-                while true do wait(0)
-                    if this:isActive() and _base:get('playerManager'):isShoping() and not _base:get('swipe'):isSwipe() then
-                        for _, product in ipairs(_base:get('productManager'):getProducts()) do
-                            if not product:isScanned() and private:haveCode(product:getCode()) then
+                            if haveCode and not product:isScanned() then
                                 _base:get('boxManager'):push(
                                     product:getTextdraw():getX(),
                                     product:getTextdraw():getY(),
@@ -261,29 +206,20 @@ function class:new(_base, _name, _default, _minmax)
                                     product:getTextdraw():getHeight(),
                                     '0x00000000',
                                     private.border,
-                                    _base:get('color'):getAlpha(50)..'ffffff',
+                                    _base:get('color'):getAlpha(50) .. _base:get('color'):get('white'),
                                     1
                                 )
-                            end
-                        end
-                    end
-                end
-            end
-        )
-        :add(
-            nil,
-            function ()
-                while true do wait(0)
-                    if this:isActive()
-                    and not this:isAdd()
-                    and _base:get('playerManager'):isShoping()
-                    and not _base:get('swipe'):isSwipe() then
-                        for _, product in ipairs(_base:get('productManager'):getProducts()) do
-                            if not product:isScanned() and private:haveCode(product:getCode()) and sampTextdrawIsExists(product:getTextdraw():getId()) then
-                                private:setScanningProduct(product)
-                                sampSendClickTextdraw(product:getTextdraw():getId())
-                                while this:isScanning() do wait(0) end
-                                wait(private:getTime())
+                            elseif not haveCode and product:isScanned() and this:isAdd() then
+                                _base:get('boxManager'):push(
+                                    product:getTextdraw():getX(),
+                                    product:getTextdraw():getY(),
+                                    product:getTextdraw():getWidth(),
+                                    product:getTextdraw():getHeight(),
+                                    '0x00000000',
+                                    private.border,
+                                    _base:get('color'):getAlpha(50) .. _base:get('color'):get('orange'),
+                                    1
+                                )
                             end
                         end
                     end
@@ -298,40 +234,12 @@ function class:new(_base, _name, _default, _minmax)
         :add(
             'onClickProduct',
             function (product)
-                if this:isActive() and this:isAdd() and _base:get('playerManager'):isShoping() then
+                if this:isAdd() and _base:get('playerManager'):isShoping() then
                     private:toggleCode(product:getCode())
                     return false
                 end
             end,
             1
-        )
-        :add(
-            'onShowDialogBuyProduct',
-            function (_, _, _, _, _, text)
-                if this:isScanning() then
-                    return private:work(text)
-                end
-            end,
-            1000
-        )
-        :add(
-            'onShowDialogBuyProductCount',
-            function (_, _, _, _, _, text)
-                if this:isScanning() then
-                    return private:work(text)
-                end
-            end,
-            1000
-        )
-        :add(
-            'onShowDialogBuyProductList',
-            function (id)
-                if this:isScanning() then
-                    _base:get('dialogManager'):send(id, 1, 0)
-                    return false
-                end
-            end,
-            1000
         )
         return private
     end

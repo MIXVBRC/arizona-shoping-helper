@@ -48,6 +48,9 @@ function class:new(_base, _id, _title, _text, _submitButtonText, _closeButtonTex
         local text = ''
         if this:getDialogType() == 0 or this:getDialogType() == 1 or this:getDialogType() == 3 then
             text = this:getText()
+            if type(this:getText()) == 'table' then
+                text = _base:get('helper'):implode('\n', this:getText())
+            end
         elseif this:getDialogType() == 2 then
             text = _base:get('helper'):implode('\n', this:getText())
         else

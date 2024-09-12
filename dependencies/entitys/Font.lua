@@ -2,7 +2,7 @@ local class = {}
 function class:new(_base)
     local this = {}
     local private = {
-        ['cache'] = _base:getInit('cache'),
+        ['cache'] = _base:getNew('cache'),
     }
 
     function this:get(name, height, flags)

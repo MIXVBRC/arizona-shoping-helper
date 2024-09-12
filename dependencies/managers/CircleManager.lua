@@ -15,7 +15,7 @@ function class:new(_base)
     end
 
     function this:create(x, y, z, radius, polygons)
-        table.insert(private.circles, _base:getInit('circle', x, y, z, radius, polygons))
+        table.insert(private.circles, _base:getNew('circle', x, y, z, radius, polygons))
         return this
     end
 

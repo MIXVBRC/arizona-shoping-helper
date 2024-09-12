@@ -3,6 +3,7 @@ function class:new(_base)
     local this = {}
     local private = {
         ['queue'] = {},
+        ['processed'] = nil,
     }
 
     -- QUEUE
@@ -16,8 +17,13 @@ function class:new(_base)
         return this
     end
 
-    function private:addQueueItem(item)
-        table.insert(private.queue, item)
+    function private:getQueueItem(index)
+        return private.queue[index]
+    end
+
+    function private:addQueueItem(queueItem)
+        table.insert(private.queue, queueItem)
+        table.sort(private.queue, function (a, b) return a.sort < b.sort end)
         return this
     end
 
@@ -26,11 +32,61 @@ function class:new(_base)
         return this
     end
 
+    -- PROCESSED
+
+    function private:isProcessed()
+        return private.processed ~= nil
+    end
+
+    function private:getProcess()
+        return private.processed
+    end
+
+    function private:setProcess(processed)
+        private.processed = processed
+        return this
+    end
+
+    function private:clearProcess()
+        private:setProcess(nil)
+        return this
+    end
+
+    -- ADD
+
+    function this:add(action, sort)
+        local queueProcess = _base:getNew('queueProcess', action)
+        private:addQueueItem({
+            ['sort'] = sort or 100,
+            ['queueProcess'] = queueProcess,
+        })
+        return queueProcess
+    end
+
     -- INITS
 
     function private:init()
-        private:initThreads()
+        private:initEvents():initThreads()
         return this
+    end
+
+    function private:initEvents()
+        _base:get('eventManager')
+        :add(
+            'onEvent',
+            function (name, ...)
+                if private:isProcessed() then
+                    local queueProcess = private:getProcess()
+                    if queueProcess ~= nil then
+                        local event = queueProcess:getEvent(name)
+                        if event ~= nil then
+                            return event(...)
+                        end
+                    end
+                end
+            end
+        )
+        return private
     end
 
     function private:initThreads()
@@ -39,8 +95,13 @@ function class:new(_base)
             nil,
             function ()
                 while true do wait(0)
-                    for _, item in ipairs(private:getQueue()) do
-                        
+                    for index, queueItem in ipairs(private:getQueue()) do
+                        if queueItem.queueProcess:isActive() then
+                            private:setProcess(queueItem.queueProcess)
+                            private:deleteQueueItem(index)
+                            queueItem.queueProcess:getExecute()(queueItem.queueProcess)
+                            private:clearProcess()
+                        end
                     end
                 end
             end

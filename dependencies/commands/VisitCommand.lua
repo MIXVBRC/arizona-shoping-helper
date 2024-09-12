@@ -5,9 +5,9 @@ function class:new(_base, _name, _default, _minmax)
         ['name'] = _name,
         ['lastShopId'] = nil,
         ['checkTime'] = 60,
-        ['minmax'] = _base:getInit('minMax', _minmax),
-        ['config'] = _base:getInit('configManager', _name, _default),
-        ['cache'] = _base:getInit('cache'),
+        ['minmax'] = _base:getNew('minMax', _minmax),
+        ['config'] = _base:getNew('configManager', _name, _default),
+        ['cache'] = _base:getNew('cache'),
     }
 
     -- NAME
@@ -244,10 +244,10 @@ function class:new(_base, _name, _default, _minmax)
                 local alpha = _base:get('color'):getAlpha(100 - math.floor(distance * 100 / private:getDistance()))
                 if isPointOnScreen(render.x, render.y, render.z, 0) and distance < private:getDistance() then
                     local sceenX, sceenY = convert3DCoordsToScreen(render.x, render.y, render.z - 1)
-                    _base:get('render'):pushLine(sceenX, sceenY, sceenX, sceenY - 90, 1, alpha .. private:getColor('stick'))
-                    _base:get('render'):pushPoint(sceenX, sceenY - 100, 20, 20, render.polygons, render.rotation, alpha .. render.color)
+                    _base:get('renderManager'):pushLine(sceenX, sceenY, sceenX, sceenY - 90, 1, alpha .. private:getColor('stick'))
+                    _base:get('renderManager'):pushPoint(sceenX, sceenY - 100, 20, 20, render.polygons, render.rotation, alpha .. render.color)
                     if render.text ~= nil and render.text ~= '' then
-                        _base:get('render'):pushText(_base:get('font'):get('Arial', 12, 4), render.text, sceenX + 15, sceenY - 110, alpha .. private:getColor('text'))
+                        _base:get('renderManager'):pushText(_base:get('font'):get('Arial', 12, 4), render.text, sceenX + 15, sceenY - 110, alpha .. private:getColor('text'))
                     end
                 end
             end

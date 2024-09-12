@@ -43,14 +43,13 @@ function class:new(_base, _name)
 
     -- LOGIC
 
-    function this:createProduct(name, code, price, count, textdraw)
+    function this:createProduct(name, code, price, textdraw)
         local product = nil
         if code ~= nil and price ~= nil and textdraw ~= nil then
-            product = _base:getInit('product',
+            product = _base:getNew('product',
                 name,
                 code,
                 price,
-                count,
                 textdraw
             )
             private:addProduct(product)
@@ -76,7 +75,7 @@ function class:new(_base, _name)
                 params.code = _base:get('helper'):md5(params.code .. childTextdraw:getCode())
             end
         end
-        this:createProduct(nil, params.code, params.price, nil, params.textdraw)
+        this:createProduct(nil, params.code, params.price, params.textdraw)
     end
 
     -- INITS

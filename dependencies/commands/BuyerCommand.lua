@@ -5,8 +5,8 @@ function class:new(_base, _name, _default, _minmax)
         ['name'] = _name,
         ['buying'] = nil,
         ['products'] = {},
-        ['minmax'] = _base:getInit('minMax', _minmax),
-        ['config'] = _base:getInit('configManager', _name, _default),
+        ['minmax'] = _base:getNew('minMax', _minmax),
+        ['config'] = _base:getNew('configManager', _name, _default),
     }
 
     -- NAME
@@ -53,22 +53,18 @@ function class:new(_base, _name, _default, _minmax)
         return this
     end
 
-    -- BUYING
+    -- BORDER
 
-    function this:isBuying()
-        return private.buying ~= nil
+    function private:getBorder()
+        return private.config:get('border') or private.minmax:getMin('border')
     end
 
-    function this:getBuying()
-        return private.buying
-    end
-
-    function this:setBuying(buying)
-        private.buying = buying
+    function private:setBorder(border)
+        private.config:set('border', private.minmax:get(border, 'border'))
         return this
     end
 
-    -- PRICE
+    -- TIME
 
     function private:getTime()
         return private.config:get('time') or private.minmax:getMin('time')
@@ -90,9 +86,9 @@ function class:new(_base, _name, _default, _minmax)
         return this
     end
 
-    function private:getProduct(name)
+    function private:getProduct(sign)
         for _, product in ipairs(private:getProducts()) do
-            if name == product.name then
+            if sign == product.name or sign == product.code then
                 return product
             end
         end
@@ -132,6 +128,40 @@ function class:new(_base, _name, _default, _minmax)
         private:setProducts(products)
     end
 
+    -- DIALOG
+
+    function private:dialog(product)
+        if product:isScanned() then
+            _base:get('dialogManager'):show(
+                _base:get('message'):get('message_dialog_title_enter_price_zero'),
+                product:getName(),
+                _base:get('message'):get('message_dialog_button_ready'),
+                _base:get('message'):get('message_dialog_button_cancel'),
+                1,
+                function (button, _, input)
+                    if button == 1 then
+                        input = _base:get('helper'):getNumber(input)
+                        local _product = private:getProduct(product:getName())
+                        if _product ~= nil then
+                            if input > 0 then
+                                _product.price = input
+                                private:changeProduct(product:getName(), _product)
+                            else
+                                private:deleteProduct(product:getName())
+                            end
+                        else
+                            private:addProduct({
+                                ['name'] = product:getName(),
+                                ['code'] = product:getCode(),
+                                ['price'] = input
+                            })
+                        end
+                    end
+                end
+            )
+        end
+    end
+
     -- INITS
 
     function private:init()
@@ -149,8 +179,43 @@ function class:new(_base, _name, _default, _minmax)
         :add({private:getName(), 'clear'}, function ()
             private:setProducts({})
         end)
+        :add({private:getName(), 'border'}, function (border)
+            private:setBorder(_base:get('helper'):getNumber(border))
+        end)
         :add({private:getName(), 'time'}, function (time)
             private:setTime(_base:get('helper'):getNumber(time))
+        end)
+        :add({private:getName(), 'remove'}, function ()
+            _base:get('dialogManager'):close()
+            local dialogTable = {
+                {
+                    _base:get('message'):get('message_dialog_table_title_name'),
+                    _base:get('message'):get('message_dialog_table_title_price'),
+                },
+            }
+            for _, product in ipairs(private:getProducts()) do
+                table.insert(dialogTable, {
+                    product.name,
+                    _base:get('helper'):implode({
+                        '{',
+                        _base:get('color'):get('green'),
+                        '}',
+                        _base:get('helper'):formatPrice(product.price)
+                    }),
+                })
+            end
+            _base:get('dialogManager'):show(
+                _base:get('message'):get('message_dialog_title_remove_product'),
+                dialogTable,
+                _base:get('message'):get('message_dialog_button_delete'),
+                _base:get('message'):get('message_dialog_button_cancel'),
+                5,
+                function (button, list)
+                    if button == 1 then
+                        private:deleteProduct(dialogTable[list+2][1])
+                    end
+                end
+            )
         end)
         return private
     end
@@ -162,18 +227,9 @@ function class:new(_base, _name, _default, _minmax)
             function ()
                 while true do wait(0)
                     if _base:get('playerManager'):isShoping() and not _base:get('dialogManager'):isOpened() then
-                        local products = {}
                         for _, product in ipairs(_base:get('productManager'):getProducts()) do
-                            if product:isScanned() and not product:isDelete() then
-                                local _product = private:getProduct(product:getCode())
-                                if _product ~= nil and product:getPrice() <= _product.price then
-                                    table.insert(products, product)
-                                end
-                            end
-                        end
-                        private.products = products
-                        if #products > 0 and not _base:get('dialogManager'):isOpened() then
-                            for _, product in ipairs(products) do
+                            local _product = private:getProduct(product:getSign())
+                            if _product ~= nil then
                                 _base:get('boxManager'):push(
                                     product:getTextdraw():getX(),
                                     product:getTextdraw():getY(),
@@ -184,26 +240,14 @@ function class:new(_base, _name, _default, _minmax)
                                     _base:get('color'):getAlpha(100) .. _base:get('color'):get('orange'),
                                     25
                                 )
-                            end
-                        end
-                    end
-                end
-            end
-        )
-        :add(
-            nil,
-            function ()
-                while true do wait(0)
-                    if this:isActive() and not this:isAdd() and not _base:get('scan'):isScanning() then
-                        for _, product in ipairs(_base:get('productManager'):getProducts()) do
-                            if product:isScanned() and not product:isDelete() then
-                                local _product = private:getProduct(product:getName())
-                                if _product ~= nil and not product:isDelete() and product:getPrice() <= _product.price and product:getName() == _product.name then
-                                    this:setBuying(product)
-                                    sampSendClickTextdraw(product:getTextdraw():getId())
-                                    wait(private:getTime())
-                                    this:setBuying(nil)
-                                end
+                                _base:get('textManager'):push(
+                                    _base:get('font'):get('Verdana', 8, 9),
+                                    _base:get('helper'):formatPrice(_product.price),
+                                    product:getTextdraw():getX() + 5,
+                                    product:getTextdraw():getY() + 5,
+                                    _base:get('color'):getAlpha(100) .. _base:get('color'):get('orange'),
+                                    25
+                                )
                             end
                         end
                     end
@@ -216,99 +260,52 @@ function class:new(_base, _name, _default, _minmax)
     function private:initEvents()
         _base:get('eventManager')
         :add(
-            'onClickProduct',
-            function (product)
-                if this:isActive() and this:isAdd() and not _base:get('scan'):isScanning() and _base:get('playerManager'):isShoping() then
-                    if product:isScanned() then
-                        _base:get('dialogManager'):show(
-                            _base:get('message'):get('message_dialog_title_enter_price_zero'),
-                            product:getName(),
-                            _base:get('message'):get('message_dialog_button_ready'),
-                            _base:get('message'):get('message_dialog_button_cancel'),
-                            1,
-                            function (button, _, input)
-                                if button == 1 then
-                                    input = _base:get('helper'):getNumber(input)
-                                    local _product = private:getProduct(product:getName())
-                                    if _product ~= nil then
-                                        if input > 0 then
-                                            _product.price = input
-                                            private:changeProduct(product:getName(), _product)
-                                        else
-                                            private:deleteProduct(product:getName())
-                                        end
-                                    else
-                                        private:addProduct({
-                                            ['name'] = product:getName(),
-                                            ['price'] = input
-                                        })
+            'onCreateProduct',
+            function (createdProduct)
+                if this:isActive() then
+                    local product = private:getProduct(createdProduct:getCode())
+                    if product ~= nil and createdProduct:getPrice() <= product.price then
+
+                        if createdProduct:isScanned() then
+                            createdProduct:buy(private:getTime())
+                        else
+                            createdProduct:scan(private:getTime(),
+                                function (scannedProduct)
+                                    product = private:getProduct(scannedProduct:getName())
+                                    if product ~= nil and scannedProduct:getPrice() <= product.price then
+                                        scannedProduct:buy(private:getTime())
                                     end
                                 end
-                            end
-                        )
-                    else
-                        _base:get('chat'):push('Товар не отсканирован!')
+                            )
+                        end
                     end
-                    return false
                 end
             end
         )
         :add(
-            'onShowDialogBuyProduct',
-            function (id, _, _, _, _, text)
-                if this:isActive() and this:isBuying() then
-                    local product = this:getBuying()
-                    if product ~= nil then
-                        local name = _base:get('scan'):extractNameFromDialog(text)
-                        if name == product:getName() then
-                            _base:get('dialogManager'):send(id, 1)
-                        else
-                            _base:get('dialogManager'):close(id)
-                        end
-                    else
-                        _base:get('dialogManager'):close(id)
-                    end
-                    this:setBuying(nil)
-                    return false
-                end
-            end,
-            1000
-        )
-        :add(
-            'onShowDialogBuyProductCount',
-            function (id, _, _, _, _, text)
-                if this:isActive() and this:isBuying() then
-                    local product = this:getBuying()
-                    if product ~= nil then
-                        local name = _base:get('scan'):extractNameFromDialog(text)
-                        if name == product:getName() then
-                            local count = _base:get('scan'):extractCountFromDialog(text)
-                            local enoughCount = _base:get('scan'):extractEnoughCountFromDialog(text)
-                            if enoughCount < count then
-                                count = enoughCount
+            'onClickProduct',
+            function (clickedProduct)
+                if _base:get('playerManager'):isShoping() then
+                    if _base:get('shopManager'):getMod() == 'buy' then
+                        if this:isAdd() then
+                            if clickedProduct:isScanned() then
+                                private:dialog(clickedProduct)
+                            else
+                                clickedProduct:scan(500,
+                                    function (scannedProduct)
+                                        if scannedProduct:isScanned() then
+                                            private:dialog(scannedProduct)
+                                        end
+                                    end
+                                )
                             end
-                            _base:get('dialogManager'):send(id, 1, nil, count)
-                        else
-                            _base:get('dialogManager'):close(id)
+                            return false
+                        elseif isKeyDown(VK_CONTROL) then
+                            clickedProduct:buy(private:getTime())
                         end
-                    else
-                        _base:get('dialogManager'):close(id)
                     end
-                    this:setBuying(nil)
-                    return false
                 end
-            end,
-            1000
-        )
-        :add(
-            'onShowDialogBuyProductList',
-            function (id)
-                if this:isActive() and this:isBuying() then
-                    _base:get('dialogManager'):send(id, 1, 0)
-                    return false
-                end
-            end,
-            1000
+            end
         )
         return private
     end

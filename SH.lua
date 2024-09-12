@@ -248,6 +248,7 @@ local data = {
         
                             ['system_regex_find_dialog_title_shop_id'] = '^Лавка №%d+$',
                             ['system_regex_find_dialog_title_buy_product'] = '^Покупка предмета$',
+                            ['system_regex_find_dialog_title_sale_product'] = '^Продажа предмета$',
                             ['system_regex_find_dialog_title_remove_sale'] = '^Снятие с продажи$',
                             ['system_regex_find_dialog_title_ad_submitting'] = '^Подача объявления$',
                             ['system_regex_find_dialog_title_select_radio_station'] = '^Выберите радиостанцию$',
@@ -276,13 +277,23 @@ local data = {
         
                             ['message_dialog_title_enter_price'] = '{orange}Введите цену',
                             ['message_dialog_title_enter_price_zero'] = '{orange}Введите цену ( 0 - удалить )',
+                            ['message_dialog_title_remove_product'] = '{orange}Удаление товаров',
         
                             ['message_dialog_button_ready'] = '{green}Готово',
                             ['message_dialog_button_add'] = '{green}Добавить',
+                            ['message_dialog_button_delete'] = '{red}Удалить',
                             ['message_dialog_button_cancel'] = '{red}Отмена',
+
+                            ['message_dialog_table_title_name'] = 'Название',
+                            ['message_dialog_table_title_price'] = 'Цена',
+                            ['message_dialog_table_title_mod'] = 'Тип',
+
+                            ['message_mod_buy'] = '{green}Продажа',
+                            ['message_mod_sale'] = '{blue}Скупка',
         
                             ['message_activated'] = '#1# {red}активирован',
                             ['message_deactivated'] = '#1# {red}деактивирован',
+                            
         
                             ['message_command_name_ad'] = 'Свайпер',
                             ['message_command_name_radius'] = 'Радиус лавок',
@@ -397,9 +408,30 @@ local data = {
                 ['init'] = true,
                 ['args'] = {},
             },
+            {
+                ['name'] = 'queueProcess',
+                ['path'] = 'dependencies.entitys.QueueProcess',
+                ['sort'] = 2000,
+                ['init'] = false,
+                ['args'] = {},
+            },
         
             -- MANAGERS
         
+            {
+                ['name'] = 'threadManager',
+                ['path'] = 'dependencies.managers.ThreadManager',
+                ['sort'] = 3000,
+                ['init'] = true,
+                ['args'] = {},
+            },
+            {
+                ['name'] = 'eventManager',
+                ['path'] = 'dependencies.managers.EventManager',
+                ['sort'] = 3000,
+                ['init'] = true,
+                ['args'] = {},
+            },
             {
                 ['name'] = 'circleManager',
                 ['path'] = 'dependencies.managers.CircleManager',
@@ -424,13 +456,6 @@ local data = {
                 },
             },
             {
-                ['name'] = 'eventManager',
-                ['path'] = 'dependencies.managers.EventManager',
-                ['sort'] = 3000,
-                ['init'] = true,
-                ['args'] = {},
-            },
-            {
                 ['name'] = 'playerManager',
                 ['path'] = 'dependencies.managers.PlayerManager',
                 ['sort'] = 3000,
@@ -447,15 +472,8 @@ local data = {
                 },
             },
             {
-                ['name'] = 'threadManager',
-                ['path'] = 'dependencies.managers.ThreadManager',
-                ['sort'] = 3000,
-                ['init'] = true,
-                ['args'] = {},
-            },
-            {
-                ['name'] = 'render',
-                ['path'] = 'dependencies.entitys.Render',
+                ['name'] = 'renderManager',
+                ['path'] = 'dependencies.managers.RenderManager',
                 ['sort'] = 3000,
                 ['init'] = true,
                 ['args'] = {},
@@ -484,6 +502,13 @@ local data = {
                 ['args'] = {},
             },
             {
+                ['name'] = 'textManager',
+                ['path'] = 'dependencies.managers.TextManager',
+                ['sort'] = 3000,
+                ['init'] = true,
+                ['args'] = {},
+            },
+            {
                 ['name'] = 'shopManager',
                 ['path'] = 'dependencies.managers.ShopManager',
                 ['sort'] = 3000,
@@ -495,6 +520,13 @@ local data = {
                         14210,
                     }
                 },
+            },
+            {
+                ['name'] = 'queueManager',
+                ['path'] = 'dependencies.managers.QueueManager',
+                ['sort'] = 3000,
+                ['init'] = true,
+                ['args'] = {},
             },
 
             -- COMMANDS
@@ -748,29 +780,31 @@ local data = {
                     },
                 },
             },
-            -- {
-            --     ['name'] = 'buyer',
-            --     ['path'] = 'dependencies.commands.BuyerCommand',
-            --     ['sort'] = 4000,
-            --     ['init'] = true,
-            --     ['args'] = {
-            --         'buyer',
-            --         {
-            --             ['active'] = false,
-            --             ['add'] = false,
-            --             ['time'] = 500,
-            --         },
-            --         {
-            --             ['price'] = {
-            --                 ['min'] = 10,
-            --             },
-            --             ['time'] = {
-            --                 ['min'] = 200,
-            --                 ['max'] = 1000,
-            --             },
-            --         },
-            --     },
-            -- },
+            {
+                ['name'] = 'buyer',
+                ['path'] = 'dependencies.commands.BuyerCommand',
+                ['sort'] = 4000,
+                ['init'] = true,
+                ['args'] = {
+                    'buyer',
+                    {
+                        ['active'] = false,
+                        ['add'] = false,
+                        ['border'] = 2,
+                        ['time'] = 500,
+                    },
+                    {
+                        ['border'] = {
+                            ['min'] = 1,
+                            ['max'] = 5,
+                        },
+                        ['time'] = {
+                            ['min'] = 200,
+                            ['max'] = 1000,
+                        },
+                    },
+                },
+            },
         },
     }
 }
@@ -823,7 +857,7 @@ function class:new(_name, _author, _version, _url, _command, _entities)
         return this
     end
 
-    function this:getInit(name, ...)
+    function this:getNew(name, ...)
         return this:getObject(name):new(this, ...)
     end
 
@@ -844,7 +878,7 @@ function class:new(_name, _author, _version, _url, _command, _entities)
     function private:initCommands()
         for _, entity in ipairs(private:getEntities()) do
             if entity.init then
-                private:add(entity.name, this:getInit(entity.name, table.unpack(entity.args)))
+                private:add(entity.name, this:getNew(entity.name, table.unpack(entity.args)))
             end
         end
         return private
@@ -867,5 +901,11 @@ function main()
         script:get('chat'):setColor(script:get('color'):get('orange'))
         script:get('chat'):addPrefix('[' .. value.name .. ']: ')
         script:get('chat'):push('{' .. script:get('color'):get('white') .. '}' .. value.name)
+        -- local count = 0
+        -- for _, command in ipairs(script:get('commandManager'):getCommands()) do
+        --     count = count + 1
+        --     script:get('chat'):push(command.command)
+        -- end
+        -- script:get('chat'):push(count)
     end
 end

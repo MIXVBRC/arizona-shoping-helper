@@ -9,7 +9,7 @@ function class:new(_base, _name, _default)
             'buy',
             'sale',
         },
-        ['config'] = _base:getInit('configManager', _name, _default),
+        ['config'] = _base:getNew('configManager', _name, _default),
     }
 
     -- NAME
@@ -88,27 +88,27 @@ function class:new(_base, _name, _default)
     end
 
     function private:initThreads()
-        _base:get('threadManager')
-        :add(
-            nil,
-            function ()
-                while true do wait(0)
-                    if private:isActive() then
-                        if _base:get('playerManager'):isShoping() then
-                            local button = private:getButton()
-                            if button ~= nil and button.mod ~= private:getMod() and button.textdraw:getParent() ~= nil then
-                                sampSendClickTextdraw(button.textdraw:getParent():getId())
-                                wait(500)
-                            else
-                                private:setSwipe(false)
-                            end
-                        else
-                            private:setSwipe(true)
-                        end
-                    end
-                end
-            end
-        )
+        -- _base:get('threadManager')
+        -- :add(
+        --     nil,
+        --     function ()
+        --         while true do wait(0)
+        --             if private:isActive() then
+        --                 if _base:get('playerManager'):isShoping() then
+        --                     local button = private:getButton()
+        --                     if button ~= nil and button.mod ~= private:getMod() and button.textdraw:getParent() ~= nil then
+        --                         sampSendClickTextdraw(button.textdraw:getParent():getId())
+        --                         wait(500)
+        --                     else
+        --                         private:setSwipe(false)
+        --                     end
+        --                 else
+        --                     private:setSwipe(true)
+        --                 end
+        --             end
+        --         end
+        --     end
+        -- )
         return private
     end
 
@@ -117,10 +117,24 @@ function class:new(_base, _name, _default)
         :add(
             'onVisitShop',
             function (_, mod, textdraw)
-                private:setButton({
-                    ['mod'] = mod,
-                    ['textdraw'] = textdraw,
-                })
+                local parendTextdraw = textdraw:getParent()
+                if mod ~= private:getMod() and parendTextdraw ~= nil then
+                    _base:get('queueManager')
+                    :add(
+                        function ()
+                            if sampTextdrawIsExists(parendTextdraw:getId()) then
+                                sampSendClickTextdraw(parendTextdraw:getId())
+                            end
+                        end,
+                        1
+                    )
+                    :active()
+                end
+                
+                -- private:setButton({
+                --     ['mod'] = mod,
+                --     ['textdraw'] = textdraw,
+                -- })
             end
         )
         return private

@@ -11,7 +11,7 @@ function class:new(_base, _name, _default)
             ['editType'] = 'add',
         },
         ['products'] = {},
-        ['config'] = _base:getInit('configManager', _name, _default),
+        ['config'] = _base:getNew('configManager', _name, _default),
     }
 
     -- NAME

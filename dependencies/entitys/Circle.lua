@@ -58,7 +58,7 @@ function class:new(_base, _x, _y, _z, _radius, _polygons)
     end
 
     function this:addPoint(x, y, z)
-        table.insert(private.points, _base:getInit('point',
+        table.insert(private.points, _base:getNew('point',
         x,
         y,
         z,

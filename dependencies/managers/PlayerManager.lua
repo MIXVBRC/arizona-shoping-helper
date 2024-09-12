@@ -5,7 +5,7 @@ function class:new(_base)
         ['shoping'] = false,
         ['admining'] = false,
         ['inventory'] = false,
-        ['cache'] = _base:getInit('cache'),
+        ['cache'] = _base:getNew('cache'),
     }
 
     -- NAME

@@ -57,7 +57,7 @@ function class:new(_base)
             function ()
                 while true do wait(0)
                     for _, box in pairs(private:getBoxes()) do
-                        _base:get('render'):pushBox(
+                        _base:get('renderManager'):pushBox(
                             box.x,
                             box.y,
                             box.width,

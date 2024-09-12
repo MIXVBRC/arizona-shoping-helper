@@ -3,8 +3,8 @@ function class:new(_base, _name, _default, _minmax)
     local this = {}
     local private = {
         ['name'] = _name,
-        ['minmax'] = _base:getInit('minMax', _minmax),
-        ['config'] = _base:getInit('configManager', _name, _default),
+        ['minmax'] = _base:getNew('minMax', _minmax),
+        ['config'] = _base:getNew('configManager', _name, _default),
     }
 
     -- NAME
@@ -86,24 +86,33 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:getProduct(sign)
         for _, product in ipairs(private:getProducts()) do
-            if sign == product.sign then
+            if sign == product.name or sign == product.code then
                 return product
             end
         end
         return nil
     end
 
-    function private:addProduct(product)
+    function private:addProduct(name, code, mod, price)
         local products = private:getProducts()
-        table.insert(products, product)
+        table.insert(products, {
+            ['name'] = name,
+            ['code'] = code,
+            ['prices'] = {
+                {
+                    ['mod'] = mod,
+                    ['value'] = price
+                }
+            }
+        })
         private:setProducts(products)
         return this
     end
 
-    function private:deleteProduct(sign)
+    function private:deleteProduct(name)
         local products = {}
         for _, product in ipairs(private:getProducts()) do
-            if sign ~= product.sign then
+            if name ~= product.name then
                 table.insert(products, product)
             end
         end
@@ -111,60 +120,66 @@ function class:new(_base, _name, _default, _minmax)
         return this
     end
 
-    function private:changeProduct(sign, data)
+    function private:changeProductPrice(name, mod, price)
         local products = private:getProducts()
-        for _, product in ipairs(products) do
-            if sign == product.sign then
-                for name, value in pairs(data) do
-                    if name ~= 'sign' then
-                        product[name] = value
+        if price ~= nil and price > 0 then
+            for _, product in ipairs(products) do
+                if name == product.name then
+                    for indexPrice, _price in ipairs(product.prices) do
+                        if mod == _price.mod then
+                            product.prices[indexPrice].value = price
+                        end
                     end
+                    break
                 end
-                break
+            end
+        else
+            for indexProduct, product in ipairs(products) do
+                if name == product.name then
+                    for indexPrice, _price in ipairs(product.prices) do
+                        if mod == _price.mod then
+                            table.remove(product.prices, indexPrice)
+                        end
+                    end
+                    if #product.prices <= 0 then
+                        table.remove(products, indexProduct)
+                    end
+                    break
+                end
             end
         end
         private:setProducts(products)
+        return this
     end
 
-    -- WORK
+    -- DIALOG
 
-    function private:work()
-        if _base:get('playerManager'):isShoping() and not _base:get('dialogManager'):isOpened() and not _base:get('swipe'):isSwipe() then
-            for _, product in ipairs(_base:get('productManager'):getProducts()) do
-                local _product = private:getProduct(product:getSign())
-                if _product ~= nil then
-                    local mod = _base:get('shopManager'):getMod()
-                    local price = _product.price[mod]
-                    if price ~= nil and price > 0 then
-                        local color = 'ff0000'
-                        if mod == 'buy' then
-                            price = price - (product:getPrice() + (product:getPrice() / 100 * private:getCommission()))
+    function private:dialog(product)
+        if product:isScanned() then
+            _base:get('dialogManager'):show(
+                _base:get('message'):get('message_dialog_title_enter_price_zero'),
+                product:getName(),
+                _base:get('message'):get('message_dialog_button_ready'),
+                _base:get('message'):get('message_dialog_button_cancel'),
+                1,
+                function (button, _, input)
+                    if button == 1 then
+                        input = _base:get('helper'):getNumber(input)
+                        local _product = private:getProduct(product:getName())
+                        local mod = _base:get('shopManager'):getMod()
+                        if _product ~= nil then
+                            private:changeProductPrice(product:getName(), mod, input)
                         else
-                            price = (product:getPrice() + (product:getPrice() / 100 * private:getCommission())) - price
+                            private:addProduct(
+                                product:getName(),
+                                product:getCode(),
+                                mod,
+                                input
+                            )
                         end
-                        if price >= 0 then
-                            color = '00ff00'
-                        end
-                        _base:get('boxManager'):push(
-                            product:getTextdraw():getX(),
-                            product:getTextdraw():getY(),
-                            product:getTextdraw():getWidth(),
-                            product:getTextdraw():getHeight(),
-                            '0x00000000',
-                            private:getBorder(),
-                            _base:get('color'):getAlpha(100) .. color,
-                            50
-                        )
-                        _base:get('render'):pushText(
-                            _base:get('font'):get('Verdana', 8, 9),
-                            _base:get('helper'):formatPrice(price),
-                            product:getTextdraw():getX() + 5,
-                            product:getTextdraw():getY() + 5,
-                            _base:get('color'):getAlpha(100) .. color
-                        )
                     end
                 end
-            end
+            )
         end
     end
 
@@ -191,6 +206,53 @@ function class:new(_base, _name, _default, _minmax)
         :add({private:getName(), 'commission'}, function (commission)
             private:setCommission(_base:get('helper'):getNumber(commission))
         end)
+        :add({private:getName(), 'remove'}, function ()
+            _base:get('dialogManager'):close()
+            local dialogTable = {
+                {
+                    _base:get('message'):get('message_dialog_table_title_name'),
+                    _base:get('message'):get('message_dialog_table_title_price'),
+                    _base:get('message'):get('message_dialog_table_title_price'),
+                },
+            }
+            for _, product in ipairs(private:getProducts()) do
+                for _, price in ipairs(product.prices) do
+                    table.insert(dialogTable, {
+                        product.name,
+                        _base:get('message'):get('message_mod_' .. price.mod),
+                        _base:get('helper'):implode({
+                            '{',
+                            _base:get('color'):get('green'),
+                            '}',
+                            _base:get('helper'):formatPrice(price.value)
+                        }),
+                    })
+                end
+            end
+            _base:get('dialogManager'):show(
+                _base:get('message'):get('message_dialog_title_remove_product'),
+                dialogTable,
+                _base:get('message'):get('message_dialog_button_delete'),
+                _base:get('message'):get('message_dialog_button_cancel'),
+                5,
+                function (button, list)
+                    if button == 1 then
+                        local count = 0
+                        for _, product in ipairs(private:getProducts()) do
+                            for _, price in ipairs(product.prices) do
+                                if list == count then
+                                    _base:get('chat'):push(product.name)
+                                    _base:get('chat'):push(price.mod)
+                                    private:changeProductPrice(product.name, price.mod, 0)
+                                    return
+                                end
+                                count = count + 1
+                            end
+                        end
+                    end
+                end
+            )
+        end)
         return private
     end
 
@@ -201,7 +263,47 @@ function class:new(_base, _name, _default, _minmax)
             function ()
                 while true do wait(0)
                     if this:isActive() then
-                        private:work()
+                        if _base:get('playerManager'):isShoping() and not _base:get('dialogManager'):isOpened() then
+                            for _, product in ipairs(_base:get('productManager'):getProducts()) do
+                                local _product = private:getProduct(product:getSign()) or private:getProduct(product:getCode())
+                                if _product ~= nil then
+                                    local mod = _base:get('shopManager'):getMod()
+                                    for _, _price in ipairs(_product.prices) do
+                                        if mod == _price.mod then
+                                            local color = 'ff0000'
+                                            local price = _price.value
+                                            if mod == 'buy' then
+                                                price = price - (product:getPrice() + (product:getPrice() / 100 * private:getCommission()))
+                                            else
+                                                price = (product:getPrice() + (product:getPrice() / 100 * private:getCommission())) - price
+                                            end
+                                            if price >= 0 then
+                                                color = '00ff00'
+                                            end
+                                            _base:get('boxManager'):push(
+                                                product:getTextdraw():getX(),
+                                                product:getTextdraw():getY(),
+                                                product:getTextdraw():getWidth(),
+                                                product:getTextdraw():getHeight(),
+                                                '0x00000000',
+                                                private:getBorder(),
+                                                _base:get('color'):getAlpha(100) .. color,
+                                                50
+                                            )
+                                            _base:get('textManager'):push(
+                                                _base:get('font'):get('Verdana', 8, 9),
+                                                _base:get('helper'):formatPrice(price),
+                                                product:getTextdraw():getX() + 5,
+                                                product:getTextdraw():getY() + 5,
+                                                _base:get('color'):getAlpha(100) .. color,
+                                                50
+                                            )
+                                            break
+                                        end
+                                    end
+                                end
+                            end
+                        end
                     end
                 end
             end
@@ -213,33 +315,19 @@ function class:new(_base, _name, _default, _minmax)
         _base:get('eventManager')
         :add(
             'onClickProduct',
-            function (product)
-                if not _base:get('scan'):isScanning() and _base:get('playerManager'):isShoping() and this:isActive() and this:isAdd() then
-                    _base:get('dialogManager'):show(
-                        _base:get('message'):get('message_dialog_title_enter_price_zero'),
-                        product:getName(),
-                        _base:get('message'):get('message_dialog_button_ready'),
-                        _base:get('message'):get('message_dialog_button_cancel'),
-                        1,
-                        function (button, _, input)
-                            if button == 1 then
-                                input = _base:get('helper'):getNumber(input)
-                                local _product = private:getProduct(product:getSign())
-                                local mod = _base:get('shopManager'):getMod()
-                                if _product ~= nil then
-                                    _product.price[mod] = input
-                                    private:changeProduct(product:getSign(), _product)
-                                else
-                                    private:addProduct({
-                                        ['sign'] = product:getSign(),
-                                        ['price'] = {
-                                            [mod] = input
-                                        }
-                                    })
+            function (clickedProduct)
+                if this:isAdd() and _base:get('playerManager'):isShoping() then
+                    if clickedProduct:isScanned() then
+                        private:dialog(clickedProduct)
+                    else
+                        clickedProduct:scan(500,
+                            function (scannedProduct)
+                                if scannedProduct:isScanned() then
+                                    private:dialog(scannedProduct)
                                 end
                             end
-                        end
-                    )
+                        )
+                    end
                     return false
                 end
             end,
