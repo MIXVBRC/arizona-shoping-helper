@@ -9,7 +9,7 @@ function class:new(_base, _name, _default)
             'buy',
             'sale',
         },
-        ['configManager'] = _base:getNewClass('configManager', _name, _default),
+        ['config'] = _base:getNewClass('configManager', _name, _default),
     }
 
     -- NAME
@@ -21,11 +21,11 @@ function class:new(_base, _name, _default)
     -- ACTIVE
 
     function private:isActive()
-        return private.configManager:get('active')
+        return private.config:get('active')
     end
 
     function private:toggleActive()
-        private.configManager:set('active', not private:isActive())
+        private.config:set('active', not private:isActive())
         return this
     end
 
@@ -43,13 +43,13 @@ function class:new(_base, _name, _default)
     -- MOD
 
     function private:getMod()
-        return private.configManager:get('mod')
+        return private.config:get('mod')
     end
 
     function private:switchMod()
         for _, mod in ipairs(private.mods) do
             if private:getMod() ~= mod then
-                private.configManager:set('mod', mod)
+                private.config:set('mod', mod)
                 break
             end
         end

@@ -5,7 +5,7 @@ function class:new(_base, _name, _default, _minmax)
         ['name'] = _name,
         ['radius'] = 5,
         ['minmax'] = _base:getNewClass('minMax', _minmax),
-        ['configManager'] = _base:getNewClass('configManager', _name, _default),
+        ['config'] = _base:getNewClass('configManager', _name, _default),
         ['lowPoint'] = _base:getNewClass('lowPoint'),
         ['cache'] = _base:getNewClass('cache'),
     }
@@ -25,40 +25,40 @@ function class:new(_base, _name, _default, _minmax)
     -- ACTIVE
 
     function private:isActive()
-        return private.configManager:get('active')
+        return private.config:get('active')
     end
 
     function private:toggleActive()
-        private.configManager:set('active', not private:isActive())
+        private.config:set('active', not private:isActive())
         return this
     end
 
     -- POLYGONS
 
     function private:getPolygons()
-        return private.configManager:get('polygons') or private.minmax:getMin('polygons')
+        return private.config:get('polygons') or private.minmax:getMin('polygons')
     end
 
     function private:setPolygons(polygons)
-        private.configManager:set('polygons', private.minmax:get(polygons, 'polygons'))
+        private.config:set('polygons', private.minmax:get(polygons, 'polygons'))
         return this
     end
 
     -- DISTANCE
 
     function private:getDistance()
-        return private.configManager:get('distance') or private.minmax:getMin('distance')
+        return private.config:get('distance') or private.minmax:getMin('distance')
     end
 
     function private:setDistance(distance)
-        private.configManager:set('distance', private.minmax:get(distance, 'distance'))
+        private.config:set('distance', private.minmax:get(distance, 'distance'))
         return this
     end
 
     -- COLOR
 
     function private:getColors()
-        return private.configManager:get('colors') or {}
+        return private.config:get('colors') or {}
     end
 
     function private:getColor(name)

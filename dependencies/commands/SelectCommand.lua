@@ -4,7 +4,7 @@ function class:new(_base, _name, _default, _minmax)
     local private = {
         ['name'] = _name,
         ['minmax'] = _base:getNewClass('minMax', _minmax),
-        ['configManager'] = _base:getNewClass('configManager', _name, _default),
+        ['config'] = _base:getNewClass('configManager', _name, _default),
     }
 
     -- NAME
@@ -16,28 +16,36 @@ function class:new(_base, _name, _default, _minmax)
     -- ACTIVE
 
     function this:isActive()
-        return private.configManager:get('active')
+        return private.config:get('active')
     end
 
     function this:toggleActive()
-        private.configManager:set('active', not this:isActive())
+        private.config:set('active', not this:isActive())
         return this
     end
 
     -- ADD
 
     function this:isAdd()
-        return private.configManager:get('add')
+        return private.config:get('add')
+    end
+
+    function this:setAdd(add)
+        private.config:set('add', add)
+        return this
     end
 
     function this:toggleAdd()
-        private.configManager:set('add', not this:isAdd())
+        private.config:set('add', not this:isAdd())
         if this:isAdd() then
-            if _base:getClass('scan'):isAdd() then
+            if _base:getClass('scan') ~= nil and _base:getClass('scan'):isAdd() then
                 _base:getClass('scan'):toggleAdd()
             end
             if _base:getClass('pricer') ~= nil and _base:getClass('pricer'):isAdd() then
                 _base:getClass('pricer'):toggleAdd()
+            end
+            if _base:getClass('buyer') ~= nil and _base:getClass('buyer'):isAdd() then
+                _base:getClass('buyer'):toggleAdd()
             end
         end
         return this
@@ -46,43 +54,42 @@ function class:new(_base, _name, _default, _minmax)
     -- BORDER
 
     function private:getBorder()
-        return private.configManager:get('border') or private.minmax:getMin('border')
+        return private.config:get('border') or private.minmax:getMin('border')
     end
 
     function private:setBorder(border)
-        private.configManager:set('border', private.minmax:get(border, 'border'))
+        private.config:set('border', private.minmax:get(border, 'border'))
         return this
     end
 
     -- COLOR
 
     function private:getColor()
-        return private.configManager:get('color')
+        return private.config:get('color')
     end
 
     function private:setColor(color)
-        return private.configManager:set('color', color or '0000ff')
+        return private.config:set('color', color or '0000ff')
     end
 
     -- ALPHA
 
     function private:getAlpha()
-        return private.configManager:get('alpha') or private.minmax:getMin('alpha')
+        return private.config:get('alpha') or private.minmax:getMin('alpha')
     end
 
     function private:setAlpha(alpha)
-        return private.configManager:set('alpha', private.minmax:get(alpha, 'alpha'))
+        return private.config:set('alpha', private.minmax:get(alpha, 'alpha'))
     end
 
     -- PRODUCTS
 
     function private:getProducts()
-        return private.configManager:get('products') or {}
+        return private.config:get('products') or {}
     end
 
     function private:setProducts(products)
-        products = products or {}
-        private.configManager:set('products', products)
+        private.config:set('products', products or {})
         return this
     end
 
@@ -118,7 +125,11 @@ function class:new(_base, _name, _default, _minmax)
     -- WORK
 
     function private:work()
-        if _base:getClass('playerManager'):isShoping() and not _base:getClass('dialogManager'):isOpened() and not _base:getClass('swipe'):isSwipe() then
+        if this:isActive()
+        and _base:getClass('playerManager'):isShoping()
+        and not _base:getClass('dialogManager'):isOpened()
+        and not _base:getClass('swipe'):isSwipe()
+        then
             for _, sign in ipairs(private:getProducts()) do
                 for _, product in ipairs(_base:getClass('productManager'):getProducts()) do
                     if sign == product:getSign() then
@@ -152,6 +163,9 @@ function class:new(_base, _name, _default, _minmax)
         _base:getClass('commandManager')
         :add({private:getName(), 'active'}, this.toggleActive)
         :add({private:getName(), 'add'}, this.toggleAdd)
+        :add({private:getName(), 'clear'}, function ()
+            private:setProducts({})
+        end)
         :add({private:getName(), 'border'}, function (border)
             private:setBorder(_base:getClass('helper'):getNumber(border))
         end)
@@ -172,9 +186,7 @@ function class:new(_base, _name, _default, _minmax)
             nil,
             function ()
                 while true do wait(0)
-                    if this:isActive() then
-                        private:work()
-                    end
+                    private:work()
                 end
             end
         )
@@ -186,7 +198,7 @@ function class:new(_base, _name, _default, _minmax)
         :add(
             'onClickProduct',
             function (product)
-                if not _base:getClass('scan'):isScanning() and _base:getClass('playerManager'):isShoping() and this:isActive() and this:isAdd() then
+                if this:isAdd() and not _base:getClass('scan'):isScanning() and _base:getClass('playerManager'):isShoping() then
                     private:toggleProduct(product:getSign())
                     return false
                 end

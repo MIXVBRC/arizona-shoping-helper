@@ -1,10 +1,11 @@
 local class = {}
-function class:new(_base, _name, _code, _price, _textdraw)
+function class:new(_base, _name, _code, _price, _count, _textdraw)
     local this = {}
     local private = {
         ['name'] = _name,
         ['code'] = _code,
         ['price'] = _price,
+        ['count'] = _count,
         ['textdraw'] = _textdraw,
         ['delete'] = false,
     }
@@ -34,6 +35,10 @@ function class:new(_base, _name, _code, _price, _textdraw)
     end
 
     function this:getPrice()
+        return private.price
+    end
+
+    function this:getCount()
         return private.price
     end
 

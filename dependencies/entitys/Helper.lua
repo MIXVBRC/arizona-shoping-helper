@@ -189,7 +189,7 @@ function class:new(_base, _symbols)
     end
 
     function this:isPrice(text)
-        text = text:gsub('%s+', ''):gsub(',', '')
+        text = text:gsub('%s+', ''):gsub(',', ''):gsub('%.','')
         if text:find('^.*$%d+$') then
             return true
         end
@@ -197,7 +197,7 @@ function class:new(_base, _symbols)
     end
 
     function this:isVCPrice(text)
-        text = text:gsub('%s+', ''):gsub(',', '')
+        text = text:gsub('%s+', ''):gsub(',', ''):gsub('%.','')
         if text:find('^VC%$%d+$') then
             return true
         end
@@ -212,9 +212,9 @@ function class:new(_base, _symbols)
 
     function this:extractPrice(price)
         if this:isVCPrice(price) then
-            price = price:gsub('%s+', ''):gsub('^VC%$',''):gsub(',',''):gsub('%s', '')
+            price = price:gsub('%s+', ''):gsub('^VC%$',''):gsub(',',''):gsub('%.',''):gsub('%s', '')
         else
-            price = price:gsub('%s+', ''):gsub('^%$',''):gsub(',',''):gsub('%s', '')
+            price = price:gsub('%s+', ''):gsub('^%$',''):gsub(',',''):gsub('%.',''):gsub('%s', '')
         end
         price = this:getNumber(price)
         return price

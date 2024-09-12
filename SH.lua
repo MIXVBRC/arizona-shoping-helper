@@ -8,7 +8,7 @@ local data = {
         ['entities'] = {
 
             -- LIBRARIES
-        
+
             {
                 ['name'] = 'moonloader',
                 ['path'] = 'moonloader',
@@ -218,7 +218,7 @@ local data = {
                 ['sort'] = 2000,
                 ['init'] = true,
                 ['args'] = {
-                    'ShopingHelper_base',
+                    'ShopingHelper_base2',
                     {},
                 },
             },
@@ -253,15 +253,20 @@ local data = {
                             ['system_regex_find_dialog_title_ad_submitting_confirmation'] = '^Подача объявления | Подтверждение$',
                             ['system_regex_find_dialog_text_sale_product'] = '^Введите цену за товар.+$',
                             ['system_regex_find_dialog_text_sale_product_count'] = '^Введите количество и цену за один товар.+$',
+                            ['system_regex_find_dialog_text_buy_product_count'] = '^В наличии:%s%d+%sшт%.$',
+                            ['system_regex_find_dialog_text_buy_product_enough_count'] = '^Ваших денег хватит на %d+ ед%. товара%.$',
                             ['system_regex_gsub_dialog_text_item_match_item'] = 'Предмет: ',
                             ['system_regex_gsub_dialog_text_item_match_bottle'] = 'Эликсир: ',
                             ['system_regex_gsub_dialog_text_item_match_accessory'] = 'Аксессуар: ',
                             ['system_regex_match_dialog_title_shop_id'] = '^Лавка №(%d+)$',
+                            ['system_regex_match_dialog_text_buy_product_count'] = '^В наличии:%s(%d+)%sшт%.$',
+                            ['system_regex_match_dialog_text_buy_product_enough_count'] = '^Ваших денег хватит на (%d+) ед%. товара%.$',
         
                             ['message_ad_push'] = '/findilavka #1# #2#',
                             ['message_ad_push_central_market'] = '/findilavka #1# (ЦР) #2#',
-                            ['message_ad_next_push_time'] = '{white}Следующая реклама будет показана через {orange}#1# {white}мин.',
+                            ['message_ad_next_push_time'] = '{white}Показ рекламы через {orange}#1# {white}мин.',
                             ['message_ad_push_error_active'] = '{red}Реклама не будет показана! {white}(функционал не активен)',
+                            ['message_ad_push_error_chats'] = '{red}Реклама не будет показана! {white}(все чаты не активны)',
                             ['message_ad_push_error_number'] = '{red}Реклама не будет показана! {white}(неизвестен номер лавки)',
                             ['message_ad_push_error_message'] = '{red}Реклама не будет показана! {white}(нет задан текст)',
         
@@ -514,7 +519,7 @@ local data = {
                 ['args'] = {
                     'hiding',
                     {
-                        ['active'] = true,
+                        ['active'] = false,
                         ['alpha'] = 80,
                     },
                     {
@@ -533,7 +538,7 @@ local data = {
                 ['args'] = {
                     'scan',
                     {
-                        ['active'] = true,
+                        ['active'] = false,
                         ['add'] = false,
                         ['time'] = 500,
                     },
@@ -553,7 +558,7 @@ local data = {
                 ['args'] = {
                     'radius',
                     {
-                        ['active'] = true,
+                        ['active'] = false,
                         ['polygons'] = 24,
                         ['distance'] = 30,
                         ['colors'] = {
@@ -582,7 +587,7 @@ local data = {
                 ['args'] = {
                     'visit',
                     {
-                        ['active'] = true,
+                        ['active'] = false,
                         ['hiding'] = {
                             {
                                 ['name'] = 'player',
@@ -649,7 +654,7 @@ local data = {
                     'select',
                     {
                         ['active'] = false,
-                        ['add'] = true,
+                        ['add'] = false,
                         ['border'] = 2,
                         ['color'] = '0000ff',
                         ['alpha'] = 100,
@@ -737,6 +742,29 @@ local data = {
                     {
                         ['time'] = {
                             ['min'] = 3,
+                        },
+                    },
+                },
+            },
+            {
+                ['name'] = 'buyer',
+                ['path'] = 'dependencies.commands.BuyerCommand',
+                ['sort'] = 4000,
+                ['init'] = true,
+                ['args'] = {
+                    'buyer',
+                    {
+                        ['active'] = false,
+                        ['add'] = false,
+                        ['time'] = 500,
+                    },
+                    {
+                        ['price'] = {
+                            ['min'] = 10,
+                        },
+                        ['time'] = {
+                            ['min'] = 200,
+                            ['max'] = 1000,
                         },
                     },
                 },

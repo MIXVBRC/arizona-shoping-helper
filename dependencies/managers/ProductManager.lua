@@ -43,18 +43,20 @@ function class:new(_base, _name)
 
     -- LOGIC
 
-    function this:createProduct(name, code, price, textdraw)
+    function this:createProduct(name, code, price, count, textdraw)
+        local product = nil
         if code ~= nil and price ~= nil and textdraw ~= nil then
-            local product = _base:getNewClass('product',
+            product = _base:getNewClass('product',
                 name,
                 code,
                 price,
+                count,
                 textdraw
             )
             private:addProduct(product)
             _base:getClass('eventManager'):trigger('onCreateProduct', product)
         end
-        return this
+        return product
     end
 
     function private:checkOrCreate(textdraw)
@@ -74,7 +76,7 @@ function class:new(_base, _name)
                 params.code = _base:getClass('helper'):md5(params.code .. childTextdraw:getCode())
             end
         end
-        this:createProduct(nil, params.code, params.price, params.textdraw)
+        this:createProduct(nil, params.code, params.price, nil, params.textdraw)
     end
 
     -- INITS

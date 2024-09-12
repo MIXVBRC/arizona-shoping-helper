@@ -6,7 +6,7 @@ function class:new(_base, _name, _default, _minmax)
         ['lastShopId'] = nil,
         ['checkTime'] = 60,
         ['minmax'] = _base:getNewClass('minMax', _minmax),
-        ['configManager'] = _base:getNewClass('configManager', _name, _default),
+        ['config'] = _base:getNewClass('configManager', _name, _default),
         ['cache'] = _base:getNewClass('cache'),
     }
 
@@ -19,40 +19,40 @@ function class:new(_base, _name, _default, _minmax)
     -- ACTIVE
 
     function private:isActive()
-        return private.configManager:get('active')
+        return private.config:get('active')
     end
 
     function private:toggleActive()
-        private.configManager:set('active', not private:isActive())
+        private.config:set('active', not private:isActive())
         return this
     end
 
     -- DISTANCE
 
     function private:getDistance()
-        return private.configManager:get('distance') or private.minmax:getMin('distance')
+        return private.config:get('distance') or private.minmax:getMin('distance')
     end
 
     function private:setDistance(distance)
-        private.configManager:set('distance', private.minmax:get(distance, 'distance'))
+        private.config:set('distance', private.minmax:get(distance, 'distance'))
         return this
     end
 
     -- TIME
 
     function private:getTime()
-        return private.configManager:get('time') or private.minmax:getMin('time')
+        return private.config:get('time') or private.minmax:getMin('time')
     end
 
     function private:setTime(time)
-        private.configManager:set('time', private.minmax:get(time, 'time'))
+        private.config:set('time', private.minmax:get(time, 'time'))
         return this
     end
 
     -- COLOR
 
     function private:getColor(name)
-        return private.configManager:get('colors')[name]
+        return private.config:get('colors')[name]
     end
 
     -- LAST SHOP ID
@@ -75,11 +75,11 @@ function class:new(_base, _name, _default, _minmax)
     -- HIDINGS
 
     function private:getHidings()
-        return private.configManager:get('hiding')
+        return private.config:get('hiding')
     end
 
     function private:setHidings(hidings)
-        private.configManager:set('hiding', hidings)
+        private.config:set('hiding', hidings)
         return this
     end
 
@@ -115,11 +115,11 @@ function class:new(_base, _name, _default, _minmax)
     -- SHOPS
 
     function private:getShops()
-        return private.configManager:get('shops') or {}
+        return private.config:get('shops') or {}
     end
 
     function private:setShops(shops)
-        return private.configManager:set('shops', shops)
+        return private.config:set('shops', shops)
     end
 
     function private:clearShops()

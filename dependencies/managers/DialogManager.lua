@@ -125,14 +125,16 @@ function class:new(_base, _customDialogId)
 
     -- LOGIC
 
-    function this:close()
-        if this:isOpened() and this:getOpenedId() ~= nil then
-            this:send(this:getOpenedId())
+    function this:close(id)
+        id = id or this:getOpenedId()
+        if this:isOpened() and id ~= nil then
+            this:send(id)
         end
         return this
     end
 
     function this:send(id, button, list, input)
+        id = id or this:getOpenedId()
         if id ~= nil then
             _base:getClass('eventManager'):trigger('onSendDialogResponse', id, button, list, input)
             sampSendDialogResponse(
@@ -184,6 +186,7 @@ function class:new(_base, _customDialogId)
                     if style == event.style
                     and ((event.regexp.title ~= '' and title:find(event.regexp.title)) or (event.regexp.text ~= '' and text:find(event.regexp.text)))
                     then
+                        -- _base:getClass('chat'):push(event.name)
                         return _base:getClass('eventManager'):trigger(event.name, id, style, title, button1, button2, text)
                     end
                 end

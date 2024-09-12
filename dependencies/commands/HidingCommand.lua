@@ -4,7 +4,7 @@ function this:new(_base, _name, _default, _minmax)
     local private = {
         ['name'] = _name,
         ['minmax'] = _base:getNewClass('minMax', _minmax),
-        ['configManager'] = _base:getNewClass('configManager', _name, _default),
+        ['config'] = _base:getNewClass('configManager', _name, _default),
     }
 
     -- NAME
@@ -16,22 +16,22 @@ function this:new(_base, _name, _default, _minmax)
     -- ACTIVE
 
     function private:isActive()
-        return private.configManager:get('active')
+        return private.config:get('active')
     end
 
     function private:toggleActive()
-        private.configManager:set('active', not private:isActive())
+        private.config:set('active', not private:isActive())
         return class
     end
 
     -- ALPHA
 
     function private:getAlpha()
-        return private.configManager:get('alpha')
+        return private.config:get('alpha')
     end
 
     function private:setAlpha(alpha)
-        private.configManager:set('alpha', private.minmax:get(alpha, 'alpha'))
+        private.config:set('alpha', private.minmax:get(alpha, 'alpha'))
         return class
     end
 
@@ -71,7 +71,7 @@ function this:new(_base, _name, _default, _minmax)
                                     _base:getClass('color'):getAlpha(private:getAlpha()) .. '1f1f1f',
                                     0,
                                     '0x00000000',
-                                    10
+                                    100
                                 )
                             end
                         end

@@ -11,7 +11,7 @@ function class:new(_base, _name, _default)
             ['editType'] = 'add',
         },
         ['products'] = {},
-        ['configManager'] = _base:getNewClass('configManager', _name, _default),
+        ['config'] = _base:getNewClass('configManager', _name, _default),
     }
 
     -- NAME
@@ -23,11 +23,11 @@ function class:new(_base, _name, _default)
     -- ACTIVE
 
     function private:isActive()
-        return private.configManager:get('active')
+        return private.config:get('active')
     end
 
     function private:toggleActive()
-        private.configManager:set('active', not private:isActive())
+        private.config:set('active', not private:isActive())
         return this
     end
 
@@ -66,11 +66,11 @@ function class:new(_base, _name, _default)
     -- PRODUCTP RICES
 
     function private:getProductPrices()
-        return private.configManager:get('prices') or {}
+        return private.config:get('prices') or {}
     end
 
     function private:setProductPrices(prices)
-        private.configManager:set('prices', prices or {})
+        private.config:set('prices', prices or {})
         return this
     end
 

@@ -7,10 +7,7 @@ function this:new(_base, _name, _default, _minmax)
         ['id'] = nil,
         ['shop'] = nil,
         ['minmax'] = _base:getNewClass('minMax', _minmax),
-        ['configManager'] = _base:getNewClass('configManager', _name, _default),
-        ['dependencies'] = {
-            
-        },
+        ['config'] = _base:getNewClass('configManager', _name, _default),
     }
 
     -- TODO: вместо 1 сообщения сделать возможность отправки нескольких сообщений в виде очереди (разнообразие)
@@ -29,11 +26,11 @@ function this:new(_base, _name, _default, _minmax)
     -- ACTIVE
 
     function private:isActive()
-        return private.configManager:get('active')
+        return private.config:get('active')
     end
 
     function private:setActive(bool)
-        private.configManager:set('active', bool)
+        private.config:set('active', bool)
         return class
     end
 
@@ -45,33 +42,33 @@ function this:new(_base, _name, _default, _minmax)
     -- MESSAGE
 
     function private:getMessage()
-        return private.configManager:get('message') or ''
+        return private.config:get('message') or ''
     end
 
     function private:setMessage(message)
-        private.configManager:set('message', message or '')
+        private.config:set('message', message or '')
         return class
     end
 
     -- TIME
 
     function private:getTime()
-        return private.configManager:get('time') or private.minmax:getMin('time')
+        return private.config:get('time') or private.minmax:getMin('time')
     end
 
     function private:setTime(time)
-        private.configManager:set('time', private.minmax:get(time, 'time'))
+        private.config:set('time', private.minmax:get(time, 'time'))
         return class
     end
 
     -- CHATS
 
     function private:getChats()
-        return private.configManager:get('chats') or {}
+        return private.config:get('chats') or {}
     end
 
     function private:setChats(chats)
-        private.configManager:set('chats', chats or {})
+        private.config:set('chats', chats or {})
         return class
     end
 
@@ -109,11 +106,11 @@ function this:new(_base, _name, _default, _minmax)
     -- PUSH AT
 
     function private:getPushAt()
-        return private.configManager:get('pushAt') or 0
+        return private.config:get('pushAt') or 0
     end
 
     function private:setPushAt(time)
-        private.configManager:set('pushAt', math.abs(time or 0))
+        private.config:set('pushAt', math.abs(time or 0))
         return class
     end
 
@@ -153,7 +150,20 @@ function this:new(_base, _name, _default, _minmax)
     -- LOGIC
 
     function private:getRemainingTime()
-        return math.ceil((private:getPushAt() - os.time()) / 60)
+        local time = math.ceil((private:getPushAt() - os.time()) / 60)
+        if time < 0 then
+            time = 0
+        end
+        return time
+    end
+
+    function private:checkChats()
+        for _, chat in ipairs(private:getChats()) do
+            if chat.active then
+                return true
+            end
+        end
+        return false
     end
 
     -- INITS
@@ -185,6 +195,9 @@ function this:new(_base, _name, _default, _minmax)
         :add({private:getName(), 'left'}, function ()
             if not private:isActive() then
                 _base:getClass('chat'):push(_base:getClass('message'):get('message_ad_push_error_active'))
+            end
+            if not private:checkChats() then
+                _base:getClass('chat'):push(_base:getClass('message'):get('message_ad_push_error_chats'))
             end
             if private:getMessage() == '' then
                 _base:getClass('chat'):push(_base:getClass('message'):get('message_ad_push_error_message'))
@@ -234,7 +247,7 @@ function this:new(_base, _name, _default, _minmax)
             function ()
                 while true do wait(1000)
                     if private:isActive() and not _base:getClass('dialogManager'):isOpened() and not _base:getClass('playerManager'):isShoping() and not _base:getClass('playerManager'):isAdmining() then
-                        if private:getPushAt() <= os.time() then
+                        if private:checkChats() and private:getPushAt() <= os.time() then
                             private:setPushAt(os.time() + private:getTime() * 60)
                             if private:getMessage() ~= '' and private:getId() ~= nil then
                                 local data = {
@@ -250,8 +263,7 @@ function this:new(_base, _name, _default, _minmax)
                                 for _, chat in ipairs(private:getChats()) do
                                     if chat.active then
                                         private:setPushing(true)
-                                        _base:getClass('chat'):push(message)
-                                        -- sampProcessChatInput(_base:getClass('helper'):implode(' ', {'/'..chat.name, message}))
+                                        sampProcessChatInput(_base:getClass('helper'):implode(' ', {'/'..chat.name, message}))
                                         wait(500)
                                     end
                                 end
