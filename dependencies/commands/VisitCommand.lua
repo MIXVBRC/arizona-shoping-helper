@@ -5,9 +5,9 @@ function class:new(_base, _name, _default, _minmax)
         ['name'] = _name,
         ['lastShopId'] = nil,
         ['checkTime'] = 60,
-        ['minmax'] = _base:getNewClass('minMax', _minmax),
-        ['config'] = _base:getNewClass('configManager', _name, _default),
-        ['cache'] = _base:getNewClass('cache'),
+        ['minmax'] = _base:getInit('minMax', _minmax),
+        ['config'] = _base:getInit('configManager', _name, _default),
+        ['cache'] = _base:getInit('cache'),
     }
 
     -- NAME
@@ -161,7 +161,7 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:work()
         local time = os.time()
-        local shops = _base:getClass('shopManager'):getShops()
+        local shops = _base:get('shopManager'):getShops()
         local renders = private.cache:get('renders')
         if renders == nil then
             renders = {}
@@ -177,31 +177,31 @@ function class:new(_base, _name, _default, _minmax)
                     ['z'] = shop:getZ() + 0.16,
                 }
                 local shopTypes = {'player'}
-                if _base:getClass('playerManager'):getName() == shop:getPlayer() then
+                if _base:get('playerManager'):getName() == shop:getPlayer() then
                     shopTypes = {'player'}
                     render.color = private:getColor('player')
                     render.polygons = 3
                     render.rotation = 180
-                elseif shop:getMod() == _base:getClass('message'):get('system_shop_sell') then
+                elseif shop:getMod() == _base:get('message'):get('system_shop_sell') then
                     shopTypes = {'sell'}
                     render.color = private:getColor('sell')
-                elseif shop:getMod() == _base:getClass('message'):get('system_shop_buy') then
+                elseif shop:getMod() == _base:get('message'):get('system_shop_buy') then
                     shopTypes = {'buy'}
                     render.color = private:getColor('buy')
-                elseif shop:getMod() == _base:getClass('message'):get('system_shop_sell_buy') then
+                elseif shop:getMod() == _base:get('message'):get('system_shop_sell_buy') then
                     shopTypes = {'sell','buy'}
                     render.color = private:getColor('sell_buy')
-                elseif shop:getMod() == _base:getClass('message'):get('system_shop_edit') then
+                elseif shop:getMod() == _base:get('message'):get('system_shop_edit') then
                     shopTypes = {'edit'}
                     render.color = private:getColor('edit')
-                elseif shop:getMod() == _base:getClass('message'):get('system_shop_empty') then
+                elseif shop:getMod() == _base:get('message'):get('system_shop_empty') then
                     shopTypes = {'empty'}
                     render.color = private:getColor('empty')
                 end
                 local show = false
                 local visitShop = private:getShop(shop:getId())
                 if visitShop ~= nil then
-                    if time <= visitShop.time and (visitShop.mod == shop:getMod() or visitShop.mod == _base:getClass('message'):get('system_shop_edit')) then
+                    if time <= visitShop.time and (visitShop.mod == shop:getMod() or visitShop.mod == _base:get('message'):get('system_shop_edit')) then
                         shopTypes = {'visit'}
                         render.color = private:getColor('visit')
                         if private:isHidingActive('time') then
@@ -240,14 +240,14 @@ function class:new(_base, _name, _default, _minmax)
     function private:render(renders)
         if #renders > 0 then
             for _, render in ipairs(renders) do
-                local distance = _base:getClass('helper'):distanceToPlayer3d(render.x, render.y, render.z)
-                local alpha = _base:getClass('color'):getAlpha(100 - math.floor(distance * 100 / private:getDistance()))
+                local distance = _base:get('helper'):distanceToPlayer3d(render.x, render.y, render.z)
+                local alpha = _base:get('color'):getAlpha(100 - math.floor(distance * 100 / private:getDistance()))
                 if isPointOnScreen(render.x, render.y, render.z, 0) and distance < private:getDistance() then
                     local sceenX, sceenY = convert3DCoordsToScreen(render.x, render.y, render.z - 1)
-                    _base:getClass('render'):pushLine(sceenX, sceenY, sceenX, sceenY - 90, 1, alpha .. private:getColor('stick'))
-                    _base:getClass('render'):pushPoint(sceenX, sceenY - 100, 20, 20, render.polygons, render.rotation, alpha .. render.color)
+                    _base:get('render'):pushLine(sceenX, sceenY, sceenX, sceenY - 90, 1, alpha .. private:getColor('stick'))
+                    _base:get('render'):pushPoint(sceenX, sceenY - 100, 20, 20, render.polygons, render.rotation, alpha .. render.color)
                     if render.text ~= nil and render.text ~= '' then
-                        _base:getClass('render'):pushText(_base:getClass('font'):get('Arial', 12, 4), render.text, sceenX + 15, sceenY - 110, alpha .. private:getColor('text'))
+                        _base:get('render'):pushText(_base:get('font'):get('Arial', 12, 4), render.text, sceenX + 15, sceenY - 110, alpha .. private:getColor('text'))
                     end
                 end
             end
@@ -257,22 +257,22 @@ function class:new(_base, _name, _default, _minmax)
     -- INITS
 
     function private:init()
-        if _base:getClass(private:getName()) ~= nil then
-            return _base:getClass(private:getName())
+        if _base:get(private:getName()) ~= nil then
+            return _base:get(private:getName())
         end
         private:initCommands():initThreads():initEvents()
         return this
     end
 
     function private:initCommands()
-        _base:getClass('commandManager')
+        _base:get('commandManager')
         :add({private:getName(), 'active'}, private.toggleActive)
         :add({private:getName(), 'clear'}, private.clearShops)
         :add({private:getName(), 'distance'}, function (distance)
-            private:setDistance(_base:getClass('helper'):getNumber(distance))
+            private:setDistance(_base:get('helper'):getNumber(distance))
         end)
         :add({private:getName(), 'time'}, function (time)
-            time = _base:getClass('helper'):getNumber(time)
+            time = _base:get('helper'):getNumber(time)
             local differenceTime = private:getTime() - time
             local shops = private:getShops()
             for _, shop in pairs(shops) do
@@ -304,7 +304,7 @@ function class:new(_base, _name, _default, _minmax)
             end
         end)
         for _, hiding in ipairs(private:getHidings()) do
-            _base:getClass('commandManager'):add({private:getName(), 'active', hiding.name}, function ()
+            _base:get('commandManager'):add({private:getName(), 'active', hiding.name}, function ()
                 private:toggleHiding(hiding.name)
             end)
         end
@@ -312,12 +312,15 @@ function class:new(_base, _name, _default, _minmax)
     end
 
     function private:initThreads()
-        _base:getClass('threadManager')
+        _base:get('threadManager')
         :add(
             nil,
             function ()
                 while true do wait(0)
-                    if private:isActive() and not _base:getClass('playerManager'):isShoping() and not _base:getClass('playerManager'):isAdmining() then
+                    if private:isActive()
+                    and not _base:get('playerManager'):isSAI()
+                    and not _base:get('dialogManager'):isOpened()
+                    then
                         private:work()
                     end
                 end
@@ -347,7 +350,7 @@ function class:new(_base, _name, _default, _minmax)
     end
 
     function private:initEvents()
-        _base:getClass('eventManager')
+        _base:get('eventManager')
         :add(
             'onVisitShop',
             function (shop)

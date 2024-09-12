@@ -2,11 +2,11 @@ local class = {}
 function class:new(_base)
     local this = {}
     local private = {
-        ['cache'] = _base:getNewClass('cache'),
+        ['cache'] = _base:getInit('cache'),
     }
 
     function this:get(name, height, flags)
-        local cacheKey = _base:getClass('helper'):md5(name .. '-' .. height .. '-' .. flags)
+        local cacheKey = _base:get('helper'):md5(name .. '-' .. height .. '-' .. flags)
         local font = private.cache:get(cacheKey)
         if font == nil then
             font = renderCreateFont(name, height, flags)

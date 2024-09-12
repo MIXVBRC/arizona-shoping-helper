@@ -9,10 +9,10 @@ function class:new(_base, _message)
     }
 
     function private:init()
-        _base:getNewClass('chat'):addPrefix(private.prefix):addPostfix(private.postfix):setColor(private.color):push(private.message)
+        _base:getInit('chat'):addPrefix(private.prefix):addPostfix(private.postfix):setColor(private.color):push(private.message)
+        return this
     end
 
-    private:init()
-    return this
+    return private:init()
 end
 return class

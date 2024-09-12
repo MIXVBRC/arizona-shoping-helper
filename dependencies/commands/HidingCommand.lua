@@ -3,8 +3,8 @@ function this:new(_base, _name, _default, _minmax)
     local class = {}
     local private = {
         ['name'] = _name,
-        ['minmax'] = _base:getNewClass('minMax', _minmax),
-        ['config'] = _base:getNewClass('configManager', _name, _default),
+        ['minmax'] = _base:getInit('minMax', _minmax),
+        ['config'] = _base:getInit('configManager', _name, _default),
     }
 
     -- NAME
@@ -38,37 +38,37 @@ function this:new(_base, _name, _default, _minmax)
     -- INITS
 
     function private:init()
-        if _base:getClass(private:getName()) ~= nil then
-            return _base:getClass(private:getName())
+        if _base:get(private:getName()) ~= nil then
+            return _base:get(private:getName())
         end
         private:initCommands():initThreads()
         return class
     end
 
     function private:initCommands()
-        _base:getClass('commandManager')
+        _base:get('commandManager')
         :add({private:getName(), 'active'}, private.toggleActive)
         :add({private:getName(), 'alpha'}, function (alpha)
-            private:setAlpha(_base:getClass('helper'):getNumber(alpha))
+            private:setAlpha(_base:get('helper'):getNumber(alpha))
         end)
         return private
     end
 
     function private:initThreads()
-        _base:getClass('threadManager')
+        _base:get('threadManager')
         :add(
             nil,
             function ()
                 while true do wait(0)
                     if private:isActive() then
-                        if _base:getClass('playerManager'):isShoping() and not _base:getClass('dialogManager'):isOpened() and not _base:getClass('swipe'):isSwipe() then
-                            for _, product in ipairs(_base:getClass('productManager'):getProducts()) do
-                                _base:getClass('boxManager'):push(
+                        if _base:get('playerManager'):isShoping() and not _base:get('dialogManager'):isOpened() and not _base:get('swipe'):isSwipe() then
+                            for _, product in ipairs(_base:get('productManager'):getProducts()) do
+                                _base:get('boxManager'):push(
                                     product:getTextdraw():getX(),
                                     product:getTextdraw():getY(),
                                     product:getTextdraw():getWidth(),
                                     product:getTextdraw():getHeight(),
-                                    _base:getClass('color'):getAlpha(private:getAlpha()) .. '1f1f1f',
+                                    _base:get('color'):getAlpha(private:getAlpha()) .. '1f1f1f',
                                     0,
                                     '0x00000000',
                                     100

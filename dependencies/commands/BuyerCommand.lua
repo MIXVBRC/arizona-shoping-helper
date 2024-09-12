@@ -5,8 +5,8 @@ function class:new(_base, _name, _default, _minmax)
         ['name'] = _name,
         ['buying'] = nil,
         ['products'] = {},
-        ['minmax'] = _base:getNewClass('minMax', _minmax),
-        ['config'] = _base:getNewClass('configManager', _name, _default),
+        ['minmax'] = _base:getInit('minMax', _minmax),
+        ['config'] = _base:getInit('configManager', _name, _default),
     }
 
     -- NAME
@@ -40,14 +40,14 @@ function class:new(_base, _name, _default, _minmax)
     function this:toggleAdd()
         private.config:set('add', not this:isAdd())
         if this:isAdd() then
-            if _base:getClass('scan') ~= nil and _base:getClass('scan'):isAdd() then
-                _base:getClass('scan'):toggleAdd()
+            if _base:get('scan') ~= nil and _base:get('scan'):isAdd() then
+                _base:get('scan'):toggleAdd()
             end
-            if _base:getClass('select') ~= nil and _base:getClass('select'):isAdd() then
-                _base:getClass('select'):toggleAdd()
+            if _base:get('select') ~= nil and _base:get('select'):isAdd() then
+                _base:get('select'):toggleAdd()
             end
-            if _base:getClass('pricer') ~= nil and _base:getClass('pricer'):isAdd() then
-                _base:getClass('pricer'):toggleAdd()
+            if _base:get('pricer') ~= nil and _base:get('pricer'):isAdd() then
+                _base:get('pricer'):toggleAdd()
             end
         end
         return this
@@ -135,35 +135,35 @@ function class:new(_base, _name, _default, _minmax)
     -- INITS
 
     function private:init()
-        if _base:getClass(private:getName()) ~= nil then
-            return _base:getClass(private:getName())
+        if _base:get(private:getName()) ~= nil then
+            return _base:get(private:getName())
         end
         private:initCommands():initThreads():initEvents()
         return this
     end
 
     function private:initCommands()
-        _base:getClass('commandManager')
+        _base:get('commandManager')
         :add({private:getName(), 'active'}, this.toggleActive)
         :add({private:getName(), 'add'}, this.toggleAdd)
         :add({private:getName(), 'clear'}, function ()
             private:setProducts({})
         end)
         :add({private:getName(), 'time'}, function (time)
-            private:setTime(_base:getClass('helper'):getNumber(time))
+            private:setTime(_base:get('helper'):getNumber(time))
         end)
         return private
     end
 
     function private:initThreads()
-        _base:getClass('threadManager')
+        _base:get('threadManager')
         :add(
             nil,
             function ()
                 while true do wait(0)
-                    if _base:getClass('playerManager'):isShoping() and not _base:getClass('dialogManager'):isOpened() then
+                    if _base:get('playerManager'):isShoping() and not _base:get('dialogManager'):isOpened() then
                         local products = {}
-                        for _, product in ipairs(_base:getClass('productManager'):getProducts()) do
+                        for _, product in ipairs(_base:get('productManager'):getProducts()) do
                             if product:isScanned() and not product:isDelete() then
                                 local _product = private:getProduct(product:getCode())
                                 if _product ~= nil and product:getPrice() <= _product.price then
@@ -172,16 +172,16 @@ function class:new(_base, _name, _default, _minmax)
                             end
                         end
                         private.products = products
-                        if #products > 0 and not _base:getClass('dialogManager'):isOpened() then
+                        if #products > 0 and not _base:get('dialogManager'):isOpened() then
                             for _, product in ipairs(products) do
-                                _base:getClass('boxManager'):push(
+                                _base:get('boxManager'):push(
                                     product:getTextdraw():getX(),
                                     product:getTextdraw():getY(),
                                     product:getTextdraw():getWidth(),
                                     product:getTextdraw():getHeight(),
                                     '0x00000000',
                                     private:getBorder(),
-                                    _base:getClass('color'):getAlpha(100) .. _base:getClass('color'):get('orange'),
+                                    _base:get('color'):getAlpha(100) .. _base:get('color'):get('orange'),
                                     25
                                 )
                             end
@@ -194,8 +194,8 @@ function class:new(_base, _name, _default, _minmax)
             nil,
             function ()
                 while true do wait(0)
-                    if this:isActive() and not this:isAdd() and not _base:getClass('scan'):isScanning() then
-                        for _, product in ipairs(_base:getClass('productManager'):getProducts()) do
+                    if this:isActive() and not this:isAdd() and not _base:get('scan'):isScanning() then
+                        for _, product in ipairs(_base:get('productManager'):getProducts()) do
                             if product:isScanned() and not product:isDelete() then
                                 local _product = private:getProduct(product:getName())
                                 if _product ~= nil and not product:isDelete() and product:getPrice() <= _product.price and product:getName() == _product.name then
@@ -214,21 +214,21 @@ function class:new(_base, _name, _default, _minmax)
     end
 
     function private:initEvents()
-        _base:getClass('eventManager')
+        _base:get('eventManager')
         :add(
             'onClickProduct',
             function (product)
-                if this:isActive() and this:isAdd() and not _base:getClass('scan'):isScanning() and _base:getClass('playerManager'):isShoping() then
+                if this:isActive() and this:isAdd() and not _base:get('scan'):isScanning() and _base:get('playerManager'):isShoping() then
                     if product:isScanned() then
-                        _base:getClass('dialogManager'):show(
-                            _base:getClass('message'):get('message_dialog_title_enter_price_zero'),
+                        _base:get('dialogManager'):show(
+                            _base:get('message'):get('message_dialog_title_enter_price_zero'),
                             product:getName(),
-                            _base:getClass('message'):get('message_dialog_button_ready'),
-                            _base:getClass('message'):get('message_dialog_button_cancel'),
+                            _base:get('message'):get('message_dialog_button_ready'),
+                            _base:get('message'):get('message_dialog_button_cancel'),
                             1,
                             function (button, _, input)
                                 if button == 1 then
-                                    input = _base:getClass('helper'):getNumber(input)
+                                    input = _base:get('helper'):getNumber(input)
                                     local _product = private:getProduct(product:getName())
                                     if _product ~= nil then
                                         if input > 0 then
@@ -247,7 +247,7 @@ function class:new(_base, _name, _default, _minmax)
                             end
                         )
                     else
-                        _base:getClass('chat'):push('Товар не отсканирован!')
+                        _base:get('chat'):push('Товар не отсканирован!')
                     end
                     return false
                 end
@@ -259,14 +259,14 @@ function class:new(_base, _name, _default, _minmax)
                 if this:isActive() and this:isBuying() then
                     local product = this:getBuying()
                     if product ~= nil then
-                        local name = _base:getClass('scan'):extractNameFromDialog(text)
+                        local name = _base:get('scan'):extractNameFromDialog(text)
                         if name == product:getName() then
-                            _base:getClass('dialogManager'):send(id, 1)
+                            _base:get('dialogManager'):send(id, 1)
                         else
-                            _base:getClass('dialogManager'):close(id)
+                            _base:get('dialogManager'):close(id)
                         end
                     else
-                        _base:getClass('dialogManager'):close(id)
+                        _base:get('dialogManager'):close(id)
                     end
                     this:setBuying(nil)
                     return false
@@ -280,19 +280,19 @@ function class:new(_base, _name, _default, _minmax)
                 if this:isActive() and this:isBuying() then
                     local product = this:getBuying()
                     if product ~= nil then
-                        local name = _base:getClass('scan'):extractNameFromDialog(text)
+                        local name = _base:get('scan'):extractNameFromDialog(text)
                         if name == product:getName() then
-                            local count = _base:getClass('scan'):extractCountFromDialog(text)
-                            local enoughCount = _base:getClass('scan'):extractEnoughCountFromDialog(text)
+                            local count = _base:get('scan'):extractCountFromDialog(text)
+                            local enoughCount = _base:get('scan'):extractEnoughCountFromDialog(text)
                             if enoughCount < count then
                                 count = enoughCount
                             end
-                            _base:getClass('dialogManager'):send(id, 1, nil, count)
+                            _base:get('dialogManager'):send(id, 1, nil, count)
                         else
-                            _base:getClass('dialogManager'):close(id)
+                            _base:get('dialogManager'):close(id)
                         end
                     else
-                        _base:getClass('dialogManager'):close(id)
+                        _base:get('dialogManager'):close(id)
                     end
                     this:setBuying(nil)
                     return false
@@ -304,7 +304,7 @@ function class:new(_base, _name, _default, _minmax)
             'onShowDialogBuyProductList',
             function (id)
                 if this:isActive() and this:isBuying() then
-                    _base:getClass('dialogManager'):send(id, 1, 0)
+                    _base:get('dialogManager'):send(id, 1, 0)
                     return false
                 end
             end,

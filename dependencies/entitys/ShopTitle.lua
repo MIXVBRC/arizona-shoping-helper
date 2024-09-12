@@ -4,7 +4,7 @@ function class:new(_base, _text, _x, _y, _z)
     local private = {
         ['text'] = _text or '',
         ['player'] = 'none',
-        ['mod'] = _base:getClass('message'):get('system_shop_empty'),
+        ['mod'] = _base:get('message'):get('system_shop_empty'),
         ['position'] = {
             ['x'] = _x or 0,
             ['y'] = _y or 0,

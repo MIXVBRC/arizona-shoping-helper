@@ -4,7 +4,7 @@ function class:new(_base)
     local private = {
         ['prefix'] = '',
         ['postfix'] = '',
-        ['color'] = _base:getClass('color'):get('white'),
+        ['color'] = _base:get('color'):get('white'),
     }
 
     function this:addPrefix(prefix)

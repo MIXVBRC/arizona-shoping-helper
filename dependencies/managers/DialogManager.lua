@@ -10,7 +10,7 @@ function class:new(_base, _customDialogId)
                 ['name'] = 'onShowDialogShopAdmining',
                 ['style'] = 2,
                 ['regexp'] = {
-                    ['title'] = _base:getClass('message'):get('system_regex_find_dialog_title_shop_id'),
+                    ['title'] = _base:get('message'):get('system_regex_find_dialog_title_shop_id'),
                     ['text'] = '',
                 },
             },
@@ -18,7 +18,7 @@ function class:new(_base, _customDialogId)
                 ['name'] = 'onShowDialogBuyProduct',
                 ['style'] = 0,
                 ['regexp'] = {
-                    ['title'] = _base:getClass('message'):get('system_regex_find_dialog_title_buy_product'),
+                    ['title'] = _base:get('message'):get('system_regex_find_dialog_title_buy_product'),
                     ['text'] = '',
                 },
             },
@@ -26,7 +26,7 @@ function class:new(_base, _customDialogId)
                 ['name'] = 'onShowDialogBuyProductCount',
                 ['style'] = 1,
                 ['regexp'] = {
-                    ['title'] = _base:getClass('message'):get('system_regex_find_dialog_title_buy_product'),
+                    ['title'] = _base:get('message'):get('system_regex_find_dialog_title_buy_product'),
                     ['text'] = '',
                 },
             },
@@ -34,7 +34,7 @@ function class:new(_base, _customDialogId)
                 ['name'] = 'onShowDialogBuyProductList',
                 ['style'] = 2,
                 ['regexp'] = {
-                    ['title'] = _base:getClass('message'):get('system_regex_find_dialog_title_buy_product'),
+                    ['title'] = _base:get('message'):get('system_regex_find_dialog_title_buy_product'),
                     ['text'] = '',
                 },
             },
@@ -42,7 +42,7 @@ function class:new(_base, _customDialogId)
                 ['name'] = 'onShowDialogRemoveSaleProduct',
                 ['style'] = 0,
                 ['regexp'] = {
-                    ['title'] = _base:getClass('message'):get('system_regex_find_dialog_title_remove_sale'),
+                    ['title'] = _base:get('message'):get('system_regex_find_dialog_title_remove_sale'),
                     ['text'] = '',
                 },
             },
@@ -50,7 +50,7 @@ function class:new(_base, _customDialogId)
                 ['name'] = 'onShowDialogAdSubmittingEnterMessage',
                 ['style'] = 1,
                 ['regexp'] = {
-                    ['title'] = _base:getClass('message'):get('system_regex_find_dialog_title_ad_submitting'),
+                    ['title'] = _base:get('message'):get('system_regex_find_dialog_title_ad_submitting'),
                     ['text'] = '',
                 },
             },
@@ -58,7 +58,7 @@ function class:new(_base, _customDialogId)
                 ['name'] = 'onShowDialogAdSelectType',
                 ['style'] = 5,
                 ['regexp'] = {
-                    ['title'] = _base:getClass('message'):get('system_regex_find_dialog_title_ad_submitting'),
+                    ['title'] = _base:get('message'):get('system_regex_find_dialog_title_ad_submitting'),
                     ['text'] = '',
                 },
             },
@@ -66,7 +66,7 @@ function class:new(_base, _customDialogId)
                 ['name'] = 'onShowDialogAdSelectRadioStation',
                 ['style'] = 5,
                 ['regexp'] = {
-                    ['title'] = _base:getClass('message'):get('system_regex_find_dialog_title_select_radio_station'),
+                    ['title'] = _base:get('message'):get('system_regex_find_dialog_title_select_radio_station'),
                     ['text'] = '',
                 },
             },
@@ -74,7 +74,7 @@ function class:new(_base, _customDialogId)
                 ['name'] = 'onShowDialogAdConfirmation',
                 ['style'] = 0,
                 ['regexp'] = {
-                    ['title'] = _base:getClass('message'):get('system_regex_find_dialog_title_ad_submitting_confirmation'),
+                    ['title'] = _base:get('message'):get('system_regex_find_dialog_title_ad_submitting_confirmation'),
                     ['text'] = '',
                 },
             },
@@ -83,7 +83,7 @@ function class:new(_base, _customDialogId)
                 ['style'] = 1,
                 ['regexp'] = {
                     ['title'] = '',
-                    ['text'] = _base:getClass('message'):get('system_regex_find_dialog_text_sale_product'),
+                    ['text'] = _base:get('message'):get('system_regex_find_dialog_text_sale_product'),
                 },
             },
             {
@@ -91,7 +91,7 @@ function class:new(_base, _customDialogId)
                 ['style'] = 1,
                 ['regexp'] = {
                     ['title'] = '',
-                    ['text'] = _base:getClass('message'):get('system_regex_find_dialog_text_sale_product_count'),
+                    ['text'] = _base:get('message'):get('system_regex_find_dialog_text_sale_product_count'),
                 },
             },
         }
@@ -136,7 +136,7 @@ function class:new(_base, _customDialogId)
     function this:send(id, button, list, input)
         id = id or this:getOpenedId()
         if id ~= nil then
-            _base:getClass('eventManager'):trigger('onSendDialogResponse', id, button, list, input)
+            _base:get('eventManager'):trigger('onSendDialogResponse', id, button, list, input)
             sampSendDialogResponse(
                 id,
                 button or 0,
@@ -150,7 +150,7 @@ function class:new(_base, _customDialogId)
     function this:show(title, text, submitButtonText, closeButtonText, dialogType, execute)
         private:setOpened(true)
         private:setOpenedId(private:getCustomDialogId())
-        _base:getNewClass('dialog',
+        _base:getInit('dialog',
             private:getCustomDialogId(),
             title,
             text,
@@ -172,22 +172,21 @@ function class:new(_base, _customDialogId)
     end
 
     function private:initEvents()
-        _base:getClass('eventManager')
+        _base:get('eventManager')
         :add(
             'onShowDialog',
             function (id, style, title, button1, button2, text)
                 private:setOpened(true)
                 private:setOpenedId(id)
-                button1 = _base:getClass('helper'):removeColors(button1)
-                button2 = _base:getClass('helper'):removeColors(button2)
-                text = _base:getClass('helper'):removeColors(text)
-                title = _base:getClass('helper'):removeColors(title)
+                button1 = _base:get('helper'):removeColors(button1)
+                button2 = _base:get('helper'):removeColors(button2)
+                text = _base:get('helper'):removeColors(text)
+                title = _base:get('helper'):removeColors(title)
                 for _, event in ipairs(private:getDialogEvents()) do
                     if style == event.style
                     and ((event.regexp.title ~= '' and title:find(event.regexp.title)) or (event.regexp.text ~= '' and text:find(event.regexp.text)))
                     then
-                        -- _base:getClass('chat'):push(event.name)
-                        return _base:getClass('eventManager'):trigger(event.name, id, style, title, button1, button2, text)
+                        return _base:get('eventManager'):trigger(event.name, id, style, title, button1, button2, text)
                     end
                 end
             end,

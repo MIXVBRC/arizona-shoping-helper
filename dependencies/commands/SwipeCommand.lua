@@ -9,7 +9,7 @@ function class:new(_base, _name, _default)
             'buy',
             'sale',
         },
-        ['config'] = _base:getNewClass('configManager', _name, _default),
+        ['config'] = _base:getInit('configManager', _name, _default),
     }
 
     -- NAME
@@ -73,28 +73,28 @@ function class:new(_base, _name, _default)
     -- INITS
 
     function private:init()
-        if _base:getClass(private:getName()) ~= nil then
-            return _base:getClass(private:getName())
+        if _base:get(private:getName()) ~= nil then
+            return _base:get(private:getName())
         end
         private:initCommands():initThreads():initEvents()
         return this
     end
 
     function private:initCommands()
-        _base:getClass('commandManager')
+        _base:get('commandManager')
         :add({private:getName(), 'active'}, private.toggleActive)
         :add({private:getName(), 'mod'}, private.switchMod)
         return private
     end
 
     function private:initThreads()
-        _base:getClass('threadManager')
+        _base:get('threadManager')
         :add(
             nil,
             function ()
                 while true do wait(0)
                     if private:isActive() then
-                        if _base:getClass('playerManager'):isShoping() then
+                        if _base:get('playerManager'):isShoping() then
                             local button = private:getButton()
                             if button ~= nil and button.mod ~= private:getMod() and button.textdraw:getParent() ~= nil then
                                 sampSendClickTextdraw(button.textdraw:getParent():getId())
@@ -113,7 +113,7 @@ function class:new(_base, _name, _default)
     end
 
     function private:initEvents()
-        _base:getClass('eventManager')
+        _base:get('eventManager')
         :add(
             'onVisitShop',
             function (_, mod, textdraw)

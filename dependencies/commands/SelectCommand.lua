@@ -3,8 +3,8 @@ function class:new(_base, _name, _default, _minmax)
     local this = {}
     local private = {
         ['name'] = _name,
-        ['minmax'] = _base:getNewClass('minMax', _minmax),
-        ['config'] = _base:getNewClass('configManager', _name, _default),
+        ['minmax'] = _base:getInit('minMax', _minmax),
+        ['config'] = _base:getInit('configManager', _name, _default),
     }
 
     -- NAME
@@ -38,14 +38,14 @@ function class:new(_base, _name, _default, _minmax)
     function this:toggleAdd()
         private.config:set('add', not this:isAdd())
         if this:isAdd() then
-            if _base:getClass('scan') ~= nil and _base:getClass('scan'):isAdd() then
-                _base:getClass('scan'):toggleAdd()
+            if _base:get('scan') ~= nil and _base:get('scan'):isAdd() then
+                _base:get('scan'):toggleAdd()
             end
-            if _base:getClass('pricer') ~= nil and _base:getClass('pricer'):isAdd() then
-                _base:getClass('pricer'):toggleAdd()
+            if _base:get('pricer') ~= nil and _base:get('pricer'):isAdd() then
+                _base:get('pricer'):toggleAdd()
             end
-            if _base:getClass('buyer') ~= nil and _base:getClass('buyer'):isAdd() then
-                _base:getClass('buyer'):toggleAdd()
+            if _base:get('buyer') ~= nil and _base:get('buyer'):isAdd() then
+                _base:get('buyer'):toggleAdd()
             end
         end
         return this
@@ -126,21 +126,21 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:work()
         if this:isActive()
-        and _base:getClass('playerManager'):isShoping()
-        and not _base:getClass('dialogManager'):isOpened()
-        and not _base:getClass('swipe'):isSwipe()
+        and _base:get('playerManager'):isShoping()
+        and not _base:get('dialogManager'):isOpened()
+        and not _base:get('swipe'):isSwipe()
         then
             for _, sign in ipairs(private:getProducts()) do
-                for _, product in ipairs(_base:getClass('productManager'):getProducts()) do
+                for _, product in ipairs(_base:get('productManager'):getProducts()) do
                     if sign == product:getSign() then
-                        _base:getClass('boxManager'):push(
+                        _base:get('boxManager'):push(
                             product:getTextdraw():getX(),
                             product:getTextdraw():getY(),
                             product:getTextdraw():getWidth(),
                             product:getTextdraw():getHeight(),
                             '0x00000000',
                             private:getBorder(),
-                            _base:getClass('color'):getAlpha(private:getAlpha()) .. private:getColor(),
+                            _base:get('color'):getAlpha(private:getAlpha()) .. private:getColor(),
                             5
                         )
                     end
@@ -152,22 +152,22 @@ function class:new(_base, _name, _default, _minmax)
     -- INITS
 
     function private:init()
-        if _base:getClass(private:getName()) ~= nil then
-            return _base:getClass(private:getName())
+        if _base:get(private:getName()) ~= nil then
+            return _base:get(private:getName())
         end
         private:initCommands():initThreads():initEvents()
         return this
     end
 
     function private:initCommands()
-        _base:getClass('commandManager')
+        _base:get('commandManager')
         :add({private:getName(), 'active'}, this.toggleActive)
         :add({private:getName(), 'add'}, this.toggleAdd)
         :add({private:getName(), 'clear'}, function ()
             private:setProducts({})
         end)
         :add({private:getName(), 'border'}, function (border)
-            private:setBorder(_base:getClass('helper'):getNumber(border))
+            private:setBorder(_base:get('helper'):getNumber(border))
         end)
         :add({private:getName(), 'color'}, function (color)
             if color:find('^%w%w%w%w%w%w$') then
@@ -175,13 +175,13 @@ function class:new(_base, _name, _default, _minmax)
             end
         end)
         :add({private:getName(), 'alpha'}, function (border)
-            private:setAlpha(_base:getClass('helper'):getNumber(border))
+            private:setAlpha(_base:get('helper'):getNumber(border))
         end)
         return private
     end
 
     function private:initThreads()
-        _base:getClass('threadManager')
+        _base:get('threadManager')
         :add(
             nil,
             function ()
@@ -194,11 +194,11 @@ function class:new(_base, _name, _default, _minmax)
     end
 
     function private:initEvents()
-        _base:getClass('eventManager')
+        _base:get('eventManager')
         :add(
             'onClickProduct',
             function (product)
-                if this:isAdd() and not _base:getClass('scan'):isScanning() and _base:getClass('playerManager'):isShoping() then
+                if this:isAdd() and not _base:get('scan'):isScanning() and _base:get('playerManager'):isShoping() then
                     private:toggleProduct(product:getSign())
                     return false
                 end

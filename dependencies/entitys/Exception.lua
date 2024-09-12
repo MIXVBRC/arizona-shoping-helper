@@ -6,7 +6,7 @@ function class:new(_base, _message)
     }
 
     function private:init()
-        _base:getNewClass('error', private.message)
+        _base:getInit('error', private.message)
         error(private.message, 4)
     end
 

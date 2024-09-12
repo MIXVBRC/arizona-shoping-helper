@@ -55,7 +55,7 @@ function class:new(_base, _x, _y, _z, _title, _admin)
         if this:getTitle() ~= nil then
             return this:getTitle():getMod()
         end
-        return _base:getClass('message'):get('system_shop_empty')
+        return _base:get('message'):get('system_shop_empty')
     end
 
     function this:isEmpty()
@@ -85,14 +85,14 @@ function class:new(_base, _x, _y, _z, _title, _admin)
     end
 
     function private:init()
-        private:setPosition(_base:getClass('helper'):normalizePosition(this:getX(), this:getY(), this:getZ()))
-        private:setId(_base:getClass('helper'):md5(this:getPlayer()..this:getX()..this:getY()..this:getZ()))
+        private:setPosition(_base:get('helper'):normalizePosition(this:getX(), this:getY(), this:getZ()))
+        private:setId(_base:get('helper'):md5(this:getPlayer()..this:getX()..this:getY()..this:getZ()))
         if this:getTitle() ~= nil then
             private:setEmpty(false)
         end
-        local cacheKey = 'shop_' .. _base:getClass('helper'):md5(this:getX()..this:getY()..this:getZ())
-        if _base:getClass('cache'):get(cacheKey) == nil then
-            for _, object in ipairs(_base:getClass('helper'):getObjectsByIds(_base:getClass('shopManager'):getCentralModelIds())) do
+        local cacheKey = 'shop_' .. _base:get('helper'):md5(this:getX()..this:getY()..this:getZ())
+        if _base:get('cache'):get(cacheKey) == nil then
+            for _, object in ipairs(_base:get('helper'):getObjectsByIds(_base:get('shopManager'):getCentralModelIds())) do
                 local _, objectX, objectY, objectZ = getObjectCoordinates(object)
                 local distance = getDistanceBetweenCoords3d(
                     this:getX(), this:getY(), this:getZ(),
@@ -100,7 +100,7 @@ function class:new(_base, _x, _y, _z, _title, _admin)
                 )
                 if distance < 3 then
                     private:setCentral(true)
-                    _base:getClass('cache'):add(cacheKey, true)
+                    _base:get('cache'):add(cacheKey, true)
                 end
             end
         else

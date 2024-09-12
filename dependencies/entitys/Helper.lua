@@ -47,7 +47,7 @@ function class:new(_base, _symbols)
                 table.insert(result, private.symbols.decode[symbol] or symbol)
             end
         )
-        return _base:getClass('helper'):implode('', result)
+        return _base:get('helper'):implode('', result)
     end
 
     function this:textEncode(text)
@@ -57,7 +57,7 @@ function class:new(_base, _symbols)
                 table.insert(result, private.symbols.encode[symbol] or symbol)
             end
         )
-        return _base:getClass('helper'):implode('', result)
+        return _base:get('helper'):implode('', result)
     end
 
     function this:getObjectsByIds(ids)
@@ -136,11 +136,11 @@ function class:new(_base, _symbols)
     end
 
     function this:distanceToPlayer2d(_x, _y)
-        return getDistanceBetweenCoords2d(_base:getClass('playerManager'):getX(), _base:getClass('playerManager'):getY(), _x, _y)
+        return getDistanceBetweenCoords2d(_base:get('playerManager'):getX(), _base:get('playerManager'):getY(), _x, _y)
     end
 
     function this:distanceToPlayer3d(_x, _y, _z)
-        return getDistanceBetweenCoords3d(_base:getClass('playerManager'):getX(), _base:getClass('playerManager'):getY(), _base:getClass('playerManager'):getZ(), _x, _y, _z)
+        return getDistanceBetweenCoords3d(_base:get('playerManager'):getX(), _base:get('playerManager'):getY(), _base:get('playerManager'):getZ(), _x, _y, _z)
     end
 
     function this:explode(separator, text)

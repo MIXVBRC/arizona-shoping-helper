@@ -232,6 +232,7 @@ local data = {
                     'ShopingHelper_langs',
                     {
                         ['rus'] = {
+                            ['system_textdraw_inventory'] = '»Õ¬≈Õ“¿–‹',
                             ['system_textdraw_shop_mod_buy'] = 'œ–Œƒ¿∆¿',
                             ['system_textdraw_shop_mod_sale'] = '— ”œ ¿',
                             ['system_textdraw_shop_shoping'] = 'Ã¿√¿«»Õ',
@@ -559,6 +560,7 @@ local data = {
                     'radius',
                     {
                         ['active'] = false,
+                        ['player'] = false,
                         ['polygons'] = 24,
                         ['distance'] = 30,
                         ['colors'] = {
@@ -746,29 +748,29 @@ local data = {
                     },
                 },
             },
-            {
-                ['name'] = 'buyer',
-                ['path'] = 'dependencies.commands.BuyerCommand',
-                ['sort'] = 4000,
-                ['init'] = true,
-                ['args'] = {
-                    'buyer',
-                    {
-                        ['active'] = false,
-                        ['add'] = false,
-                        ['time'] = 500,
-                    },
-                    {
-                        ['price'] = {
-                            ['min'] = 10,
-                        },
-                        ['time'] = {
-                            ['min'] = 200,
-                            ['max'] = 1000,
-                        },
-                    },
-                },
-            },
+            -- {
+            --     ['name'] = 'buyer',
+            --     ['path'] = 'dependencies.commands.BuyerCommand',
+            --     ['sort'] = 4000,
+            --     ['init'] = true,
+            --     ['args'] = {
+            --         'buyer',
+            --         {
+            --             ['active'] = false,
+            --             ['add'] = false,
+            --             ['time'] = 500,
+            --         },
+            --         {
+            --             ['price'] = {
+            --                 ['min'] = 10,
+            --             },
+            --             ['time'] = {
+            --                 ['min'] = 200,
+            --                 ['max'] = 1000,
+            --             },
+            --         },
+            --     },
+            -- },
         },
     }
 }
@@ -812,16 +814,16 @@ function class:new(_name, _author, _version, _url, _command, _entities)
 
     -- CLASSES
 
-    function this:getClass(name)
+    function this:get(name)
         return private.classes[name]
     end
 
-    function private:addClass(name, _class)
+    function private:add(name, _class)
         private.classes[name] = _class
         return this
     end
 
-    function this:getNewClass(name, ...)
+    function this:getInit(name, ...)
         return this:getObject(name):new(this, ...)
     end
 
@@ -842,7 +844,7 @@ function class:new(_name, _author, _version, _url, _command, _entities)
     function private:initCommands()
         for _, entity in ipairs(private:getEntities()) do
             if entity.init then
-                private:addClass(entity.name, this:getNewClass(entity.name, table.unpack(entity.args)))
+                private:add(entity.name, this:getInit(entity.name, table.unpack(entity.args)))
             end
         end
         return private
@@ -862,8 +864,8 @@ function main()
             value.command,
             value.entities
         )
-        script:getClass('chat'):setColor(script:getClass('color'):get('orange'))
-        script:getClass('chat'):addPrefix('[' .. value.name .. ']: ')
-        script:getClass('chat'):push('{' .. script:getClass('color'):get('white') .. '}' .. value.name)
+        script:get('chat'):setColor(script:get('color'):get('orange'))
+        script:get('chat'):addPrefix('[' .. value.name .. ']: ')
+        script:get('chat'):push('{' .. script:get('color'):get('white') .. '}' .. value.name)
     end
 end

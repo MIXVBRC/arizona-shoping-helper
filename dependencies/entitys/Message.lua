@@ -3,7 +3,7 @@ function class:new(_base, _lang, _name, _default)
     local this = {}
     local private = {
         ['lang'] = _lang,
-        ['config'] = _base:getNewClass('config', _name, _default),
+        ['config'] = _base:getInit('config', _name, _default),
     }
 
     function private:getLang()
@@ -26,7 +26,7 @@ function class:new(_base, _lang, _name, _default)
 
     -- TODO: replase Color:getAll() to Color:get(color_name)
     function private:replaceColor(text)
-        for name, color in pairs(_base:getClass('color'):getAll()) do
+        for name, color in pairs(_base:get('color'):getAll()) do
             text = text:gsub('{'..name..'}', '{'..color..'}')
         end
         return text

@@ -49,14 +49,14 @@ function class:new(_base, _id, _title, _text, _submitButtonText, _closeButtonTex
         if this:getDialogType() == 0 or this:getDialogType() == 1 or this:getDialogType() == 3 then
             text = this:getText()
         elseif this:getDialogType() == 2 then
-            text = _base:getClass('helper'):implode('\n', this:getText())
+            text = _base:get('helper'):implode('\n', this:getText())
         else
             text = ''
             for _, value in ipairs(this:getText()) do
                 if text == '' then
-                    text = _base:getClass('helper'):implode('\t', value)
+                    text = _base:get('helper'):implode('\t', value)
                 else
-                    text = text .. '\n' .. _base:getClass('helper'):implode('\t', value)
+                    text = text .. '\n' .. _base:get('helper'):implode('\t', value)
                 end
             end
         end
@@ -74,7 +74,7 @@ function class:new(_base, _id, _title, _text, _submitButtonText, _closeButtonTex
     end
 
     function private:initThreads()
-        _base:getClass('threadManager')
+        _base:get('threadManager')
         :add(
             nil,
             function ()

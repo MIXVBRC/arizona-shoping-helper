@@ -6,8 +6,8 @@ function this:new(_base, _name, _default, _minmax)
         ['pushing'] = false,
         ['id'] = nil,
         ['shop'] = nil,
-        ['minmax'] = _base:getNewClass('minMax', _minmax),
-        ['config'] = _base:getNewClass('configManager', _name, _default),
+        ['minmax'] = _base:getInit('minMax', _minmax),
+        ['config'] = _base:getInit('configManager', _name, _default),
     }
 
     -- TODO: вместо 1 сообщения сделать возможность отправки нескольких сообщений в виде очереди (разнообразие)
@@ -169,15 +169,15 @@ function this:new(_base, _name, _default, _minmax)
     -- INITS
 
     function private:init()
-        if _base:getClass(private:getName()) ~= nil then
-            return _base:getClass(private:getName())
+        if _base:get(private:getName()) ~= nil then
+            return _base:get(private:getName())
         end
         private:initCommands():initEvents():initThreads()
         return class
     end
 
     function private:initCommands()
-        _base:getClass('commandManager')
+        _base:get('commandManager')
         :add({private:getName(), 'active'}, private.toggleActive)
         :add({private:getName(), 'push'}, function ()
             private:setPushAt(0)
@@ -186,7 +186,7 @@ function this:new(_base, _name, _default, _minmax)
             private:setMessage(message)
         end)
         :add({private:getName(), 'time'}, function (time)
-            time = _base:getClass('helper'):getNumber(time)
+            time = _base:get('helper'):getNumber(time)
             if private:getPushAt() > 0 then
                 private:setPushAt(private:getPushAt() - (private:getTime() - time) * 60)
             end
@@ -194,23 +194,23 @@ function this:new(_base, _name, _default, _minmax)
         end)
         :add({private:getName(), 'left'}, function ()
             if not private:isActive() then
-                _base:getClass('chat'):push(_base:getClass('message'):get('message_ad_push_error_active'))
+                _base:get('chat'):push(_base:get('message'):get('message_ad_push_error_active'))
             end
             if not private:checkChats() then
-                _base:getClass('chat'):push(_base:getClass('message'):get('message_ad_push_error_chats'))
+                _base:get('chat'):push(_base:get('message'):get('message_ad_push_error_chats'))
             end
             if private:getMessage() == '' then
-                _base:getClass('chat'):push(_base:getClass('message'):get('message_ad_push_error_message'))
+                _base:get('chat'):push(_base:get('message'):get('message_ad_push_error_message'))
             end
             if private:getId() == nil then
-                _base:getClass('chat'):push(_base:getClass('message'):get('message_ad_push_error_number'))
+                _base:get('chat'):push(_base:get('message'):get('message_ad_push_error_number'))
             end
-            _base:getClass('chat'):push(_base:getClass('message'):get('message_ad_next_push_time', {
+            _base:get('chat'):push(_base:get('message'):get('message_ad_next_push_time', {
                 private:getRemainingTime()
             }))
         end)
         for _, chat in ipairs(private:getChats()) do
-            _base:getClass('commandManager'):add({private:getName(), 'active', chat.name}, function ()
+            _base:get('commandManager'):add({private:getName(), 'active', chat.name}, function ()
                 private:toggleChat(chat.name)
             end)
         end
@@ -218,9 +218,9 @@ function this:new(_base, _name, _default, _minmax)
     end
 
     function private:initEvents()
-        _base:getClass('eventManager')
+        _base:get('eventManager')
         :add(
-            'onEnterShopAdmining',
+            'onOpenShopAdminingList',
             function (shop, id)
                 private:setId(id)
                 private:setShop(shop)
@@ -230,7 +230,7 @@ function this:new(_base, _name, _default, _minmax)
             'onShowDialog',
             function (id)
                 if private:isPushing() then
-                    _base:getClass('dialogManager'):send(id, 1)
+                    _base:get('dialogManager'):send(id, 1)
                     private:setPushing(false)
                     return false
                 end
@@ -241,12 +241,12 @@ function this:new(_base, _name, _default, _minmax)
     end
 
     function private:initThreads()
-        _base:getClass('threadManager')
+        _base:get('threadManager')
         :add(
             nil,
             function ()
                 while true do wait(1000)
-                    if private:isActive() and not _base:getClass('dialogManager'):isOpened() and not _base:getClass('playerManager'):isShoping() and not _base:getClass('playerManager'):isAdmining() then
+                    if private:isActive() and not _base:get('dialogManager'):isOpened() and not _base:get('playerManager'):isShoping() and not _base:get('playerManager'):isAdmining() then
                         if private:checkChats() and private:getPushAt() <= os.time() then
                             private:setPushAt(os.time() + private:getTime() * 60)
                             if private:getMessage() ~= '' and private:getId() ~= nil then
@@ -256,25 +256,25 @@ function this:new(_base, _name, _default, _minmax)
                                 }
                                 local message = ''
                                 if private:getShop() ~= nil and private:getShop():isCentral() then
-                                    message = _base:getClass('message'):get('message_ad_push_central_market', data)
+                                    message = _base:get('message'):get('message_ad_push_central_market', data)
                                 else
-                                    message = _base:getClass('message'):get('message_ad_push', data)
+                                    message = _base:get('message'):get('message_ad_push', data)
                                 end
                                 for _, chat in ipairs(private:getChats()) do
                                     if chat.active then
                                         private:setPushing(true)
-                                        sampProcessChatInput(_base:getClass('helper'):implode(' ', {'/'..chat.name, message}))
+                                        sampProcessChatInput(_base:get('helper'):implode(' ', {'/'..chat.name, message}))
                                         wait(500)
                                     end
                                 end
                             else
                                 if private:getMessage() == '' then
-                                    _base:getClass('chat'):push(_base:getClass('message'):get('message_ad_push_error_message'))
+                                    _base:get('chat'):push(_base:get('message'):get('message_ad_push_error_message'))
                                 elseif private:getId() == nil then
-                                    _base:getClass('chat'):push(_base:getClass('message'):get('message_ad_push_error_number'))
+                                    _base:get('chat'):push(_base:get('message'):get('message_ad_push_error_number'))
                                 end
                             end
-                            _base:getClass('chat'):push(_base:getClass('message'):get('message_ad_next_push_time', {
+                            _base:get('chat'):push(_base:get('message'):get('message_ad_next_push_time', {
                                 private:getRemainingTime()
                             }))
                             private:setPushing(false)

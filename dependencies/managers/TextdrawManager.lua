@@ -32,7 +32,7 @@ function class:new(_base)
     function private:pushDeleteTextdrawsEvent(textdraws)
         if #textdraws > 0 then
             for _, textdraw in ipairs(textdraws) do
-                _base:getClass('eventManager'):trigger('onDeleteÑlickableTextdraw', textdraw)
+                _base:get('eventManager'):trigger('onDeleteÑlickableTextdraw', textdraw)
             end
         end
         return this
@@ -46,11 +46,11 @@ function class:new(_base)
     end
 
     function private:initEvents()
-        _base:getClass('eventManager')
+        _base:get('eventManager')
         :add(
             'onShowTextDraw',
             function (id, data)
-                local newTextdraw = _base:getNewClass('textdraw',
+                local newTextdraw = _base:getInit('textdraw',
                     id,
                     data.modelId,
                     data.text,
@@ -77,7 +77,7 @@ function class:new(_base)
                             and textdraw:getY() + textdraw:getHeight() > newTextdraw:getY()
                             then
                                 textdraw:addChild(newTextdraw)
-                                _base:getClass('eventManager'):trigger('onTextdrawAddChild', textdraw, newTextdraw)
+                                _base:get('eventManager'):trigger('onTextdrawAddChild', textdraw, newTextdraw)
                             end
                         end
                     end
@@ -87,7 +87,7 @@ function class:new(_base)
                 end
                 private:pushDeleteTextdrawsEvent(deleteTextdraws)
                 private:setTextdraws(textdraws)
-                _base:getClass('eventManager'):trigger('onCreateTextdraw', newTextdraw)
+                _base:get('eventManager'):trigger('onCreateTextdraw', newTextdraw)
             end
         )
         :add(
@@ -115,7 +115,7 @@ function class:new(_base)
     end
 
     function private:initThreads()
-        _base:getClass('threadManager')
+        _base:get('threadManager')
         :add(
             nil,
             function ()

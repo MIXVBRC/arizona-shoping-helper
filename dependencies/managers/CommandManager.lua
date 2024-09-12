@@ -16,16 +16,16 @@ function class:new(_base)
 
     function this:getCommandName(_name)
         if type(_name) == 'table' then
-            _name = _base:getClass('helper'):implode('-', _name)
+            _name = _base:get('helper'):implode('-', _name)
         end
-        return _base:getClass('helper'):implode('-', {_base:getCommand(), _name})
+        return _base:get('helper'):implode('-', {_base:getCommand(), _name})
     end
 
     function this:getCommandMessageName(_name)
         if type(_name) == 'table' then
-            _name = _base:getClass('helper'):implode('_', _name)
+            _name = _base:get('helper'):implode('_', _name)
         end
-        return 'command_' .. _base:getClass('helper'):implode('_', {_base:getCommand(), _name}) .. '_description'
+        return 'command_' .. _base:get('helper'):implode('_', {_base:getCommand(), _name}) .. '_description'
     end
 
     function this:add(_name, _function)

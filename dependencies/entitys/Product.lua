@@ -61,7 +61,7 @@ function class:new(_base, _name, _code, _price, _count, _textdraw)
     end
 
     function private:initThreads()
-        _base:getClass('threadManager')
+        _base:get('threadManager')
         :add(
             nil,
             function ()
