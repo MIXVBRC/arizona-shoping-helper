@@ -14,13 +14,15 @@ function class:new(_base, _x, _y, _z, _title, _admin)
         ['admin'] = _admin,
     }
 
+    -- PARAMS
+
     function this:getId()
         return private.id
     end
 
     function private:setId(id)
         private.id = id
-        return this
+        return private
     end
 
     function this:getPosition()
@@ -41,7 +43,7 @@ function class:new(_base, _x, _y, _z, _title, _admin)
 
     function private:setPosition(position)
         private.position = position
-        return this
+        return private
     end
 
     function this:getPlayer()
@@ -64,7 +66,7 @@ function class:new(_base, _x, _y, _z, _title, _admin)
 
     function private:setEmpty(bool)
         private.empty = bool
-        return this
+        return private
     end
 
     function this:isCentral()
@@ -73,7 +75,7 @@ function class:new(_base, _x, _y, _z, _title, _admin)
 
     function private:setCentral(bool)
         private.central = bool
-        return this
+        return private
     end
 
     function this:getTitle()
@@ -84,12 +86,31 @@ function class:new(_base, _x, _y, _z, _title, _admin)
         return private.admin
     end
 
+    -- INITS
+
     function private:init()
+        private:initPosition():initId():initEmpty():initCentral()
+        return this
+    end
+
+    function private:initPosition()
         private:setPosition(_base:get('helper'):normalizePosition(this:getX(), this:getY(), this:getZ()))
+        return private
+    end
+
+    function private:initId()
         private:setId(_base:get('helper'):md5(this:getPlayer()..this:getX()..this:getY()..this:getZ()))
+        return private
+    end
+
+    function private:initEmpty()
         if this:getTitle() ~= nil then
             private:setEmpty(false)
         end
+        return private
+    end
+
+    function private:initCentral()
         local cacheKey = 'shop_' .. _base:get('helper'):md5(this:getX()..this:getY()..this:getZ())
         if _base:get('cache'):get(cacheKey) == nil then
             for _, object in ipairs(_base:get('helper'):getObjectsByIds(_base:get('shopManager'):getCentralModelIds())) do
@@ -106,9 +127,9 @@ function class:new(_base, _x, _y, _z, _title, _admin)
         else
             private:setCentral(true)
         end
+        return private
     end
 
-    private:init()
-    return this
+    return private:init()
 end
 return class

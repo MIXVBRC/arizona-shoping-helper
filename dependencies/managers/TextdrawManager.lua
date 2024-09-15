@@ -3,8 +3,6 @@ function class:new(_base)
     local this = {}
     local private = {
         ['textdraws'] = {},
-        ['idLinks'] = {},
-        ['all'] = {},
     }
 
     -- TEXTDRAWS
@@ -15,7 +13,7 @@ function class:new(_base)
 
     function private:setTextdraws(textdraws)
         private.textdraws = textdraws or {}
-        return this
+        return private
     end
 
     function this:getTextdrawById(id)
@@ -35,14 +33,14 @@ function class:new(_base)
                 _base:get('eventManager'):trigger('onDelete—lickableTextdraw', textdraw)
             end
         end
-        return this
+        return private
     end
 
     -- INITS
 
     function private:init()
-        private:initEvents()
-        private:initThreads()
+        private:initEvents():initThreads()
+        return this
     end
 
     function private:initEvents()
@@ -112,6 +110,7 @@ function class:new(_base)
                 end
             end
         )
+        return private
     end
 
     function private:initThreads()
@@ -136,9 +135,9 @@ function class:new(_base)
                 end
             end
         )
+        return private
     end
 
-    private:init()
-    return this
+    return private:init()
 end
 return class

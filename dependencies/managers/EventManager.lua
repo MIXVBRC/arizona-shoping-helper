@@ -1,6 +1,6 @@
-local this = {}
-function this:new(_base)
-    local class = {}
+local class = {}
+function class:new(_base)
+    local this = {}
     local private = {
         ['base'] = 'onEvent',
         ['triggers'] = {},
@@ -10,21 +10,21 @@ function this:new(_base)
         return private.base
     end
 
-    function class:add(name, trigger, sort)
+    function this:add(name, trigger, sort)
         private.triggers[name] = private.triggers[name] or {}
         table.insert(private.triggers[name], {
             ['sort'] = sort or 100,
             ['entity'] = trigger,
         })
         table.sort(private.triggers[name], function (a, b) return a.sort < b.sort end)
-        return class
+        return this
     end
 
-    function class:trigger(name, ...)
+    function this:trigger(name, ...)
         local result = nil
         local triggers = private.triggers[name]
         if name ~= private:getBaseEvent() then
-            result = class:trigger(private:getBaseEvent(), name, ...)
+            result = this:trigger(private:getBaseEvent(), name, ...)
             if result ~= nil then
                 return result
             end
@@ -44,23 +44,32 @@ function this:new(_base)
     function private:init()
         local events = _base:getObject('events')
         function events.onShowTextDraw(...)
-            return class:trigger('onShowTextDraw', ...)
+            return this:trigger('onShowTextDraw', ...)
         end
         function events.onTextDrawSetString(...)
-            return class:trigger('onTextDrawSetString', ...)
+            return this:trigger('onTextDrawSetString', ...)
         end
         function events.onSendClickTextDraw(...)
-            return class:trigger('onSendClickTextDraw', ...)
+            return this:trigger('onSendClickTextDraw', ...)
         end
         function events.onShowDialog(...)
-            return class:trigger('onShowDialog', ...)
+            return this:trigger('onShowDialog', ...)
         end
         function events.onSendDialogResponse(...)
-            return class:trigger('onSendDialogResponse', ...)
+            return this:trigger('onSendDialogResponse', ...)
         end
+        function events.onServerMessage(...)
+            return this:trigger('onServerMessage', ...)
+        end
+        function events.onSendChat(...)
+            return this:trigger('onSendChat', ...)
+        end
+        function events.onSendCommand(...)
+            return this:trigger('onSendCommand', ...)
+        end
+        return this
     end
 
-    private:init()
-    return class
+    return private:init()
 end
-return this
+return class

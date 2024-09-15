@@ -16,7 +16,7 @@ function class:new(_base, _name, _default, _minmax)
         return private.name
     end
 
-    -- NAME
+    -- RADIUS
 
     function private:getRadius()
         return private.radius
@@ -30,10 +30,10 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:toggleActive()
         private.config:set('active', not private:isActive())
-        return this
+        return private
     end
 
-    -- ACTIVE
+    -- PLAYER
 
     function private:isPlayer()
         return private.config:get('player')
@@ -41,7 +41,7 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:togglePlayer()
         private.config:set('player', not private:isPlayer())
-        return this
+        return private
     end
 
     -- POLYGONS
@@ -52,7 +52,7 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:setPolygons(polygons)
         private.config:set('polygons', private.minmax:get(polygons, 'polygons'))
-        return this
+        return private
     end
 
     -- DISTANCE
@@ -63,7 +63,7 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:setDistance(distance)
         private.config:set('distance', private.minmax:get(distance, 'distance'))
-        return this
+        return private
     end
 
     -- COLOR
@@ -172,58 +172,6 @@ function class:new(_base, _name, _default, _minmax)
         end
     end
 
-    -- WORK
-
-    function private:work()
-        local segments = private.cache:get('segments')
-        if segments == nil then
-            local shops = private:getShops()
-            local cacheName = private:getPolygons()
-            for _, shop in ipairs(shops) do
-                cacheName = cacheName .. shop:getId()
-            end
-            cacheName = _base:get('helper'):md5(cacheName)
-            local points = private.cache:get('points_'..cacheName)
-            if points == nil then
-                points = {}
-                local circleManager = _base:getNew('circleManager')
-                for _, circle in ipairs(private:getCircles(shops)) do
-                    circleManager:create(
-                        circle.position.x,
-                        circle.position.y,
-                        circle.position.z,
-                        circle.radius,
-                        circle.polygons
-                    )
-                end
-                circleManager:booleanUnion()
-                for index, circle in ipairs(circleManager:getAll()) do
-                    points[index] = {}
-                    for _, point in ipairs(circle:getPoints()) do
-                        table.insert(points[index], private:getOmitPoint(point))
-                    end
-                end
-                private.cache:add('points_'..cacheName, points, 60)
-            end
-            segments = private:getSegments(points)
-            private.cache:add('segments', segments, 1)
-        end
-        private:drawSegments(segments)
-        local shop = _base:get('shopManager'):getNearby(private:isPlayer())
-        if shop ~= nil and not shop:isCentral() then
-            if shop:getAdmin() ~= nil then
-                local distance = _base:get('helper'):distanceToPlayer2d(shop:getAdmin():getX(), shop:getAdmin():getY())
-                if distance < 6 then
-                    private.lowPoint:setColor(private:getColor('green'))
-                    if distance <= private:getRadius() then
-                        private.lowPoint:setColor(private:getColor('red'))
-                    end
-                    private.lowPoint:render()
-                end
-            end
-        end
-    end
-
     -- INITS
 
     function private:init()
@@ -254,7 +202,53 @@ function class:new(_base, _name, _default, _minmax)
             function ()
                 while true do wait(0)
                     if private:isActive() and not _base:get('playerManager'):isSAI() then
-                        private:work()
+                        local segments = private.cache:get('segments')
+                        if segments == nil then
+                            local shops = private:getShops()
+                            local cacheName = private:getPolygons()
+                            for _, shop in ipairs(shops) do
+                                cacheName = cacheName .. shop:getId()
+                            end
+                            cacheName = _base:get('helper'):md5(cacheName)
+                            local points = private.cache:get('points_'..cacheName)
+                            if points == nil then
+                                points = {}
+                                local circleManager = _base:getNew('circleManager')
+                                for _, circle in ipairs(private:getCircles(shops)) do
+                                    circleManager:create(
+                                        circle.position.x,
+                                        circle.position.y,
+                                        circle.position.z,
+                                        circle.radius,
+                                        circle.polygons
+                                    )
+                                end
+                                circleManager:booleanUnion()
+                                for index, circle in ipairs(circleManager:getAll()) do
+                                    points[index] = {}
+                                    for _, point in ipairs(circle:getPoints()) do
+                                        table.insert(points[index], private:getOmitPoint(point))
+                                    end
+                                end
+                                private.cache:add('points_'..cacheName, points, 60)
+                            end
+                            segments = private:getSegments(points)
+                            private.cache:add('segments', segments, 1)
+                        end
+                        private:drawSegments(segments)
+                        local shop = _base:get('shopManager'):getNearby(private:isPlayer(), true)
+                        if shop ~= nil and not shop:isCentral() then
+                            if shop:getAdmin() ~= nil then
+                                local distance = _base:get('helper'):distanceToPlayer2d(shop:getAdmin():getX(), shop:getAdmin():getY())
+                                if distance < 6 then
+                                    private.lowPoint:setColor(private:getColor('green'))
+                                    if distance <= private:getRadius() then
+                                        private.lowPoint:setColor(private:getColor('red'))
+                                    end
+                                    private.lowPoint:render()
+                                end
+                            end
+                        end
                     end
                 end
             end

@@ -4,7 +4,6 @@ function class:new(_base, _name, _default, _minmax)
     local private = {
         ['name'] = _name,
         ['lastShopId'] = nil,
-        ['checkTime'] = 60,
         ['minmax'] = _base:getNew('minMax', _minmax),
         ['config'] = _base:getNew('configManager', _name, _default),
         ['cache'] = _base:getNew('cache'),
@@ -24,7 +23,7 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:toggleActive()
         private.config:set('active', not private:isActive())
-        return this
+        return private
     end
 
     -- DISTANCE
@@ -35,7 +34,7 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:setDistance(distance)
         private.config:set('distance', private.minmax:get(distance, 'distance'))
-        return this
+        return private
     end
 
     -- TIME
@@ -46,7 +45,7 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:setTime(time)
         private.config:set('time', private.minmax:get(time, 'time'))
-        return this
+        return private
     end
 
     -- COLOR
@@ -63,13 +62,7 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:setLastShopId(id)
         private.lastShopId = id
-        return this
-    end
-
-    -- CHECK TIME
-
-    function private:getCheckTime()
-        return private.checkTime
+        return private
     end
 
     -- HIDINGS
@@ -80,7 +73,7 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:setHidings(hidings)
         private.config:set('hiding', hidings)
-        return this
+        return private
     end
 
     function private:getHiding(name)
@@ -100,7 +93,7 @@ function class:new(_base, _name, _default, _minmax)
             end
         end
         private:setHidings(hidings)
-        return this
+        return private
     end
 
     function private:isHidingActive(name)
@@ -139,7 +132,7 @@ function class:new(_base, _name, _default, _minmax)
         local shops = private:getShops()
         table.insert(shops, shop)
         private:setShops(shops)
-        return this
+        return private
     end
 
     function private:changeShop(id, data)
@@ -154,87 +147,7 @@ function class:new(_base, _name, _default, _minmax)
             end
         end
         private:setShops(shops)
-        return this
-    end
-
-    -- WORK
-
-    function private:work()
-        local time = os.time()
-        local shops = _base:get('shopManager'):getShops()
-        local renders = private.cache:get('renders')
-        if renders == nil then
-            renders = {}
-            local timeNow = os.time()
-            for _, shop in ipairs(shops) do
-                local render = {
-                    ['text'] = '',
-                    ['color'] = private:getColor('while'),
-                    ['polygons'] = 4,
-                    ['rotation'] = 0,
-                    ['x'] = shop:getX(),
-                    ['y'] = shop:getY(),
-                    ['z'] = shop:getZ() + 0.16,
-                }
-                local shopTypes = {'player'}
-                if _base:get('playerManager'):getName() == shop:getPlayer() then
-                    shopTypes = {'player'}
-                    render.color = private:getColor('player')
-                    render.polygons = 3
-                    render.rotation = 180
-                elseif shop:getMod() == _base:get('message'):get('system_shop_sell') then
-                    shopTypes = {'sell'}
-                    render.color = private:getColor('sell')
-                elseif shop:getMod() == _base:get('message'):get('system_shop_buy') then
-                    shopTypes = {'buy'}
-                    render.color = private:getColor('buy')
-                elseif shop:getMod() == _base:get('message'):get('system_shop_sell_buy') then
-                    shopTypes = {'sell','buy'}
-                    render.color = private:getColor('sell_buy')
-                elseif shop:getMod() == _base:get('message'):get('system_shop_edit') then
-                    shopTypes = {'edit'}
-                    render.color = private:getColor('edit')
-                elseif shop:getMod() == _base:get('message'):get('system_shop_empty') then
-                    shopTypes = {'empty'}
-                    render.color = private:getColor('empty')
-                end
-                local show = false
-                local visitShop = private:getShop(shop:getId())
-                if visitShop ~= nil then
-                    if time <= visitShop.time and (visitShop.mod == shop:getMod() or visitShop.mod == _base:get('message'):get('system_shop_edit')) then
-                        shopTypes = {'visit'}
-                        render.color = private:getColor('visit')
-                        if private:isHidingActive('time') then
-                            render.text = math.ceil((visitShop.time - timeNow) / 60) .. ' min'
-                        end
-                    else
-                        private:changeShop(shop:getId(), {
-                            ['time'] = 0,
-                            ['mod'] = shop:getMod(),
-                        })
-                    end
-                    if visitShop.select then
-                        render.color = private:getColor('select')
-                        render.polygons = 3
-                        render.rotation = 180
-                        render.text = visitShop.text
-                        show = true
-                    end
-                end
-                if not show then
-                    for _, shopType in ipairs(shopTypes) do
-                        if private:isHidingActive(shopType) then
-                            show = true
-                        end
-                    end
-                end
-                if show then
-                    table.insert(renders, render)
-                end
-            end
-            private.cache:add('renders', renders, 1)
-        end
-        private:render(renders)
+        return private
     end
 
     function private:render(renders)
@@ -252,6 +165,7 @@ function class:new(_base, _name, _default, _minmax)
                 end
             end
         end
+        return private
     end
 
     -- INITS
@@ -321,7 +235,81 @@ function class:new(_base, _name, _default, _minmax)
                     and not _base:get('playerManager'):isSAI()
                     and not _base:get('dialogManager'):isOpened()
                     then
-                        private:work()
+                        local time = os.time()
+                        local shops = _base:get('shopManager'):getShops()
+                        local renders = private.cache:get('renders')
+                        if renders == nil then
+                            renders = {}
+                            local timeNow = os.time()
+                            for _, shop in ipairs(shops) do
+                                local render = {
+                                    ['text'] = '',
+                                    ['color'] = private:getColor('while'),
+                                    ['polygons'] = 4,
+                                    ['rotation'] = 0,
+                                    ['x'] = shop:getX(),
+                                    ['y'] = shop:getY(),
+                                    ['z'] = shop:getZ() + 0.16,
+                                }
+                                local shopTypes = {'player'}
+                                if _base:get('playerManager'):getName() == shop:getPlayer() then
+                                    shopTypes = {'player'}
+                                    render.color = private:getColor('player')
+                                    render.polygons = 3
+                                    render.rotation = 180
+                                elseif shop:getMod() == _base:get('message'):get('system_shop_sell') then
+                                    shopTypes = {'sell'}
+                                    render.color = private:getColor('sell')
+                                elseif shop:getMod() == _base:get('message'):get('system_shop_buy') then
+                                    shopTypes = {'buy'}
+                                    render.color = private:getColor('buy')
+                                elseif shop:getMod() == _base:get('message'):get('system_shop_sell_buy') then
+                                    shopTypes = {'sell','buy'}
+                                    render.color = private:getColor('sell_buy')
+                                elseif shop:getMod() == _base:get('message'):get('system_shop_edit') then
+                                    shopTypes = {'edit'}
+                                    render.color = private:getColor('edit')
+                                elseif shop:getMod() == _base:get('message'):get('system_shop_empty') then
+                                    shopTypes = {'empty'}
+                                    render.color = private:getColor('empty')
+                                end
+                                local show = false
+                                local visitShop = private:getShop(shop:getId())
+                                if visitShop ~= nil then
+                                    if time <= visitShop.time and (visitShop.mod == shop:getMod() or visitShop.mod == _base:get('message'):get('system_shop_edit')) then
+                                        shopTypes = {'visit'}
+                                        render.color = private:getColor('visit')
+                                        if private:isHidingActive('time') then
+                                            render.text = math.ceil((visitShop.time - timeNow) / 60) .. ' min'
+                                        end
+                                    else
+                                        private:changeShop(shop:getId(), {
+                                            ['time'] = 0,
+                                            ['mod'] = shop:getMod(),
+                                        })
+                                    end
+                                    if visitShop.select then
+                                        render.color = private:getColor('select')
+                                        render.polygons = 3
+                                        render.rotation = 180
+                                        render.text = visitShop.text
+                                        show = true
+                                    end
+                                end
+                                if not show then
+                                    for _, shopType in ipairs(shopTypes) do
+                                        if private:isHidingActive(shopType) then
+                                            show = true
+                                        end
+                                    end
+                                end
+                                if show then
+                                    table.insert(renders, render)
+                                end
+                            end
+                            private.cache:add('renders', renders, 1)
+                        end
+                        private:render(renders)
                     end
                 end
             end
@@ -329,7 +317,7 @@ function class:new(_base, _name, _default, _minmax)
         :add(
             nil,
             function ()
-                while true do wait(1000 * private:getCheckTime())
+                while true do wait(1000 * 60)
                     local time = os.time()
                     local flag = false
                     local shops = {}
@@ -352,26 +340,29 @@ function class:new(_base, _name, _default, _minmax)
     function private:initEvents()
         _base:get('eventManager')
         :add(
-            'onVisitShop',
-            function (shop)
-                private:setLastShopId(shop:getId())
-                local time = os.time() + ( private:getTime() * 60 )
-                if private:getShop(shop:getId()) ~= nil then
-                    private:changeShop(
-                        shop:getId(),
-                        {
+            'onEnterShop',
+            function ()
+                local shop = _base:get('shopManager'):getNearby()
+                if shop ~= nil then
+                    private:setLastShopId(shop:getId())
+                    local time = os.time() + ( private:getTime() * 60 )
+                    if private:getShop(shop:getId()) ~= nil then
+                        private:changeShop(
+                            shop:getId(),
+                            {
+                                ['time'] = time,
+                                ['mod'] = shop:getMod(),
+                            }
+                        )
+                    else
+                        private:addShop({
+                            ['id'] = shop:getId(),
                             ['time'] = time,
                             ['mod'] = shop:getMod(),
-                        }
-                    )
-                else
-                    private:addShop({
-                        ['id'] = shop:getId(),
-                        ['time'] = time,
-                        ['mod'] = shop:getMod(),
-                        ['select'] = false,
-                        ['text'] = '',
-                    })
+                            ['select'] = false,
+                            ['text'] = '',
+                        })
+                    end
                 end
             end
         )

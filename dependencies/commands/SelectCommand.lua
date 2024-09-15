@@ -38,14 +38,11 @@ function class:new(_base, _name, _default, _minmax)
     function this:toggleAdd()
         private.config:set('add', not this:isAdd())
         if this:isAdd() then
-            if _base:get('scan') ~= nil and _base:get('scan'):isAdd() then
-                _base:get('scan'):toggleAdd()
+            if _base:get('scan') ~= nil then
+                _base:get('scan'):setAdd(false)
             end
-            if _base:get('pricer') ~= nil and _base:get('pricer'):isAdd() then
-                _base:get('pricer'):toggleAdd()
-            end
-            if _base:get('buyer') ~= nil and _base:get('buyer'):isAdd() then
-                _base:get('buyer'):toggleAdd()
+            if _base:get('pricer') ~= nil then
+                _base:get('pricer'):setAdd(false)
             end
         end
         return this
@@ -59,7 +56,7 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:setBorder(border)
         private.config:set('border', private.minmax:get(border, 'border'))
-        return this
+        return private
     end
 
     -- COLOR
@@ -90,7 +87,7 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:setProducts(products)
         private.config:set('products', products or {})
-        return this
+        return private
     end
 
     function private:getProduct(sign)
@@ -106,7 +103,7 @@ function class:new(_base, _name, _default, _minmax)
         local products = private:getProducts()
         table.insert(products, sign)
         private:setProducts(products)
-        return this
+        return private
     end
 
     function private:deleteProduct(sign)
@@ -117,7 +114,7 @@ function class:new(_base, _name, _default, _minmax)
             end
         end
         private:setProducts(products)
-        return this
+        return private
     end
 
     function private:toggleProduct(sign)
@@ -128,29 +125,7 @@ function class:new(_base, _name, _default, _minmax)
             end
         end
         private:addProduct(sign)
-        return this
-    end
-
-    -- WORK
-
-    function private:work()
-        if this:isActive() and _base:get('playerManager'):isShoping() and not _base:get('dialogManager'):isOpened() then
-            for _, product in ipairs(_base:get('productManager'):getProducts()) do
-                local sign = private:getProduct(product:getSign()) or private:getProduct(product:getCode())
-                if sign ~= nil then
-                    _base:get('boxManager'):push(
-                        product:getTextdraw():getX(),
-                        product:getTextdraw():getY(),
-                        product:getTextdraw():getWidth(),
-                        product:getTextdraw():getHeight(),
-                        '0x00000000',
-                        private:getBorder(),
-                        _base:get('color'):getAlpha(private:getAlpha()) .. private:getColor(),
-                        5
-                    )
-                end
-            end
-        end
+        return private
     end
 
     -- INITS
@@ -190,7 +165,23 @@ function class:new(_base, _name, _default, _minmax)
             nil,
             function ()
                 while true do wait(0)
-                    private:work()
+                    if this:isActive() and _base:get('playerManager'):isShoping() and not _base:get('dialogManager'):isOpened() then
+                        for _, product in ipairs(_base:get('productManager'):getProducts()) do
+                            local sign = private:getProduct(product:getSign()) or private:getProduct(product:getCode())
+                            if sign ~= nil then
+                                _base:get('boxManager'):push(
+                                    product:getTextdraw():getX(),
+                                    product:getTextdraw():getY(),
+                                    product:getTextdraw():getWidth(),
+                                    product:getTextdraw():getHeight(),
+                                    '0x00000000',
+                                    private:getBorder(),
+                                    _base:get('color'):getAlpha(private:getAlpha()) .. private:getColor(),
+                                    5
+                                )
+                            end
+                        end
+                    end
                 end
             end
         )
@@ -202,7 +193,7 @@ function class:new(_base, _name, _default, _minmax)
         :add(
             'onClickProduct',
             function (product)
-                if this:isAdd() and _base:get('playerManager'):isShoping() then
+                if this:isAdd() and not isKeyDown(VK_CONTROL) and _base:get('playerManager'):isShoping() then
                     private:toggleProduct(product:getSign())
                     return false
                 end

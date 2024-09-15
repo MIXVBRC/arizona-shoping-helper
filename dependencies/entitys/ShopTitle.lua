@@ -12,6 +12,8 @@ function class:new(_base, _text, _x, _y, _z)
         },
     }
 
+    -- PARAMS
+
     function this:getText()
         return private.text
     end
@@ -22,7 +24,7 @@ function class:new(_base, _text, _x, _y, _z)
 
     function private:setPlayer(player)
         private.player = player
-        return this
+        return private
     end
 
     function this:getMod()
@@ -31,7 +33,7 @@ function class:new(_base, _text, _x, _y, _z)
 
     function private:setMod(mod)
         private.mod = mod
-        return this
+        return private
     end
 
     function this:getPosition()
@@ -50,12 +52,23 @@ function class:new(_base, _text, _x, _y, _z)
         return this:getPosition().z
     end
 
+    -- INITS
+
     function private:init()
-        private:setPlayer(this:getText():match('^(.+)%s{......}.+{......}.+$'))
-        private:setMod(this:getText():match('^.+{......}(.+){......}.+$'))
+        private:initPlayer():initMod()
+        return this
     end
 
-    private:init()
-    return this
+    function private:initPlayer()
+        private:setPlayer(this:getText():match('^(.+)%s{......}.+{......}.+$'))
+        return private
+    end
+
+    function private:initMod()
+        private:setMod(this:getText():match('^.+{......}(.+){......}.+$'))
+        return private
+    end
+
+    return private:init()
 end
 return class

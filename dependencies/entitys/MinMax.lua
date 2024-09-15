@@ -1,29 +1,29 @@
-local this = {}
-function this:new(_base, _minmax)
-    local class = {}
+local class = {}
+function class:new(_base, _minmax)
+    local this = {}
     local private = {
         ['minmax'] = _minmax,
     }
 
-    function class:getMin(name)
+    function this:getMin(name)
         private.minmax[name] = private.minmax[name] or {}
         return private.minmax[name].min
     end
 
-    function class:getMax(name)
+    function this:getMax(name)
         private.minmax[name] = private.minmax[name] or {}
         return private.minmax[name].max
     end
 
-    function class:get(num, name)
-        local min = class:getMin(name) or num
-        local max = class:getMax(name) or num
+    function this:get(num, name)
+        local min = this:getMin(name) or num
+        local max = this:getMax(name) or num
         if num < min then num = min
         elseif num > max then num = max
         end
         return num
     end
 
-    return class
+    return this
 end
-return this
+return class

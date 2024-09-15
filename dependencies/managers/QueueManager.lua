@@ -23,7 +23,7 @@ function class:new(_base)
 
     function private:addQueueItem(queueItem)
         table.insert(private.queue, queueItem)
-        table.sort(private.queue, function (a, b) return a.sort < b.sort end)
+        table.sort(private.queue, function (a, b) return a.sort > b.sort end)
         return this
     end
 
@@ -54,8 +54,8 @@ function class:new(_base)
 
     -- ADD
 
-    function this:add(action, sort)
-        local queueProcess = _base:getNew('queueProcess', action)
+    function this:add(execute, sort)
+        local queueProcess = _base:getNew('queueProcess', execute)
         private:addQueueItem({
             ['sort'] = sort or 100,
             ['queueProcess'] = queueProcess,

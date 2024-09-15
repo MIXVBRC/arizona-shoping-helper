@@ -7,6 +7,7 @@ function class:new(_base, _name, _code, _price, _textdraw)
         ['price'] = _price,
         ['textdraw'] = _textdraw,
         ['delete'] = false,
+        ['buy'] = false,
     }
 
     -- PARAMS
@@ -52,15 +53,19 @@ function class:new(_base, _name, _code, _price, _textdraw)
         return this
     end
 
+    function this:isBuy()
+        return private.buy
+    end
+
     -- SCAN
 
     function this:scan(time, execute)
         _base:get('queueManager')
         :add(
             function ()
-                if not this:isDelete() and not this:isScanned() and sampTextdrawIsExists(this:getTextdraw():getId()) then
+                if not this:isScanned() and sampTextdrawIsExists(this:getTextdraw():getId()) then
                     sampSendClickTextdraw(this:getTextdraw():getId())
-                    while not this:isScanned() do wait(0) end
+                    while not this:isScanned() and not this:isDelete() do wait(0) end
                     wait(time or 500)
                 end
             end,
@@ -129,26 +134,28 @@ function class:new(_base, _name, _code, _price, _textdraw)
                 end
             end
         )
-        :active()
+        :push()
     end
 
     -- BUY
 
-    function this:buy(time, execute)
+    function this:buy(count)
         _base:get('queueManager')
         :add(
             function ()
                 if not this:isDelete() and sampTextdrawIsExists(this:getTextdraw():getId()) then
                     sampSendClickTextdraw(this:getTextdraw():getId())
-                    wait(time or 500)
+                    while not this:isBuy() and not this:isDelete() do wait(0) end
+                    wait(500)
                 end
             end,
-            (this:getTextdraw():getX() + this:getTextdraw():getY())
+            1
         )
         :addEvent(
             'onShowDialogBuyProduct',
             function (id)
                 _base:get('dialogManager'):send(id, 1)
+                private.buy = true
                 _base:get('eventManager'):trigger('onBuyProduct', this, 1)
                 return false
             end
@@ -158,12 +165,16 @@ function class:new(_base, _name, _code, _price, _textdraw)
             function (id, _, _, _, _, text)
                 local enoughCount = _base:get('helper'):extractEnoughCountFromDialog(text)
                 if enoughCount > 0 then
-                    local count = _base:get('helper'):extractCountFromDialog(text)
-                    if enoughCount < count then
-                        count = enoughCount
+                    local haveCount = _base:get('helper'):extractCountFromDialog(text)
+                    if enoughCount < haveCount then
+                        haveCount = enoughCount
                     end
-                    _base:get('dialogManager'):send(id, 1, nil, count)
-                    _base:get('eventManager'):trigger('onBuyProduct', this, count)
+                    if count < haveCount then
+                        haveCount = count
+                    end
+                    _base:get('dialogManager'):send(id, 1, nil, haveCount)
+                    private.buy = true
+                    _base:get('eventManager'):trigger('onBuyProduct', this, haveCount)
                 else
                     _base:get('dialogManager'):close(id)
                 end
@@ -177,36 +188,9 @@ function class:new(_base, _name, _code, _price, _textdraw)
                 return false
             end
         )
-        :addEvent(
-            'onScanProduct',
-            function (buyingProduct, count)
-                if execute ~= nil then
-                    execute(buyingProduct, count)
-                end
-            end
-        )
-        :active()
+        :push()
     end
 
-    -- INITS
-
-    function private:init()
-        private:initThreads()
-        return this
-    end
-
-    function private:initThreads()
-        _base:get('threadManager')
-        :add(
-            nil,
-            function ()
-                while sampTextdrawIsExists(this:getTextdraw():getId()) do wait(0) end
-                this:delete()
-            end
-        )
-        return private
-    end
-
-    return private:init()
+    return this
 end
 return class

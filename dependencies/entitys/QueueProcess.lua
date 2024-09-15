@@ -13,11 +13,6 @@ function class:new(_, _execute)
         return private.active
     end
 
-    function this:active()
-        private.active = true
-        return this
-    end
-
     -- EXECUTE
 
     function this:getExecute()
@@ -32,6 +27,13 @@ function class:new(_, _execute)
 
     function this:addEvent(name, trigger)
         private.events[name] = trigger
+        return this
+    end
+
+    -- PUSH
+
+    function this:push()
+        private.active = true
         return this
     end
 

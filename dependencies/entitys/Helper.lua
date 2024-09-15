@@ -3,6 +3,7 @@ function class:new(_base, _symbols)
     local this = {}
     local private = {
         ['symbols'] = _symbols or {},
+        ['cache'] = _base:getNew('cache'),
     }
 
     function this:normalize(num, index)
@@ -24,40 +25,50 @@ function class:new(_base, _symbols)
     end
 
     function this:jsonDecode(json)
-        return _base:getObject('json').decode(json)
+        return _base:getObject('dkjson').decode(json)
     end
 
     function this:jsonEncode(array)
-        return _base:getObject('json').encode(array)
+        return _base:getObject('dkjson').encode(array)
     end
 
     function this:iniLoad(default, name)
-        return _base:getObject('ini').load(default, name)
+        return _base:getObject('inicfg').load(default, name)
     end
 
     function this:iniSave(data, name)
-        _base:getObject('ini').save(data, name)
+        _base:getObject('inicfg').save(data, name)
         return this
     end
 
     function this:textDecode(text)
-        local result = {}
-        text:gsub('.',
-            function(symbol)
-                table.insert(result, private.symbols.decode[symbol] or symbol)
-            end
-        )
-        return _base:get('helper'):implode('', result)
+        local result = private.cache:get('text_'..text)
+        if result == nil then
+            result = {}
+            text:gsub('.',
+                function(symbol)
+                    table.insert(result, private.symbols.decode[symbol] or symbol)
+                end
+            )
+            result = _base:get('helper'):implode('', result)
+            private.cache:add('text_'..text, result)
+        end
+        return result
     end
 
     function this:textEncode(text)
-        local result = {}
-        text:gsub('.',
-            function(symbol)
-                table.insert(result, private.symbols.encode[symbol] or symbol)
-            end
-        )
-        return _base:get('helper'):implode('', result)
+        local result = private.cache:get('text_'..text)
+        if result == nil then
+            result = {}
+            text:gsub('.',
+                function(symbol)
+                    table.insert(result, private.symbols.encode[symbol] or symbol)
+                end
+            )
+            result = _base:get('helper'):implode('', result)
+            private.cache:add('text_'..text, result)
+        end
+        return result
     end
 
     function this:getObjectsByIds(ids)

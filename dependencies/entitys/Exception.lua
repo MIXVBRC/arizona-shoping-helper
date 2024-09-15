@@ -8,9 +8,9 @@ function class:new(_base, _message)
     function private:init()
         _base:getNew('error', private.message)
         error(private.message, 4)
+        return this
     end
 
-    private:init()
-    return this
+    return private:init()
 end
 return class

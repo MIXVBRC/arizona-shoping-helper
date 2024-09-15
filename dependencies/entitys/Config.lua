@@ -1,23 +1,38 @@
 local class = {}
-function class:new(_base, _name, _default)
+function class:new(_base, _name, _default, _force)
     local this = {}
     local private = {
         ['name'] = (_name or 'config') .. '.ini',
         ['data'] = _default or {},
+        ['force'] = _force or false,
         ['arrayName'] = 'json',
     }
+
+    -- NAME
 
     function private:getName()
         return private.name
     end
 
+    -- FORCE
+
+    function private:isForce()
+        return private.force
+    end
+
+    -- ARRAY NAME
+
     function private:getArrayName()
         return private.arrayName
     end
 
+    -- ARRAY DATA NAME
+
     function private:getArrayDataName(title, name)
         return title .. '-' .. name
     end
+
+    -- GET
 
     function this:get(title, name)
         if private.data[title] ~= nil then
@@ -25,6 +40,8 @@ function class:new(_base, _name, _default)
         end
         return nil
     end
+
+    -- SET
 
     function this:set(title, name, data)
         if title ~= private:getArrayName() and data ~= private:getArrayName() then
@@ -34,6 +51,8 @@ function class:new(_base, _name, _default)
         end
         return this
     end
+
+    -- DELETE
 
     function this:delete(_title, _name)
         if _title ~= private:getArrayName() then
@@ -53,6 +72,8 @@ function class:new(_base, _name, _default)
         return this
     end
 
+    -- COLLECT
+
     function private:collect()
         for title, values in pairs(private.data) do
             for name, value in pairs(values) do
@@ -63,7 +84,10 @@ function class:new(_base, _name, _default)
                 end
             end
         end
+        return private
     end
+
+    -- DISASSEMBLE
 
     function private:disassemble()
         for title, values in pairs(private.data) do
@@ -77,28 +101,37 @@ function class:new(_base, _name, _default)
                 end
             end
         end
+        return private
     end
+
+    -- LOAD
 
     function private:load()
         private:collect()
         private.data = _base:get('helper'):iniLoad(private.data, private:getName())
         private:disassemble()
-        return this
+        return private
     end
+
+    -- SAVE
 
     function private:save()
         private:collect()
         _base:get('helper'):iniSave(private.data, private:getName())
         private:disassemble()
-        return this
+        return private
     end
 
-    function this:init()
-        private:load()
+    -- INITS
+
+    function private:init()
+        if not private:isForce() then
+            private:load()
+        end
         private:save()
         return this
     end
 
-    return this:init()
+    return private:init()
 end
 return class

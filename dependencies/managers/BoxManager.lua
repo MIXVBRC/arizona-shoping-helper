@@ -13,7 +13,7 @@ function class:new(_base)
 
     function private:setBoxes(boxes)
         private.boxes = boxes
-        return this
+        return private
     end
 
     function private:getBox(code)
@@ -22,7 +22,7 @@ function class:new(_base)
 
     function private:addBox(box)
         private.boxes[box.code] = box
-        return this
+        return private
     end
 
     -- LOGIC
@@ -48,6 +48,7 @@ function class:new(_base)
 
     function private:init()
         private:initThreads()
+        return this
     end
 
     function private:initThreads()
@@ -71,9 +72,9 @@ function class:new(_base)
                 end
             end
         )
+        return private
     end
 
-    private:init()
-    return this
+    return private:init()
 end
 return class

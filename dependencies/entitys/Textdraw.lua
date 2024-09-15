@@ -73,12 +73,12 @@ function class:new(_base, _id, _model, _text, _color, _selectable, _x, _y, _widt
 
     function private:setX(x)
         private.position.x = x
-        return this
+        return private
     end
 
     function private:setY(y)
         private.position.y = y
-        return this
+        return private
     end
 
     -- SIZE
@@ -97,12 +97,12 @@ function class:new(_base, _id, _model, _text, _color, _selectable, _x, _y, _widt
 
     function private:setWidth(width)
         this:getSize().width = width
-        return this
+        return private
     end
 
     function private:setHeight(height)
         this:getSize().height = height
-        return this
+        return private
     end
 
     -- TIME
@@ -157,9 +157,9 @@ function class:new(_base, _id, _model, _text, _color, _selectable, _x, _y, _widt
         private.position.x, private.position.y = convertGameScreenCoordsToWindowScreenCoords(this:getX(), this:getY())
         private.size.width, private.size.height = convertGameScreenCoordsToWindowScreenCoords(this:getWidth(), this:getHeight())
         if private.selectable == 1 then private.selectable = true else private.selectable = false end
+        return this
     end
 
-    private:init()
-    return this
+    return private:init()
 end
 return class

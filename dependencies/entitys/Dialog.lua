@@ -1,5 +1,5 @@
 local class = {}
-function class:new(_base, _id, _title, _text, _submitButtonText, _closeButtonText, _dialogType, _execute)
+function class:new(_, _id, _title, _text, _submitButtonText, _closeButtonText, _dialogType, _successExecute, _cancleExecute)
     local this = {}
     local private = {
         ['id'] = _id,
@@ -8,91 +8,77 @@ function class:new(_base, _id, _title, _text, _submitButtonText, _closeButtonTex
         ['submitButtonText'] = _submitButtonText,
         ['closeButtonText'] = _closeButtonText,
         ['dialogType'] = _dialogType,
-        ['execute'] = _execute,
+        ['successExecute'] = _successExecute or function () end,
+        ['cancleExecute'] = _cancleExecute or function () end,
     }
+
+    -- ID
 
     function this:getId()
         return private.id
     end
 
+    -- TITLE
+
     function this:getTitle()
         return private.title
     end
+
+    -- TEXT
 
     function this:getText()
         return private.text
     end
 
+    -- SUBMIT BUTTON TEXT
+
     function this:getSubmitButtonText()
         return private.submitButtonText
     end
+
+    -- CLOSE BUTTON TEXT
 
     function this:getCloseButtonText()
         return private.closeButtonText
     end
 
+    -- DIALOG TYPE
+
     function this:getDialogType()
         return private.dialogType
     end
 
-    function this:getExecute()
-        return private.execute
+    -- SUCCESS EXECUTE
+
+    function this:getSuccessExecute()
+        return private.successExecute
     end
+
+    -- CANCLE EXECUTE
+
+    function this:getCancleExecute()
+        return private.cancleExecute
+    end
+
+    -- INITS
 
     function private:init()
         private:initDialog()
-        private:initThreads()
+        return this
     end
 
     function private:initDialog()
-        local text = ''
-        if this:getDialogType() == 0 or this:getDialogType() == 1 or this:getDialogType() == 3 then
-            text = this:getText()
-            if type(this:getText()) == 'table' then
-                text = _base:get('helper'):implode('\n', this:getText())
-            end
-        elseif this:getDialogType() == 2 then
-            text = _base:get('helper'):implode('\n', this:getText())
-        else
-            text = ''
-            for _, value in ipairs(this:getText()) do
-                if text == '' then
-                    text = _base:get('helper'):implode('\t', value)
-                else
-                    text = text .. '\n' .. _base:get('helper'):implode('\t', value)
-                end
-            end
-        end
-        if type(text) ~= 'string' then
-            text = ''
-        end
         sampShowDialog(
             this:getId(),
             this:getTitle(),
-            text,
+            this:getText(),
             this:getSubmitButtonText(),
             this:getCloseButtonText(),
             this:getDialogType()
         )
+        return private
     end
 
-    function private:initThreads()
-        _base:get('threadManager')
-        :add(
-            nil,
-            function ()
-                while true do wait(0)
-                    local result, button, list, input = sampHasDialogRespond(this:getId())
-                    if result then
-                        this:getExecute()(button, list, input)
-                        return
-                    end
-                end
-            end
-        )
-    end
-
-    private:init()
-    return this
+    return private:init()
 end
 return class

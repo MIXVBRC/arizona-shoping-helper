@@ -13,9 +13,13 @@ function class:new(_base, _x, _y, _z, _radius, _polygons)
         ['points'] = {},
     }
 
+    -- ID
+
     function this:getId()
         return private.id
     end
+
+    -- POSITION
 
     function this:getPosition()
         return private.position
@@ -33,13 +37,19 @@ function class:new(_base, _x, _y, _z, _radius, _polygons)
         return this:getPosition().z
     end
 
+    -- RADIUS
+
     function this:getRadius()
         return private.radius
     end
 
+    -- POLYGONS
+
     function this:getPolygons()
         return private.polygons
     end
+
+    -- POINTS
 
     function this:getPoints()
         return private.points
@@ -67,6 +77,22 @@ function class:new(_base, _x, _y, _z, _radius, _polygons)
         private:sort()
     end
 
+    -- SORT
+
+    function private:sort()
+        if #private.points > 0 then
+            table.sort(private.points, function (a, b) return a:getAngle() > b:getAngle() end)
+        end
+        return this
+    end
+
+    -- INITS
+
+    function private:init()
+        private:initPoints()
+        return this
+    end
+
     function private:initPoints()
         for angle = 0, 360, math.floor(360 / this:getPolygons()) do
             this:addPoint(
@@ -76,16 +102,9 @@ function class:new(_base, _x, _y, _z, _radius, _polygons)
             )
         end
         private:sort()
+        return private
     end
 
-    function private:sort()
-        if #private.points > 0 then
-            table.sort(private.points, function (a, b) return a:getAngle() > b:getAngle() end)
-        end
-        return this
-    end
-
-    private:initPoints()
-    return this
+    return private:init()
 end
 return class

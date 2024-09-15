@@ -11,7 +11,7 @@ function class:new(_base)
 
     function private:addCommand(command)
         table.insert(private.commands, command)
-        return this
+        return private
     end
 
     function this:getCommandName(_name)

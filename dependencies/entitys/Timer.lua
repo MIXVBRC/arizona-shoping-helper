@@ -7,7 +7,7 @@ function class:new()
 
     function private:setTime(time)
         private.time = time
-        return this
+        return private
     end
 
     function private:getTime()

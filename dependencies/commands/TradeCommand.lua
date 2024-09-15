@@ -3,12 +3,10 @@ function class:new(_base, _name, _default)
     local this = {}
     local private = {
         ['name'] = _name,
-        ['edit'] = false,
         ['product'] = {
             ['textdraw'] = nil,
             ['count'] = 1,
-            ['needCount'] = false,
-            ['editType'] = 'add',
+            ['last'] = false,
         },
         ['products'] = {},
         ['config'] = _base:getNew('configManager', _name, _default),
@@ -28,18 +26,7 @@ function class:new(_base, _name, _default)
 
     function private:toggleActive()
         private.config:set('active', not private:isActive())
-        return this
-    end
-
-    -- EDIT
-
-    function private:isEdit()
-        return private.edit
-    end
-
-    function private:setEdit(bool)
-        private.edit = bool
-        return this
+        return private
     end
 
     -- PRODUCT
@@ -48,105 +35,76 @@ function class:new(_base, _name, _default)
         return private.product
     end
 
-    function private:setProduct(textdraw, count, needCount, editType)
+    function private:setProduct(textdraw, count, last)
         private.product = {
             ['textdraw'] = textdraw,
-            ['count'] = count,
-            ['needCount'] = needCount,
-            ['editType'] = editType,
+            ['count'] = count or 1,
+            ['last'] = last or false,
         }
-        return this
+        return private
     end
 
-    function private:clearProduct()
-        private:setProduct(nil, 1, false, 'add')
-        return this
+    -- COUNT
+
+    function private:getCount()
+        return private.count
     end
 
-    -- PRODUCTP RICES
+    function private:setCount(count)
+        private.count = count or 1
+        return private
+    end
 
-    function private:getProductPrices()
+    -- TEXTDRAW
+
+    function private:getTextdraw()
+        return private.textdraw
+    end
+
+    function private:setTextdraw(textdraw)
+        private.textdraw = textdraw
+        return private
+    end
+
+    -- PRICES
+
+    function private:getPrices()
         return private.config:get('prices') or {}
     end
 
-    function private:setProductPrices(prices)
+    function private:setPrices(prices)
         private.config:set('prices', prices or {})
-        return this
+        return private
     end
 
-    function private:getProductPrice(code)
-        return private:getProductPrices()[code]
-    end
-
-    function private:addProductPrice(code, price)
-        local prices = private:getProductPrices()
-        prices[code] = price
-        private:setProductPrices(prices)
-        return this
-    end
-
-    -- PRODUCTS
-
-    function this:getProducts()
-        return private.products
-    end
-
-    function private:setProducts(products)
-        private.products = products
-        return this
-    end
-
-    function private:changeProduct(name, price, count)
-        for _, product in ipairs(this:getProducts()) do
-            if name == product.name then
-                if price ~= nil and price > 0 then
-                    product.price = price
-                end
-                product.count = product.count + count
-                if product.count <= 0 then
-                    private:deleteProduct(name)
-                end
-                return this
+    function private:getPrice(name)
+        for _, price in ipairs(private:getPrices()) do
+            if name == price.name then
+                return price.value
             end
         end
-        if count > 0 then
-            table.insert(private.products, {
-                ['name'] = name,
-                ['price'] = price,
-                ['count'] = count,
-            })
-        end
-        return this
+        return nil
     end
 
-    function private:deleteProduct(name)
-        local products = {}
-        for _, product in ipairs(this:getProducts()) do
-            if name ~= product.name then
-                table.insert(products, product)
-            end
-        end
-        private:setProducts(products)
-        return this
+    function private:addPrice(name, price)
+        local prices = private:getPrices()
+        table.insert(prices, {
+            ['name'] = name,
+            ['value'] = price,
+        })
+        private:setPrices(prices)
+        return private
     end
 
-    -- LOGIC
-
-    function private:getStatusProducts()
-        if #this:getProducts() > 0 then
-            local globalPrice = 0
-            for _, product in ipairs(this:getProducts()) do
-                local fullPrice = product.price * product.count
-                _base:get('chat'):push(_base:get('helper'):implode(' | ', {
-                    product.name,
-                    product.count,
-                    _base:get('helper'):formatPrice(product.price),
-                    _base:get('helper'):formatPrice(fullPrice),
-                }))
-                globalPrice = globalPrice + fullPrice
+    function private:changePrice(name, value)
+        local prices = private:getPrices()
+        for _, price in ipairs(prices) do
+            if name == price.name then
+                price.value = value
             end
-            _base:get('chat'):push(_base:get('helper'):formatPrice(globalPrice))
         end
+        private:setPrices(prices)
+        return nil
     end
 
     -- INITS
@@ -163,104 +121,121 @@ function class:new(_base, _name, _default)
         _base:get('commandManager')
         :add({private:getName(), 'active'}, private.toggleActive)
         :add({private:getName(), 'clear'}, private.setProductPrices)
-        :add({private:getName(), 'status'}, private.getStatusProducts)
         return private
     end
 
     function private:initEvents()
         _base:get('eventManager')
         :add(
-            'onSendClickTextDraw',
-            function (textdrawId)
-                if private:isEdit() then
-                    return false
-                else
-                    if _base:get('playerManager'):isAdmining() and private:isActive() then
-                        local textdraw = _base:get('textdrawManager'):getTextdrawById(textdrawId)
-                        if textdraw ~= nil then
-                            local count = 1
-                            local needCount = false
-                            for _, childTextdraw in ipairs(textdraw:getChilds()) do
-                                if _base:get('helper'):isPrice(childTextdraw:getText()) then
-                                    private:setProduct(textdraw, 1, false, 'delete')
-                                    return
-                                elseif _base:get('helper'):isNumber(childTextdraw:getText()) then
-                                    count = _base:get('helper'):getNumber(childTextdraw:getText())
-                                    needCount = true
-                                    break
-                                end
-                            end
-                            if isKeyDown(VK_CONTROL) then
-                                count = count - 1
-                                if count <= 0 then
-                                    return false
-                                end
-                            end
-                            private:setProduct(textdraw, count, needCount, 'add')
+            'onClickNotProduct',
+            function (textdraw)
+                if _base:get('playerManager'):isAdmining() and private:isActive() then
+                    local count = 1
+                    for _, childTextdraw in ipairs(textdraw:getChilds()) do
+                        if _base:get('helper'):isNumber(childTextdraw:getText()) then
+                            count = _base:get('helper'):getNumber(childTextdraw:getText())
+                            break
                         end
                     end
+                    private:setProduct(textdraw, count, isKeyDown(VK_CONTROL))
                 end
             end,
             1
         )
         :add(
-            'onShowDialog',
-            function (dialogId, _, _, _, _, text)
-                if _base:get('playerManager'):isAdmining() and private:isActive() then
-                    local product = private:getProduct()
-                    if product.textdraw ~= nil then
-                        if product.editType == 'add' then
-                            local name = text:match('^.*%(%s+{.+}(.+){.+}%s+%).*$')
-                            local price = private:getProductPrice(name)
-                            if price ~= nil and not isKeyDown(VK_SHIFT) then
-                                local input = price
-                                if product.needCount and product.count ~= nil then
-                                    input =  _base:get('helper'):implode(',', {product.count, price})
-                                    _base:get('chat'):push(_base:get('message'):get('message_trade_add_product_count', {
-                                        name,
-                                        product.count,
-                                        _base:get('helper'):formatPrice(price),
-                                    }))
-                                else
-                                    _base:get('chat'):push(_base:get('message'):get('message_trade_add_product', {
-                                        name,
-                                        _base:get('helper'):formatPrice(price),
-                                    }))
+            'onShowDialogSaleProduct',
+            function (id, _, _, _, _, text)
+                local name = _base:get('helper'):trim(text:match(_base:get('message'):get('system_regex_match_dialog_text_sale_product')))
+                return _base:get('eventManager'):trigger('onShowDialogSaleProductCustom', id, name)
+            end
+        )
+        :add(
+            'onShowDialogSaleProductCount',
+            function (id, _, _, _, _, text)
+                local name = _base:get('helper'):trim(text:match(_base:get('message'):get('system_regex_match_dialog_text_sale_product_count')))
+                return _base:get('eventManager'):trigger('onShowDialogSaleProductCustom', id, name, private:getProduct().count)
+            end
+        )
+        :add(
+            'onShowDialogSaleProductCustom',
+            function (id, name, count)
+                if name ~= nil then
+                    local price = private:getPrice(name)
+                    if price ~= nil and not isKeyDown(VK_SHIFT) then
+                        if count ~= nil then
+                            if private:getProduct().last then
+                                count = count - 1
+                                if count <= 0 then
+                                    count = 1
                                 end
-                                private:changeProduct(name, price, product.count)
-                                _base:get('dialogManager'):send(dialogId, 1, 0, input)
-                                private:clearProduct()
-                            else
-                                _base:get('dialogManager'):close()
-                                private:setEdit(true)
+                            end
+                            _base:get('chat'):push(_base:get('message'):get('message_trade_add_product_count', {
+                                name,
+                                count,
+                                _base:get('helper'):formatPrice(price),
+                            }))
+                            price = _base:get('helper'):implode(',', {count, price})
+                        else
+                            _base:get('chat'):push(_base:get('message'):get('message_trade_add_product', {
+                                name,
+                                _base:get('helper'):formatPrice(price),
+                            }))
+                        end
+                        _base:get('dialogManager'):send(id, 1, 0, price)
+                    else
+                        _base:get('dialogManager'):close(id)
+                        _base:get('queueManager')
+                        :add(
+                            function ()
                                 _base:get('dialogManager'):show(
                                     _base:get('message'):get('message_dialog_title_enter_price'),
                                     name,
                                     _base:get('message'):get('message_dialog_button_add'),
                                     _base:get('message'):get('message_dialog_button_cancel'),
                                     1,
-                                    function (button, _, input)
-                                        private:setEdit(false)
-                                        if button == 1 then
-                                            input = _base:get('helper'):getNumber(input)
-                                            private:addProductPrice(name, input)
-                                            sampSendClickTextdraw(product.textdraw:getId())
+                                    function (_, input)
+                                        input = _base:get('helper'):getNumber(input)
+                                        if private:getPrice(name) ~= nil then
+                                            private:changePrice(name, input)
                                         else
-                                            private:clearProduct()
+                                            private:addPrice(name, input)
+                                        end
+                                        local textdraw = private:getProduct().textdraw
+                                        if textdraw ~= nil then
+                                            sampSendClickTextdraw(textdraw:getId())
                                         end
                                     end
                                 )
-                            end
-                            return false
-                        elseif product.editType == 'delete' then
-                            -- local name = _base:get('chat'):push(_base:get('scan'):extractNameFromDialog(text))
-                            _base:get('dialogManager'):send(dialogId, 1)
-                            return false
-                        end
+                            end,
+                            1
+                        )
+                        :push()
                     end
                 end
+                return false
+            end
+        )
+        :add(
+            'onShowDialogRemoveSaleProduct',
+            function (id)
+                if _base:get('playerManager'):isAdmining() and private:isActive() then
+                    _base:get('dialogManager'):send(id, 1)
+                    return false
+                end
             end,
-            1000
+            1
+        )
+        :add(
+            'onServerMessage',
+            function (_, text)
+                text = _base:get('helper'):removeColors(text or '')
+                if text:find(_base:get('message'):get('system_regex_find_chat_sale_product'))
+                or text:find(_base:get('message'):get('system_regex_find_chat_remove_sale_product'))
+                then
+                    return false
+                end
+            end,
+            1
         )
         return private
     end

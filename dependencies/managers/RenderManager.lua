@@ -45,6 +45,7 @@ function class:new(_base)
 
     function private:init()
         private:initThreads()
+        return this
     end
 
     function private:initThreads()
@@ -70,9 +71,9 @@ function class:new(_base)
                 end
             end
         )
+        return private
     end
 
-    private:init()
-    return this
+    return private:init()
 end
 return class

@@ -3,9 +3,7 @@ function class:new(_base, _name, _default, _minmax)
     local this = {}
     local private = {
         ['name'] = _name,
-        ['scanning'] = false,
         ['border'] = 10,
-        ['products'] = {},
         ['minmax'] = _base:getNew('minMax', _minmax),
         ['config'] = _base:getNew('configManager', _name, _default),
     }
@@ -41,14 +39,11 @@ function class:new(_base, _name, _default, _minmax)
     function this:toggleAdd()
         private.config:set('add', not this:isAdd())
         if this:isAdd() then
-            if _base:get('select') ~= nil and _base:get('select'):isAdd() then
-                _base:get('select'):toggleAdd()
+            if _base:get('select') ~= nil then
+                _base:get('select'):setAdd(false)
             end
-            if _base:get('pricer') ~= nil and _base:get('pricer'):isAdd() then
-                _base:get('pricer'):toggleAdd()
-            end
-            if _base:get('buyer') ~= nil and _base:get('buyer'):isAdd() then
-                _base:get('buyer'):toggleAdd()
+            if _base:get('pricer') ~= nil then
+                _base:get('pricer'):setAdd(false)
             end
         end
         return this
@@ -62,24 +57,18 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:setTime(time)
         private.config:set('time', private.minmax:get(time, 'time'))
-        return this
+        return private
     end
 
-    -- SCANNING
+    -- BORDER
 
-    function this:isScanning()
-        return private:getScanningProduct() ~= nil
+    function private:getBorder()
+        return private.border
     end
 
-    -- SCANNING PRODUCT
-
-    function private:getScanningProduct()
-        return private.products
-    end
-
-    function private:setScanningProduct(product)
-        private.products = product
-        return this
+    function private:setBorder(border)
+        private.border = border
+        return private
     end
 
     -- CODES
@@ -90,7 +79,7 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:setCodes(productCodes)
         private.config:set('codes', productCodes or {})
-        return this
+        return private
     end
 
     function private:haveCode(_code)
@@ -106,7 +95,7 @@ function class:new(_base, _name, _default, _minmax)
         local productCodes = private:getCodes()
         table.insert(productCodes, name)
         private:setCodes(productCodes)
-        return this
+        return private
     end
 
     function private:deleteCode(code)
@@ -117,18 +106,18 @@ function class:new(_base, _name, _default, _minmax)
             end
         end
         private:setCodes(productCodes)
-        return this
+        return private
     end
 
     function private:toggleCode(code)
         for _, productCode in ipairs(private:getCodes()) do
             if code == productCode then
                 private:deleteCode(code)
-                return this
+                return private
             end
         end
         private:addCode(code)
-        return this
+        return private
     end
 
     -- INITS
@@ -160,7 +149,7 @@ function class:new(_base, _name, _default, _minmax)
             nil,
             function ()
                 while true do wait(0)
-                    if this:isActive() and _base:get('playerManager'):isShoping() then
+                    if this:isActive() and _base:get('playerManager'):isShoping() and _base:get('swipe'):isSwipe() then
                         for _, product in ipairs(_base:get('productManager'):getProducts()) do
                             if not product:isScanned() and private:haveCode(product:getCode()) then
                                 product:scan(private:getTime())
@@ -174,9 +163,9 @@ function class:new(_base, _name, _default, _minmax)
             nil,
             function ()
                 while true do wait(50)
-                    private.border = private.border - 1
-                    if private.border <= 0 then
-                        private.border = 10
+                    private:setBorder(private:getBorder() - 1)
+                    if private:getBorder() <= 0 then
+                        private:setBorder(10)
                     end
                 end
             end
@@ -234,7 +223,7 @@ function class:new(_base, _name, _default, _minmax)
         :add(
             'onClickProduct',
             function (product)
-                if this:isAdd() and _base:get('playerManager'):isShoping() then
+                if this:isAdd() and not isKeyDown(VK_CONTROL) and _base:get('playerManager'):isShoping() then
                     private:toggleCode(product:getCode())
                     return false
                 end

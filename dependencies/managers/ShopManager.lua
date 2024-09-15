@@ -3,7 +3,7 @@ function class:new(_base, _centralModelIds)
     local this = {}
     local private = {
         ['shops'] = {},
-        ['mod'] = 'sell',
+        ['mod'] = nil,
         ['mods'] = {
             [_base:get('message'):get('system_textdraw_shop_mod_sale')] = 'sale',
             [_base:get('message'):get('system_textdraw_shop_mod_buy')] = 'buy',
@@ -20,12 +20,12 @@ function class:new(_base, _centralModelIds)
 
     function private:setShops(shops)
         private.shops = shops or {}
-        return this
+        return private
     end
 
     function private:addShop(shop)
         table.insert(private.shops, shop)
-        return this
+        return private
     end
 
     -- MOD
@@ -36,7 +36,7 @@ function class:new(_base, _centralModelIds)
 
     function private:setMod(mod)
         private.mod = mod
-        return this
+        return private
     end
 
     -- MODS
@@ -53,13 +53,13 @@ function class:new(_base, _centralModelIds)
 
     -- LOGIC
 
-    function this:getNearby(player)
+    function this:getNearby(player, admining)
         local nearbyShop = nil
         local minDistance = nil
         for _, shop in ipairs(this:getShops()) do
             if not player or shop:getPlayer() ~= _base:get('playerManager'):getName() then
                 local x, y, z = shop:getX(), shop:getY(), shop:getZ()
-                if shop:getAdmin() ~= nil then
+                if admining and shop:getAdmin() ~= nil then
                     x, y, z = shop:getAdmin():getX(), shop:getAdmin():getY(), shop:getAdmin():getZ()
                 end
                 local distance = _base:get('helper'):distanceToPlayer3d(x, y, z)
@@ -75,8 +75,8 @@ function class:new(_base, _centralModelIds)
     -- INITS
 
     function private:init()
-        private:initThreads()
-        private:initEvents()
+        private:initThreads():initEvents()
+        return this
     end
 
     function private:initThreads()
@@ -144,6 +144,7 @@ function class:new(_base, _centralModelIds)
                 end
             end
         )
+        return private
     end
 
     function private:initEvents()
@@ -152,26 +153,38 @@ function class:new(_base, _centralModelIds)
             'onAfterChangeTextdraw',
             function (textdraw)
                 if textdraw:getText() ~= '' then
-                    local cacheKey = 'text_'..textdraw:getText()
-                    local text = private.cache:get(cacheKey)
-                    if text == nil then
-                        text = _base:get('helper'):textDecode(textdraw:getText())
-                        private.cache:add(cacheKey, text)
-                    end
-                    local mod = private:getModByName(text)
+                    local mod = private:getModByName(_base:get('helper'):textDecode(textdraw:getText()))
                     if mod ~= nil then
                         private:setMod(mod)
-                        local shop = this:getNearby()
-                        if shop ~= nil then
-                            _base:get('eventManager'):trigger('onVisitShop', shop, mod, textdraw)
+                        _base:get('eventManager'):trigger('onInitShopModButton', mod, textdraw:getParent())
+                            _base:get('threadManager')
+                            :add(
+                                nil,
+                                function ()
+                                    while sampTextdrawIsExists(textdraw:getId()) do wait(0) end
+                                    private:setMod(nil)
+                                end
+                            )
+                    end
+                end
+            end
+        )
+        :add(
+            'onSendClickTextDraw',
+            function (id)
+                for _, textdraw in ipairs(_base:get('textdrawManager'):getTextdraws()) do
+                    if id == textdraw:getId() then
+                        local mod = private:getModByName(_base:get('helper'):textDecode(textdraw:getText()))
+                        if mod ~= nil then
+                            _base:get('eventManager'):trigger('onClickShopModButton', textdraw)
                         end
                     end
                 end
             end
         )
+        return private
     end
 
-    private:init()
-    return this
+    return private:init()
 end
 return class

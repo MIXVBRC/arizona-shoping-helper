@@ -1,6 +1,6 @@
-local this = {}
-function this:new(_base, _name, _default, _minmax)
-    local class = {}
+local class = {}
+function class:new(_base, _name, _default, _minmax)
+    local this = {}
     local private = {
         ['name'] = _name,
         ['minmax'] = _base:getNew('minMax', _minmax),
@@ -21,7 +21,7 @@ function this:new(_base, _name, _default, _minmax)
 
     function private:toggleActive()
         private.config:set('active', not private:isActive())
-        return class
+        return private
     end
 
     -- ALPHA
@@ -32,7 +32,7 @@ function this:new(_base, _name, _default, _minmax)
 
     function private:setAlpha(alpha)
         private.config:set('alpha', private.minmax:get(alpha, 'alpha'))
-        return class
+        return private
     end
 
     -- INITS
@@ -42,7 +42,7 @@ function this:new(_base, _name, _default, _minmax)
             return _base:get(private:getName())
         end
         private:initCommands():initThreads()
-        return class
+        return this
     end
 
     function private:initCommands()
@@ -84,4 +84,4 @@ function this:new(_base, _name, _default, _minmax)
 
     return private:init()
 end
-return this
+return class

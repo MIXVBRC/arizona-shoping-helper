@@ -50,7 +50,7 @@ function class:new(_base)
 
     function private:setShoping(bool)
         private.shoping = bool
-        return this
+        return private
     end
 
     -- ADMINING
@@ -61,7 +61,7 @@ function class:new(_base)
 
     function private:setAdmining(bool)
         private.admining = bool
-        return this
+        return private
     end
 
     -- INVENTORY
@@ -72,7 +72,7 @@ function class:new(_base)
 
     function private:setInventory(bool)
         private.inventory = bool
-        return this
+        return private
     end
 
     -- SHOPING ADMINING INVENTORY
@@ -85,6 +85,7 @@ function class:new(_base)
 
     function private:init()
         private:initEvents()
+        return this
     end
 
     function private:initEvents()
@@ -96,10 +97,10 @@ function class:new(_base)
                     nil,
                     function ()
                         while _base:get('dialogManager'):isOpened() do wait(1000)
-                            local shop = _base:get('shopManager'):getNearby()
+                            local shop = _base:get('shopManager'):getNearby(false, true)
                             if shop ~= nil and shop:getPlayer() == this:getName() then
                                 local id = _base:get('helper'):getNumber(title:match(_base:get('message'):get('system_regex_match_dialog_title_shop_id')))
-                                _base:get('eventManager'):trigger('onOpenShopAdminingList', shop, id)
+                                _base:get('eventManager'):trigger('onOpenShopAdminingList', id, shop)
                                 return
                             end
                         end
@@ -111,12 +112,7 @@ function class:new(_base)
             'onCreateTextdraw',
             function (textdraw)
                 if textdraw:getText() ~= '' then
-                    local cacheKey = 'text_'..textdraw:getText()
-                    local text = private.cache:get(cacheKey)
-                    if text == nil then
-                        text = _base:get('helper'):textDecode(textdraw:getText())
-                        private.cache:add(cacheKey, text)
-                    end
+                    local text = _base:get('helper'):textDecode(textdraw:getText())
                     if text == _base:get('message'):get('system_textdraw_shop_shoping') then
                         private:setShoping(true)
                         _base:get('threadManager'):add(
@@ -156,10 +152,9 @@ function class:new(_base)
                 end
             end
         )
+        return private
     end
 
-    private:init()
-    return this
+    return private:init()
 end
-
 return class

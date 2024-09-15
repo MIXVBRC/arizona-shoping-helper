@@ -24,14 +24,14 @@ local data = {
                 ['args'] = {},
             },
             {
-                ['name'] = 'ini',
+                ['name'] = 'inicfg',
                 ['path'] = 'inicfg',
                 ['sort'] = 1000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
-                ['name'] = 'json',
+                ['name'] = 'dkjson',
                 ['path'] = 'dkjson',
                 ['sort'] = 1000,
                 ['init'] = false,
@@ -46,6 +46,14 @@ local data = {
             },
         
             -- ENTITYS
+
+            {
+                ['name'] = 'cache',
+                ['path'] = 'dependencies.entitys.Cache',
+                ['sort'] = 2000,
+                ['init'] = true,
+                ['args'] = {},
+            },
             {
                 ['name'] = 'helper',
                 ['path'] = 'dependencies.entitys.Helper',
@@ -192,13 +200,6 @@ local data = {
                 },
             },
             {
-                ['name'] = 'cache',
-                ['path'] = 'dependencies.entitys.Cache',
-                ['sort'] = 2000,
-                ['init'] = true,
-                ['args'] = {},
-            },
-            {
                 ['name'] = 'point',
                 ['path'] = 'dependencies.entitys.Point',
                 ['sort'] = 2000,
@@ -245,7 +246,7 @@ local data = {
                             ['system_shop_sell_buy'] = 'продаёт и покупает',
                             ['system_shop_empty'] = 'пустая',
                             ['system_shop_product_management'] = 'Управления товарами.',
-        
+
                             ['system_regex_find_dialog_title_shop_id'] = '^Лавка №%d+$',
                             ['system_regex_find_dialog_title_buy_product'] = '^Покупка предмета$',
                             ['system_regex_find_dialog_title_sale_product'] = '^Продажа предмета$',
@@ -253,36 +254,85 @@ local data = {
                             ['system_regex_find_dialog_title_ad_submitting'] = '^Подача объявления$',
                             ['system_regex_find_dialog_title_select_radio_station'] = '^Выберите радиостанцию$',
                             ['system_regex_find_dialog_title_ad_submitting_confirmation'] = '^Подача объявления | Подтверждение$',
+                            ['system_regex_find_dialog_title_ad_cancel'] = '^Отмена публикации объявления$',
                             ['system_regex_find_dialog_text_sale_product'] = '^Введите цену за товар.+$',
                             ['system_regex_find_dialog_text_sale_product_count'] = '^Введите количество и цену за один товар.+$',
                             ['system_regex_find_dialog_text_buy_product_count'] = '^В наличии:%s%d+%sшт%.$',
                             ['system_regex_find_dialog_text_buy_product_enough_count'] = '^Ваших денег хватит на %d+ ед%. товара%.$',
+                            ['system_regex_find_dialog_text_vr'] = '^.*Ваше сообщение является рекламой%?.*$',
+                            ['system_regex_find_chat_sale_product'] = '^%[Информация%] Товар .+ успешно выставлен на продажу!$',
+                            ['system_regex_find_chat_remove_sale_product'] = '^%[Информация%] Товар .+ успешно удален из продажи!$',
+
                             ['system_regex_gsub_dialog_text_item_match_item'] = 'Предмет: ',
                             ['system_regex_gsub_dialog_text_item_match_bottle'] = 'Эликсир: ',
                             ['system_regex_gsub_dialog_text_item_match_accessory'] = 'Аксессуар: ',
+
+                            ['system_regex_gsub_ad_command_shop_id'] = '/findilavka #1#',
+
                             ['system_regex_match_dialog_title_shop_id'] = '^Лавка №(%d+)$',
                             ['system_regex_match_dialog_text_buy_product_count'] = '^В наличии:%s(%d+)%sшт%.$',
                             ['system_regex_match_dialog_text_buy_product_enough_count'] = '^Ваших денег хватит на (%d+) ед%. товара%.$',
-        
-                            ['message_ad_push'] = '/findilavka #1# #2#',
-                            ['message_ad_push_central_market'] = '/findilavka #1# (ЦР) #2#',
+                            ['system_regex_match_dialog_text_sale_product'] = '^Введите цену за товар %( (.+) %)$',
+                            ['system_regex_match_dialog_text_sale_product_count'] = '^Введите количество и цену за один товар %( (.+) %).+$',
+
                             ['message_ad_next_push_time'] = '{white}Показ рекламы через {orange}#1# {white}мин.',
-                            ['message_ad_push_error_active'] = '{red}Реклама не будет показана! {white}(функционал не активен)',
-                            ['message_ad_push_error_chats'] = '{red}Реклама не будет показана! {white}(все чаты не активны)',
-                            ['message_ad_push_error_number'] = '{red}Реклама не будет показана! {white}(неизвестен номер лавки)',
-                            ['message_ad_push_error_message'] = '{red}Реклама не будет показана! {white}(нет задан текст)',
-        
+                            ['message_ad_push_error_shop_id'] = 'Неизвестен номер лавки (загляните в свою лавку)',
+                            ['message_ad_push_error_defender'] = 'Защита от пуша рекламного сообщения',
+                            ['message_ad_push_error_ad_len'] = 'Реклама должна содержать от 20 до 80 символов',
+                            ['message_ad_push_error_ad_len_entered'] = 'Вы ввели #1# символов',
+                            ['message_ad_push_error_chat_name'] = 'Чат #1#',
+                            ['message_ad_push_error_message'] = '#1# - #2#',
+
+                            ['message_ad_dialog_title_list'] = '{orange}Рекламные сообщения',
+                            ['message_ad_dialog_title_select'] = '{orange}Рекламное сообщение',
+                            ['message_ad_dialog_title_add'] = '{orange}Реклама в чат {green}/',
+                            ['message_ad_dialog_title_chat_select'] = '{orange}Выберите чат',
+                            ['message_ad_dialog_title_chat'] = '{orange}Чат {green}/',
+                            ['message_ad_dialog_message_add_1'] = '{white}Подстановка значений:',
+                            ['message_ad_dialog_message_add_1_1'] = '{orange}#shopid# {white}- id лавки (если известен, загляните в свою лавку)',
+                            ['message_ad_dialog_message_add_1_2'] = '{orange}#shop# {white}- команда и id лавки',
+                            ['message_ad_dialog_message_add_2'] = '{white}Пример сообщения:',
+                            ['message_ad_dialog_message_add_2_1'] = '{white}#shop# - Найдется все по низкой цене!',
+                            ['message_ad_dialog_message_add_3'] = '{white}В результате выведется:',
+                            ['message_ad_dialog_message_add_3_1'] = '{white}/findilavka 99 - Найдется все по низкой цене!',
+                            ['message_ad_dialog_message_add_4'] = '{orange}Не забудьте про смайлики из чата!',
+                            ['message_ad_dialog_message_add_5'] = '{grey}Рекламное сообщение должно содержать от 20 до 80 символов',
+                            ['message_ad_dialog_table_chat'] = 'Чат',
+                            ['message_ad_dialog_table_active'] = 'Активность',
+                            ['message_ad_dialog_table_message'] = 'Сообщение',
+                            ['message_ad_dialog_text_chat'] = '{white}Чат: {orange}#1#{white}',
+                            ['message_ad_dialog_text_name'] = '{white}Название: {orange}#1#{white}',
+                            ['message_ad_dialog_text_price'] = '{white}Цена: {green}#1#{white}',
+                            ['message_ad_dialog_text_active'] = '{white}Активен: #1#{white}',
+                            ['message_ad_dialog_text_yes'] = '{green}Да{white}',
+                            ['message_ad_dialog_text_no'] = '{red}Нет{white}',
+                            ['message_ad_dialog_text_len'] = '{white}Символов: {grey}#1#{white}',
+                            ['message_ad_dialog_text_text'] = '{white}Текст: {grey}#1#{white}',
+                            ['message_ad_dialog_text_result'] = '{white}Результат: {grey}#1#{white}',
+                            ['message_ad_dialog_text_errors'] = '{red}Ошибки:{white}',
+                            ['message_ad_dialog_text_error'] = '{red}#1#{white}',
+                            ['message_ad_dialog_text_delete'] = '{red}Удалить{white}',
+                            ['message_ad_dialog_text_message_count'] = '{white}Рекламных сообщений: #1#{white}',
+
+                            ['message_ad_init_shop_id'] = '{white}ID вашей лавки {orange}#1#',
+
+                            ['message_buyer_buy_error_price'] = 'Цена предмета выше установленной цены',
+
                             ['message_trade_add_product_count'] = '{green}#1# {blue}#2# {white}выставлен за {green}#3#',
                             ['message_trade_add_product'] = '{green}#1# {white}выставлен за {green}#2#',
-        
+
                             ['message_dialog_title_enter_price'] = '{orange}Введите цену',
                             ['message_dialog_title_enter_price_zero'] = '{orange}Введите цену ( 0 - удалить )',
                             ['message_dialog_title_remove_product'] = '{orange}Удаление товаров',
-        
-                            ['message_dialog_button_ready'] = '{green}Готово',
-                            ['message_dialog_button_add'] = '{green}Добавить',
-                            ['message_dialog_button_delete'] = '{red}Удалить',
-                            ['message_dialog_button_cancel'] = '{red}Отмена',
+                            ['message_dialog_title_change_product'] = '{orange}Изменение товаров',
+
+                            ['message_dialog_button_ready'] = '{white}Готово',
+                            ['message_dialog_button_add'] = '{white}Добавить',
+                            ['message_dialog_button_select'] = '{white}Выбрать',
+                            ['message_dialog_button_change'] = '{white}Изменить',
+                            ['message_dialog_button_delete'] = '{white}Удалить',
+                            ['message_dialog_button_back'] = '{white}Назад',
+                            ['message_dialog_button_cancel'] = '{white}Отмена',
 
                             ['message_dialog_table_title_name'] = 'Название',
                             ['message_dialog_table_title_price'] = 'Цена',
@@ -290,11 +340,10 @@ local data = {
 
                             ['message_mod_buy'] = '{green}Продажа',
                             ['message_mod_sale'] = '{blue}Скупка',
-        
+
                             ['message_activated'] = '#1# {red}активирован',
                             ['message_deactivated'] = '#1# {red}деактивирован',
-                            
-        
+
                             ['message_command_name_ad'] = 'Свайпер',
                             ['message_command_name_radius'] = 'Радиус лавок',
                             ['message_command_name_pricer'] = 'Указание цен',
@@ -334,6 +383,7 @@ local data = {
                         ['blue'] = '42bdb5',
                         ['orange'] = 'ffd700',
                         ['white'] = 'ffffff',
+                        ['grey'] = '808080',
                         ['black'] = '000000',
                     }
                 },
@@ -374,15 +424,15 @@ local data = {
                 ['args'] = {},
             },
             {
-                ['name'] = 'exception',
-                ['path'] = 'dependencies.entitys.Exception',
+                ['name'] = 'error',
+                ['path'] = 'dependencies.entitys.Error',
                 ['sort'] = 2000,
                 ['init'] = false,
                 ['args'] = {},
             },
             {
-                ['name'] = 'error',
-                ['path'] = 'dependencies.entitys.Error',
+                ['name'] = 'exception',
+                ['path'] = 'dependencies.entitys.Exception',
                 ['sort'] = 2000,
                 ['init'] = false,
                 ['args'] = {},
@@ -524,6 +574,13 @@ local data = {
             {
                 ['name'] = 'queueManager',
                 ['path'] = 'dependencies.managers.QueueManager',
+                ['sort'] = 3000,
+                ['init'] = true,
+                ['args'] = {},
+            },
+            {
+                ['name'] = 'serverManager',
+                ['path'] = 'dependencies.managers.ServerManager',
                 ['sort'] = 3000,
                 ['init'] = true,
                 ['args'] = {},
@@ -771,6 +828,10 @@ local data = {
                                 ['name'] = 'al',
                                 ['active'] = false,
                             },
+                            {
+                                ['name'] = 's',
+                                ['active'] = false,
+                            },
                         }
                     },
                     {
@@ -789,18 +850,15 @@ local data = {
                     'buyer',
                     {
                         ['active'] = false,
-                        ['add'] = false,
-                        ['border'] = 2,
-                        ['time'] = 500,
+                        ['price'] = 100000,
+                        ['count'] = 1,
                     },
                     {
-                        ['border'] = {
-                            ['min'] = 1,
-                            ['max'] = 5,
+                        ['price'] = {
+                            ['min'] = 0,
                         },
-                        ['time'] = {
-                            ['min'] = 200,
-                            ['max'] = 1000,
+                        ['count'] = {
+                            ['min'] = 1,
                         },
                     },
                 },
@@ -901,6 +959,12 @@ function main()
         script:get('chat'):setColor(script:get('color'):get('orange'))
         script:get('chat'):addPrefix('[' .. value.name .. ']: ')
         script:get('chat'):push('{' .. script:get('color'):get('white') .. '}' .. value.name)
+
+        -- local test = load()
+
+        -- script:get('chat'):push(test)
+        -- script:get('chat'):push(_VERSION)
+
         -- local count = 0
         -- for _, command in ipairs(script:get('commandManager'):getCommands()) do
         --     count = count + 1
