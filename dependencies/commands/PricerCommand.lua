@@ -305,7 +305,7 @@ function class:new(_base, _name, _default, _minmax)
                                         if price >= 0 then
                                             color = '00ff00'
                                         end
-                                        _base:get('boxManager'):push(
+                                        _base:get('drawManager'):addBox(
                                             product:getTextdraw():getX(),
                                             product:getTextdraw():getY(),
                                             product:getTextdraw():getWidth(),
@@ -315,7 +315,7 @@ function class:new(_base, _name, _default, _minmax)
                                             _base:get('color'):getAlpha(100) .. color,
                                             50
                                         )
-                                        _base:get('textManager'):push(
+                                        _base:get('drawManager'):addText(
                                             _base:get('font'):get('Verdana', 8, 9),
                                             _base:get('helper'):formatPrice(price),
                                             product:getTextdraw():getX() + 5,

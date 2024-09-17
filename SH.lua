@@ -44,6 +44,17 @@ local data = {
                 ['init'] = false,
                 ['args'] = {},
             },
+
+            -- TRAITS
+
+            
+            {
+                ['name'] = 'destructorTrait',
+                ['path'] = 'dependencies.traits.DestructorTrait',
+                ['sort'] = 2000,
+                ['init'] = false,
+                ['args'] = {},
+            },
         
             -- ENTITYS
 
@@ -276,6 +287,7 @@ local data = {
                             ['system_regex_match_dialog_text_sale_product_count'] = '^Введите количество и цену за один товар %( (.+) %).+$',
 
                             ['message_ad_next_push_time'] = '{white}Показ рекламы через {orange}#1# {white}мин.',
+                            ['message_ad_next_push_ad_message'] = '{white}Ваше объявление: {grey}#1#',
                             ['message_ad_push_error_shop_id'] = 'Неизвестен номер лавки (загляните в свою лавку)',
                             ['message_ad_push_error_defender'] = 'Защита от пуша рекламного сообщения',
                             ['message_ad_push_error_ad_len'] = 'Реклама должна содержать от 20 до 80 символов',
@@ -285,9 +297,9 @@ local data = {
 
                             ['message_ad_dialog_title_list'] = '{orange}Рекламные сообщения',
                             ['message_ad_dialog_title_select'] = '{orange}Рекламное сообщение',
-                            ['message_ad_dialog_title_add'] = '{orange}Реклама в чат {green}/',
+                            ['message_ad_dialog_title_add'] = '{orange}Реклама в чат {green}/#1#',
                             ['message_ad_dialog_title_chat_select'] = '{orange}Выберите чат',
-                            ['message_ad_dialog_title_chat'] = '{orange}Чат {green}/',
+                            ['message_ad_dialog_title_chat'] = '{orange}Чат {green}/#1#',
                             ['message_ad_dialog_message_add_1'] = '{white}Подстановка значений:',
                             ['message_ad_dialog_message_add_1_1'] = '{orange}#shopid# {white}- id лавки (если известен, загляните в свою лавку)',
                             ['message_ad_dialog_message_add_1_2'] = '{orange}#shop# {white}- команда и id лавки',
@@ -301,6 +313,9 @@ local data = {
                             ['message_ad_dialog_table_active'] = 'Активность',
                             ['message_ad_dialog_table_message'] = 'Сообщение',
                             ['message_ad_dialog_text_chat'] = '{white}Чат: {orange}#1#{white}',
+                            ['message_ad_dialog_text_chat_time'] = '{white}Задержка: {orange}#1# мин{white}',
+                            ['message_ad_dialog_text_chat_time_left'] = '{white}Оставшееся время: {orange}#1# мин{white}',
+                            ['message_ad_dialog_text_chat_reset_time'] = '{white}Сбросить оставшееся время{white}',
                             ['message_ad_dialog_text_name'] = '{white}Название: {orange}#1#{white}',
                             ['message_ad_dialog_text_price'] = '{white}Цена: {green}#1#{white}',
                             ['message_ad_dialog_text_active'] = '{white}Активен: #1#{white}',
@@ -312,7 +327,7 @@ local data = {
                             ['message_ad_dialog_text_errors'] = '{red}Ошибки:{white}',
                             ['message_ad_dialog_text_error'] = '{red}#1#{white}',
                             ['message_ad_dialog_text_delete'] = '{red}Удалить{white}',
-                            ['message_ad_dialog_text_message_count'] = '{white}Рекламных сообщений: #1#{white}',
+                            ['message_ad_dialog_text_message_count'] = '{white}Рекламных сообщений: {orange}#1#{white}',
 
                             ['message_ad_init_shop_id'] = '{white}ID вашей лавки {orange}#1#',
 
@@ -465,6 +480,13 @@ local data = {
                 ['init'] = false,
                 ['args'] = {},
             },
+            {
+                ['name'] = 'text3d',
+                ['path'] = 'dependencies.entitys.Text3d',
+                ['sort'] = 2000,
+                ['init'] = false,
+                ['args'] = {},
+            },
         
             -- MANAGERS
         
@@ -545,15 +567,8 @@ local data = {
                 ['args'] = {},
             },
             {
-                ['name'] = 'boxManager',
-                ['path'] = 'dependencies.managers.BoxManager',
-                ['sort'] = 3000,
-                ['init'] = true,
-                ['args'] = {},
-            },
-            {
-                ['name'] = 'textManager',
-                ['path'] = 'dependencies.managers.TextManager',
+                ['name'] = 'drawManager',
+                ['path'] = 'dependencies.managers.DrawManager',
                 ['sort'] = 3000,
                 ['init'] = true,
                 ['args'] = {},
@@ -583,6 +598,13 @@ local data = {
                 ['path'] = 'dependencies.managers.ServerManager',
                 ['sort'] = 3000,
                 ['init'] = true,
+                ['args'] = {},
+            },
+            {
+                ['name'] = 'text3dManager',
+                ['path'] = 'dependencies.managers.Text3dManager',
+                ['sort'] = 3000,
+                ['init'] = false,
                 ['args'] = {},
             },
 
@@ -710,6 +732,7 @@ local data = {
                             },
                         },
                         ['distance'] = 50,
+                        ['xray'] = true,
                         ['time'] = 200,
                         ['colors'] = {
                             ['player'] = 'e06936',
@@ -808,29 +831,36 @@ local data = {
                     'ad',
                     {
                         ['active'] = false,
-                        ['message'] = '',
-                        ['time'] = 10,
-                        ['pushAt'] = 0,
                         ['chats'] = {
                             {
                                 ['name'] = 'vr',
                                 ['active'] = false,
+                                ['time'] = 10,
+                                ['left'] = 0,
                             },
                             {
                                 ['name'] = 'ad',
                                 ['active'] = false,
+                                ['time'] = 10,
+                                ['left'] = 0,
                             },
                             {
                                 ['name'] = 'fam',
                                 ['active'] = false,
+                                ['time'] = 10,
+                                ['left'] = 0,
                             },
                             {
                                 ['name'] = 'al',
                                 ['active'] = false,
+                                ['time'] = 10,
+                                ['left'] = 0,
                             },
                             {
                                 ['name'] = 's',
                                 ['active'] = false,
+                                ['time'] = 10,
+                                ['left'] = 0,
                             },
                         }
                     },
@@ -959,17 +989,5 @@ function main()
         script:get('chat'):setColor(script:get('color'):get('orange'))
         script:get('chat'):addPrefix('[' .. value.name .. ']: ')
         script:get('chat'):push('{' .. script:get('color'):get('white') .. '}' .. value.name)
-
-        -- local test = load()
-
-        -- script:get('chat'):push(test)
-        -- script:get('chat'):push(_VERSION)
-
-        -- local count = 0
-        -- for _, command in ipairs(script:get('commandManager'):getCommands()) do
-        --     count = count + 1
-        --     script:get('chat'):push(command.command)
-        -- end
-        -- script:get('chat'):push(count)
     end
 end

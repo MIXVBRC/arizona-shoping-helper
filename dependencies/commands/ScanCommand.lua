@@ -178,7 +178,7 @@ function class:new(_base, _name, _default, _minmax)
                         for _, product in ipairs(_base:get('productManager'):getProducts()) do
                             local haveCode = private:haveCode(product:getCode())
                             if product:isScanned() then
-                                _base:get('textManager'):push(
+                                _base:get('drawManager'):addText(
                                     _base:get('font'):get('Arial', 8, 0),
                                     'S',
                                     product:getTextdraw():getX() + product:getTextdraw():getWidth() - 15,
@@ -188,7 +188,7 @@ function class:new(_base, _name, _default, _minmax)
                                 )
                             end
                             if haveCode and not product:isScanned() then
-                                _base:get('boxManager'):push(
+                                _base:get('drawManager'):addBox(
                                     product:getTextdraw():getX(),
                                     product:getTextdraw():getY(),
                                     product:getTextdraw():getWidth(),
@@ -199,7 +199,7 @@ function class:new(_base, _name, _default, _minmax)
                                     1
                                 )
                             elseif not haveCode and product:isScanned() and this:isAdd() then
-                                _base:get('boxManager'):push(
+                                _base:get('drawManager'):addBox(
                                     product:getTextdraw():getX(),
                                     product:getTextdraw():getY(),
                                     product:getTextdraw():getWidth(),

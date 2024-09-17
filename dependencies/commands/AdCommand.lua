@@ -120,25 +120,59 @@ function class:new(_base, _name, _default, _minmax)
         return nil
     end
 
-    function private:setChat(name, bool)
-        local chats = private:getChats()
-        for _, chat in ipairs(chats) do
-            if name == chat.name then
-                chat.active = bool
-            end
-        end
-        private:setChats(chats)
-        return private
-    end
-
-    function private:toggleChat(name)
-        local chats = private:getChats()
-        for _, chat in ipairs(chats) do
+    function private:toggleChatActive(name)
+        for _, chat in ipairs(private:getChats()) do
             if name == chat.name then
                 chat.active = not chat.active
             end
         end
-        private:setChats(chats)
+        private:setChats(private:getChats())
+        return private
+    end
+
+    function private:setChatTime(name, time)
+        for _, chat in ipairs(private:getChats()) do
+            if name == chat.name then
+                chat.time = time
+            end
+        end
+        private:setChats(private:getChats())
+        return private
+    end
+
+    function private:getChatTimeLeft(name)
+        local time = 0
+        for _, chat in ipairs(private:getChats()) do
+            if name == chat.name then
+                time = math.ceil((chat.left - os.time()) / 60)
+                if time < 0 then
+                    time = 0
+                end
+                break
+            end
+        end
+        return time
+    end
+
+    function private:setChatTimeLeft(name, time)
+        for _, chat in ipairs(private:getChats()) do
+            if name == chat.name then
+                chat.left = time
+                break
+            end
+        end
+        private:setChats(private:getChats())
+        return time
+    end
+
+    function private:updateChatTimeLeft(name)
+        for _, chat in ipairs(private:getChats()) do
+            if name == chat.name then
+                chat.left = os.time() + chat.time * 60
+                break
+            end
+        end
+        private:setChats(private:getChats())
         return private
     end
 
@@ -220,7 +254,6 @@ function class:new(_base, _name, _default, _minmax)
             _base:get('message'):get('message_dialog_button_cancel'),
             5,
             function (list, _)
-                _base:get('chat'):push(list)
                 for index, chat in ipairs(private:getChats()) do
                     if list == index then
                         if action == 'add' then
@@ -238,11 +271,12 @@ function class:new(_base, _name, _default, _minmax)
 
     -- DIALOG CHAT CHANGE
 
-    function private:dialogChatChange(name)
+    function private:dialogChatChange(chatName)
         _base:get('dialogManager'):close()
-        local chat = private:getChat(name)
+        local chat = private:getChat(chatName)
         if chat ~= nil then
             local dialogList = {}
+
             local activeMessage = ''
             if chat.active then
                 activeMessage = _base:get('message'):get('message_ad_dialog_text_active', {
@@ -254,27 +288,46 @@ function class:new(_base, _name, _default, _minmax)
                 })
             end
             table.insert(dialogList, activeMessage)
-            table.insert(dialogList, ' ')
+
+            local timeMessage = _base:get('message'):get('message_ad_dialog_text_chat_time', {chat.time})
+            table.insert(dialogList, timeMessage)
+
+            table.insert(dialogList, _base:get('message'):get('message_ad_dialog_text_chat_time_left', {
+                private:getChatTimeLeft(chat.name)
+            }))
+
             local messageCount = 0
             for _, message in ipairs(private:getMessages()) do
                 if message.chat == chat.name then
                     messageCount = messageCount + 1
                 end
             end
-            table.insert(dialogList, _base:get('message'):get('message_ad_dialog_text_message_count', {
-                messageCount
-            }))
+            table.insert(dialogList, _base:get('message'):get('message_ad_dialog_text_message_count', {messageCount}))
+
+            table.insert(dialogList, ' ')
+
+            local pushMessage = _base:get('message'):get('message_ad_dialog_text_chat_reset_time')
+            if messageCount > 0 then
+                table.insert(dialogList, pushMessage)
+            end
+
             _base:get('dialogManager'):show(
-                _base:get('message'):get('message_ad_dialog_title_select'),
+                _base:get('message'):get('message_ad_dialog_title_chat', {chat.name}),
                 dialogList,
                 _base:get('message'):get('message_dialog_button_select'),
                 _base:get('message'):get('message_dialog_button_back'),
                 2,
                 function (list)
-                    if dialogList[list] == activeMessage then
-                        private:toggleChat(chat.name)
+                    local selectedRow = dialogList[list]
+                    if selectedRow == activeMessage then
+                        private:toggleChatActive(chat.name)
+                    elseif selectedRow == timeMessage then
+                        private:dialogSetChatTime(chat.name)
+                        return
+                    elseif selectedRow == pushMessage then
+                        private:setChatTimeLeft(chat.name, 0)
                     end
-                    private:dialogChatChange(name)
+                    private:dialogChatChange(chat.name)
                 end,
                 function ()
                     private:dialogChatSelect('change')
@@ -284,9 +337,37 @@ function class:new(_base, _name, _default, _minmax)
         return private
     end
 
+    -- DIALOG SET CHAT TIME
+
+    function private:dialogSetChatTime(chatName)
+        _base:get('dialogManager'):close()
+        local chat = private:getChat(chatName)
+        if chat ~= nil then
+            local dialogList = {}
+            table.insert(dialogList, _base:get('message'):get('message_ad_dialog_text_chat', {
+                chat.name
+            }))
+            _base:get('dialogManager'):show(
+                _base:get('message'):get('message_ad_dialog_title_add', {chatName}),
+                dialogList,
+                _base:get('message'):get('message_dialog_button_add'),
+                _base:get('message'):get('message_dialog_button_cancel'),
+                1,
+                function (_, input)
+                    if input ~= '' then
+                        input = private.minmax:get(_base:get('helper'):getNumber(input), 'time')
+                        private:setChatTime(chat.name, input)
+                    end
+                    private:dialogChatChange(chatName)
+                end
+            )
+        end
+        return private
+    end
+
     -- DIALOG MESSAGE ADD
 
-    function private:dialogMessageAdd(chat)
+    function private:dialogMessageAdd(chatName)
         _base:get('dialogManager'):close()
         local dialogList = {}
         table.insert(dialogList, _base:get('message'):get('message_ad_dialog_message_add_1'))
@@ -298,7 +379,7 @@ function class:new(_base, _name, _default, _minmax)
         table.insert(dialogList, ' ')
         table.insert(dialogList, _base:get('message'):get('message_ad_dialog_message_add_3'))
         table.insert(dialogList, _base:get('message'):get('message_ad_dialog_message_add_3_1'))
-        if chat ~= 'ad' then
+        if chatName ~= 'ad' then
             table.insert(dialogList, ' ')
             table.insert(dialogList, _base:get('message'):get('message_ad_dialog_message_add_4'))
         else
@@ -306,23 +387,23 @@ function class:new(_base, _name, _default, _minmax)
             table.insert(dialogList, _base:get('message'):get('message_ad_dialog_message_add_5'))
         end
         _base:get('dialogManager'):show(
-            _base:get('message'):get('message_ad_dialog_title_add') .. chat,
+            _base:get('message'):get('message_ad_dialog_title_add', {chatName}),
             dialogList,
             _base:get('message'):get('message_dialog_button_add'),
             _base:get('message'):get('message_dialog_button_cancel'),
             1,
             function (_, input)
-                if chat == 'ad' then
+                if chatName == 'ad' then
                     if input:len() < 20 or 80 < input:len() then
                         _base:getNew('error', _base:get('message'):get('message_ad_push_error_ad_len'))
                         _base:getNew('error', _base:get('message'):get('message_ad_push_error_ad_len_entered', {
                             input:len()
                         }))
-                        private:dialogMessageAdd(chat)
+                        private:dialogMessageAdd(chatName)
                         return
                     end
                 end
-                local index = private:addMessage(chat, input)
+                local index = private:addMessage(chatName, input)
                 private:dialogMessageSelected(index)
             end
         )
@@ -585,8 +666,9 @@ function class:new(_base, _name, _default, _minmax)
             function ()
                 _base:get('dialogManager'):close()
                 private:setPushing(true)
-                sampProcessChatInput('/ad')
+                sampProcessChatInput('/ad ' .. text)
                 while waiting do wait(0) end
+                _base:get('chat'):push(_base:get('message'):get('message_ad_next_push_ad_message', {text}))
                 private:setPushing(false)
                 wait(1000)
             end,
@@ -596,7 +678,7 @@ function class:new(_base, _name, _default, _minmax)
             'onShowDialogAdCancel',
             function (id)
                 _base:get('dialogManager'):send(id, 1)
-                sampProcessChatInput('/ad')
+                sampProcessChatInput('/ad ' .. text)
                 return false
             end,
             1
@@ -634,14 +716,6 @@ function class:new(_base, _name, _default, _minmax)
             end,
             1
         )
-        :addEvent(
-            'onShowDialog',
-            function (id)
-                _base:get('dialogManager'):close(id)
-                return false
-            end,
-            1000
-        )
         :push()
     end
 
@@ -658,9 +732,9 @@ function class:new(_base, _name, _default, _minmax)
     function private:initCommands()
         _base:get('commandManager')
         :add({private:getName(), 'active'}, private.toggleActive)
-        :add({private:getName(), 'push'}, function ()
-            private:setPushAt(0)
-        end)
+        -- :add({private:getName(), 'push'}, function ()
+        --     private:setPushAt(0)
+        -- end)
         :add({private:getName(), 'add'}, function ()
             private:dialogChatSelect('add')
         end)
@@ -668,24 +742,24 @@ function class:new(_base, _name, _default, _minmax)
             private:dialogChatSelect('change')
         end)
         :add({private:getName(), 'list'}, private.dialogMessageList)
-        :add({private:getName(), 'time'}, function (time)
-            time = _base:get('helper'):getNumber(time)
-            if private:getPushAt() > 0 then
-                private:setPushAt(private:getPushAt() - (private:getTime() - time) * 60)
-            end
-            private:setTime(time)
-        end)
-        :add({private:getName(), 'left'}, function ()
-            _base:get('chat'):push(_base:get('message'):get('message_ad_next_push_time', {
-                private:getRemainingTime()
-            }))
-        end)
-        for _, chat in ipairs(private:getChats()) do
-            _base:get('commandManager')
-            :add({private:getName(), 'active', chat.name}, function ()
-                private:toggleChat(chat.name)
-            end)
-        end
+        -- :add({private:getName(), 'time'}, function (time)
+        --     time = _base:get('helper'):getNumber(time)
+        --     if private:getPushAt() > 0 then
+        --         private:setPushAt(private:getPushAt() - (private:getTime() - time) * 60)
+        --     end
+        --     private:setTime(time)
+        -- end)
+        -- :add({private:getName(), 'left'}, function ()
+        --     _base:get('chat'):push(_base:get('message'):get('message_ad_next_push_time', {
+        --         private:getRemainingTime()
+        --     }))
+        -- end)
+        -- for _, chat in ipairs(private:getChats()) do
+        --     _base:get('commandManager')
+        --     :add({private:getName(), 'active', chat.name}, function ()
+        --         private:toggleChatActive(chat.name)
+        --     end)
+        -- end
         return private
     end
 
@@ -706,7 +780,6 @@ function class:new(_base, _name, _default, _minmax)
             'onSendCommand',
             function (message)
                 if private:isPushing() then
-                    _base:get('chat'):push('pushing: ' .. message)
                     for _, pushing in ipairs(private:getPushingMessages()) do
                         if pushing == message then
                             break
@@ -732,51 +805,32 @@ function class:new(_base, _name, _default, _minmax)
         :add(
             nil,
             function ()
-                while true do wait(1000 * 60)
+                while true do wait(1000)
                     if private:isActive()
                     and not _base:get('dialogManager'):isOpened()
                     and not _base:get('playerManager'):isShoping()
                     and not _base:get('playerManager'):isAdmining()
                     then
-                        if private:getPushAt() <= os.time() then
-                            local chatErrors = {}
-                            for _, chat in ipairs(private:getChats()) do
-                                if chat.active then
-                                    for _, message in ipairs(private:getMessages()) do
-                                        if chat.name == message.chat and message.active then
-                                            local result, errors = private:push(chat.name, message.text)
-                                            if not result then
-                                                table.insert(chatErrors, {
-                                                    ['name'] = chat.name,
-                                                    ['errors'] = errors,
-                                                })
+                        for _, chat in ipairs(private:getChats()) do
+                            if chat.active and private:getChatTimeLeft(chat.name) <= 0 then
+                                for _, message in ipairs(private:getMessages()) do
+                                    if chat.name == message.chat and message.active then
+                                        local result, errors = private:push(chat.name, message.text)
+                                        if result then
+                                            private:updateChatTimeLeft(chat.name)
+                                            _base:get('chat'):push(_base:get('message'):get('message_ad_next_push_time', {
+                                                private:getChatTimeLeft(chat.name)
+                                            }))
+                                        else
+                                            private:toggleChatActive(chat.name)
+                                            for _, errorMessage in ipairs(errors) do
+                                                _base:getNew('error', chat.name .. ' | ' .. errorMessage)
                                             end
-                                            break
                                         end
+                                        break
                                     end
                                 end
                             end
-                            if #chatErrors > 0 then
-                                for _, chat in ipairs(chatErrors) do
-                                    for _, errorMessage in ipairs(chat.errors) do
-                                        _base:getNew('error', chat.name .. ' | ' .. errorMessage)
-                                    end
-                                end
-                            end
-                            local waiting = true
-                            _base:get('queueManager')
-                            :add(
-                                function ()
-                                    private:setPushAt(os.time() + private:getTime() * 60)
-                                    _base:get('chat'):push(_base:get('message'):get('message_ad_next_push_time', {
-                                        private:getRemainingTime()
-                                    }))
-                                    waiting = false
-                                end,
-                                1
-                            )
-                            :push()
-                            while waiting do wait(1000) end
                         end
                     end
                 end

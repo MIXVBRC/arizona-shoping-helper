@@ -23,6 +23,15 @@ function class:new(_base, _centralModelIds)
         return private
     end
 
+    function private:getShopById(id)
+        for _, shop in ipairs(this:getShops()) do
+            if id == shop:getId() then
+                return shop
+            end
+        end
+        return nil
+    end
+
     function private:addShop(shop)
         table.insert(private.shops, shop)
         return private
@@ -72,6 +81,55 @@ function class:new(_base, _centralModelIds)
         return nearbyShop, minDistance
     end
 
+    -- FIND SHOPS
+
+    function private:findShops()
+        local shops = {}
+        local titles = {}
+        local admins = {}
+        for _, textId in ipairs(_base:get('helper'):getTextIds()) do
+            local text, _, x, y, z, _, _, _, _ = sampGet3dTextInfoById(textId)
+            if text == _base:get('message'):get('system_shop') then
+                table.insert(shops, {
+                    ['x'] = x,
+                    ['y'] = y,
+                    ['z'] = z,
+                })
+            elseif text:find('^%a+_%a+%s{......}.+{......}.+$') then
+                table.insert(titles, _base:getNew('shopTitle',
+                    text,
+                    x,
+                    y,
+                    z
+                ))
+            elseif text:find('^' .. _base:get('message'):get('system_shop_product_management') .. '$') then
+                table.insert(admins, _base:getNew('shopAdmin',
+                    text,
+                    x,
+                    y,
+                    z
+                ))
+            end
+        end
+        for _, shop in ipairs(shops) do
+            for _, title in ipairs(titles) do
+                if 3 > getDistanceBetweenCoords3d(shop.x, shop.y, shop.z, title:getX(), title:getY(), title:getZ()) then
+                    shop.title = title
+                    break
+                end
+            end
+            if shop.title ~= nil then
+                for _, admin in ipairs(admins) do
+                    if 3 > getDistanceBetweenCoords3d(shop.title:getX(), shop.title:getY(), shop.title:getZ(), admin:getX(), admin:getY(), admin:getZ()) then
+                        shop.admin = admin
+                        break
+                    end
+                end
+            end
+        end
+        return shops
+    end
+
     -- INITS
 
     function private:init()
@@ -84,63 +142,33 @@ function class:new(_base, _centralModelIds)
         :add(
             nil,
             function ()
-                while true do wait(0)
-                    if private.cache:get('shops') == nil then
-                        private:setShops({})
-                        local shops = {}
-                        local titles = {}
-                        local admins = {}
-                        for _, textId in ipairs(_base:get('helper'):getTextIds()) do
-                            local text, _, x, y, z, _, _, _, _ = sampGet3dTextInfoById(textId)
-                            if text == _base:get('message'):get('system_shop') then
-                                table.insert(shops, {
-                                    ['x'] = x,
-                                    ['y'] = y,
-                                    ['z'] = z,
-                                })
-                            elseif text:find('^%a+_%a+%s{......}.+{......}.+$') then
-                                table.insert(titles, _base:getNew('shopTitle',
-                                    text,
-                                    x,
-                                    y,
-                                    z
-                                ))
-                            elseif text:find('^' .. _base:get('message'):get('system_shop_product_management') .. '$') then
-                                table.insert(admins, _base:getNew('shopAdmin',
-                                    text,
-                                    x,
-                                    y,
-                                    z
-                                ))
-                            end
+                while true do wait(1000)
+                    local shops = {}
+                    for _, shop in ipairs(private:findShops()) do
+                        local position = _base:get('helper'):normalizePosition(shop.x, shop.y, shop.z)
+                        local playerName = 'none'
+                        if shop.title ~= nil then
+                            playerName = shop.title:getPlayer()
                         end
-                        for _, shop in ipairs(shops) do
-                            local title = nil
-                            local admin = nil
-                            for _, _title in ipairs(titles) do
-                                if 3 > getDistanceBetweenCoords3d(shop.x, shop.y, shop.z, _title:getX(), _title:getY(), _title:getZ()) then
-                                    title = _title
-                                    break
-                                end
-                            end
-                            if title ~= nil then
-                                for _, _admin in ipairs(admins) do
-                                    if 3 > getDistanceBetweenCoords3d(title:getX(), title:getY(), title:getZ(), _admin:getX(), _admin:getY(), _admin:getZ()) then
-                                        admin = _admin
-                                        break
-                                    end
-                                end
-                            end
-                            private:addShop(_base:getNew('shop',
-                                shop.x,
-                                shop.y,
-                                shop.z,
-                                title,
-                                admin
-                            ))
+                        local id = _base:get('helper'):md5(playerName..position.x..position.y..position.z)
+                        local oldShop = private:getShopById(id)
+                        if oldShop == nil then
+                            table.insert(shops,
+                                _base:getNew('shop',
+                                    id,
+                                    position.x,
+                                    position.y,
+                                    position.z,
+                                    shop.title,
+                                    shop.admin
+                                )
+                            )
+                        else
+                            table.insert(shops, oldShop)
                         end
-                        private.cache:add('shops', this:getShops(), 1)
                     end
+                    private:setShops(shops)
+                    collectgarbage()
                 end
             end
         )

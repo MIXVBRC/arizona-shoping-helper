@@ -63,7 +63,7 @@ function class:new(_base, _name, _default, _minmax)
                     if private:isActive() then
                         if _base:get('playerManager'):isShoping() and not _base:get('dialogManager'):isOpened() then
                             for _, product in ipairs(_base:get('productManager'):getProducts()) do
-                                _base:get('boxManager'):push(
+                                _base:get('drawManager'):addBox(
                                     product:getTextdraw():getX(),
                                     product:getTextdraw():getY(),
                                     product:getTextdraw():getWidth(),

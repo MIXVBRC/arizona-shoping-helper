@@ -278,7 +278,7 @@ function class:new(_base, _dialogId)
         :add(
             'onSendClickTextDraw',
             function ()
-                if this:isOpened() then
+                if this:isOpened() and this:getOpenedId() == private:getDialogId() then
                     return false
                 end
             end,

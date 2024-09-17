@@ -1,8 +1,8 @@
 local class = {}
-function class:new(_base, _x, _y, _z, _title, _admin)
+function class:new(_base, _id, _x, _y, _z, _title, _admin, _text3d)
     local this = {}
     local private = {
-        ['id'] = nil,
+        ['id'] = _id,
         ['position'] = {
             ['x'] = _x or 0,
             ['y'] = _y or 0,
@@ -12,17 +12,13 @@ function class:new(_base, _x, _y, _z, _title, _admin)
         ['central'] = false,
         ['title'] = _title,
         ['admin'] = _admin,
+        ['text3d'] = _text3d,
     }
 
     -- PARAMS
 
     function this:getId()
         return private.id
-    end
-
-    function private:setId(id)
-        private.id = id
-        return private
     end
 
     function this:getPosition()
@@ -86,21 +82,20 @@ function class:new(_base, _x, _y, _z, _title, _admin)
         return private.admin
     end
 
+    function this:getText3d()
+        return private.text3d
+    end
+
+    function private:setText3d(text3d)
+        private.text3d = text3d
+        return private
+    end
+
     -- INITS
 
     function private:init()
-        private:initPosition():initId():initEmpty():initCentral()
+        private:initEmpty():initCentral():initText3d()
         return this
-    end
-
-    function private:initPosition()
-        private:setPosition(_base:get('helper'):normalizePosition(this:getX(), this:getY(), this:getZ()))
-        return private
-    end
-
-    function private:initId()
-        private:setId(_base:get('helper'):md5(this:getPlayer()..this:getX()..this:getY()..this:getZ()))
-        return private
     end
 
     function private:initEmpty()
@@ -127,6 +122,21 @@ function class:new(_base, _x, _y, _z, _title, _admin)
         else
             private:setCentral(true)
         end
+        return private
+    end
+
+    function private:initText3d()
+        private:setText3d(
+            _base:getNew('text3d',
+                nil,
+                '',
+                nil,
+                nil,
+                this:getX(),
+                this:getY(),
+                this:getZ()
+            )
+        )
         return private
     end
 

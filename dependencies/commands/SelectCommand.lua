@@ -169,7 +169,7 @@ function class:new(_base, _name, _default, _minmax)
                         for _, product in ipairs(_base:get('productManager'):getProducts()) do
                             local sign = private:getProduct(product:getSign()) or private:getProduct(product:getCode())
                             if sign ~= nil then
-                                _base:get('boxManager'):push(
+                                _base:get('drawManager'):addBox(
                                     product:getTextdraw():getX(),
                                     product:getTextdraw():getY(),
                                     product:getTextdraw():getWidth(),
