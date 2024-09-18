@@ -23,7 +23,7 @@ function class:new(_base, _centralModelIds)
         return private
     end
 
-    function private:getShopById(id)
+    function this:getShopById(id)
         for _, shop in ipairs(this:getShops()) do
             if id == shop:getId() then
                 return shop
@@ -149,11 +149,13 @@ function class:new(_base, _centralModelIds)
                             (shop.title or {}).id,
                             (shop.admin or {}).id
                         )
-                        local oldShop = private:getShopById(newShop:getId())
-                        if oldShop == nil then
-                            table.insert(shops, newShop)
-                        else
-                            table.insert(shops, oldShop)
+                        if newShop ~= nil then
+                            local oldShop = this:getShopById(newShop:getId())
+                            if oldShop == nil then
+                                table.insert(shops, newShop)
+                            else
+                                table.insert(shops, oldShop)
+                            end
                         end
                     end
                     private:setShops(shops)
