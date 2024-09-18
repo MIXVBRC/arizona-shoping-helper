@@ -1,8 +1,8 @@
 local class = {}
-function class:new(_base, _window, _title, _admin)
+function class:new(_base, _id, _windowId, _titleId, _adminId)
     local this = {}
     local private = {
-        ['id'] = nil,
+        ['id'] = _id,
         ['position'] = {
             ['x'] = 0,
             ['y'] = 0,
@@ -10,9 +10,9 @@ function class:new(_base, _window, _title, _admin)
         },
         ['empty'] = true,
         ['central'] = false,
-        ['window'] = _window,
-        ['title'] = _title,
-        ['admin'] = _admin,
+        ['window'] = _base:getNew('shopWindow', _windowId),
+        ['title'] = _base:getNew('shopTitle', _titleId),
+        ['admin'] = _base:getNew('shopAdmin', _adminId),
     }
 
     -- PARAMS
@@ -22,19 +22,19 @@ function class:new(_base, _window, _title, _admin)
     end
 
     function this:getPosition()
-        return private.position
+        return this:getWindow():getPosition()
     end
 
     function this:getX()
-        return this:getPosition().x
+        return this:getWindow():getX()
     end
 
     function this:getY()
-        return this:getPosition().y
+        return this:getWindow():getY()
     end
 
     function this:getZ()
-        return this:getPosition().z
+        return this:getWindow():getZ()
     end
 
     function this:getPlayerName()
@@ -74,75 +74,25 @@ function class:new(_base, _window, _title, _admin)
     -- INITS
 
     function private:init()
-        if private.window ~= nil then
-            private:initWindow():initTitle():initAdmin():initPosition():initId():initCentral()
+        if this:getWindow() ~= nil then
+            private:initEmpty():initCentral()
             _base:getNew('destructorTrait', this)
             return this
         end
         return nil
     end
 
-    function private:initWindow()
-        private.window = _base:getNew('shopWindow', private.window)
-        if private.window ~= nil then
-            private.position.x = private.position.x + private.window:getX()
-            private.position.y = private.position.y + private.window:getY()
-            private.position.z = private.position.z + private.window:getZ()
-        end
-        return private
-    end
-
-    function private:initTitle()
+    function private:initEmpty()
         if private.title ~= nil then
-            private.title = _base:getNew('shopTitle', private.title)
-            if private.title ~= nil then
-                private.position.x = private.position.x + private.title:getX()
-                private.position.y = private.position.y + private.title:getY()
-                private.position.z = private.position.z + private.title:getZ()
-                private.empty = false
-            end
+            private.empty = false
         end
-        return private
-    end
-
-    function private:initAdmin()
-        if private.admin ~= nil then
-            private.admin = _base:getNew('shopAdmin', private.admin)
-            if private.admin ~= nil then
-                private.position.x = private.position.x + private.admin:getX()
-                private.position.y = private.position.y + private.admin:getY()
-                private.position.z = private.position.z + private.admin:getZ()
-            end
-        end
-        return private
-    end
-
-    function private:initPosition()
-        local num = 0
-        for _, value in ipairs({private.window, private.title, private.admin}) do
-            if value ~= nil then
-                num = num + 1
-            end
-        end
-        if num > 0 then
-            private.position = _base:get('helper'):normalizePosition(
-                private.position.x / num,
-                private.position.y / num,
-                private.position.z / num
-            )
-        end
-        return private
-    end
-
-    function private:initId()
-        private.id = _base:get('helper'):md5(this:getPlayerName()..this:getX()..this:getY()..this:getZ())
         return private
     end
 
     function private:initCentral()
         local cacheKey = 'shop_' .. _base:get('helper'):md5(this:getX()..this:getY()..this:getZ())
         if _base:get('cache'):get(cacheKey) == nil then
-            for _, object in ipairs(_base:get('helper'):getObjectsByIds(_base:get('shopManager'):getCentralModelIds())) do
+            for _, object in ipairs(_base:get('helper'):getObjects(_base:get('shopManager'):getCentralModelIds())) do
                 local _, objectX, objectY, objectZ = getObjectCoordinates(object)
                 local distance = getDistanceBetweenCoords3d(
                     this:getX(), this:getY(), this:getZ(),

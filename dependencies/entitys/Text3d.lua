@@ -4,8 +4,8 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
     local private = {
         ['id'] = _id,
         ['text'] = _text or '',
-        ['alpha'] = _alpha or '0xff',
-        ['color'] = _color or 'ffffff',
+        ['alpha'] = _alpha or '0x00',
+        ['color'] = _color or '000000',
         ['position'] = {
             ['x'] = _x or 0,
             ['y'] = _y or 0,
@@ -17,6 +17,7 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
         ['car'] = _car or -1,
         ['custom'] = false,
         ['delete'] = false,
+        ['thread'] = true,
     }
 
     -- ID
@@ -171,6 +172,17 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
         return nil
     end
 
+    -- THREAD
+
+    function this:threadRun()
+        return private.thread
+    end
+
+    function this:shopThread()
+        private.thread = false
+        return this
+    end
+
     -- DESTRUCTOR
 
     function this:__destructor()
@@ -253,7 +265,7 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
         :add(
             nil,
             function ()
-                while not this:isDelete() and not this:isCustom() do wait(1000)
+                while this:threadRun() and not this:isDelete() and not this:isCustom() do wait(1000)
                     private:recalculate()
                 end
             end

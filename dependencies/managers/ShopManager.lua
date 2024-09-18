@@ -91,6 +91,7 @@ function class:new(_base, _centralModelIds)
             if sampIs3dTextDefined(id) then
                 local text, _, x, y, z, _, _, _, _ = sampGet3dTextInfoById(id)
                 local data = {
+                    ['text'] = text,
                     ['id'] = id,
                     ['x'] = x,
                     ['y'] = y,
@@ -144,18 +145,29 @@ function class:new(_base, _centralModelIds)
                 while true do wait(1000)
                     local shops = {}
                     for _, shop in ipairs(private:findShops()) do
-                        local newShop = _base:getNew('shop',
-                            shop.window.id,
-                            (shop.title or {}).id,
-                            (shop.admin or {}).id
+
+                        local id = _base:get('helper'):md5(
+                            ((shop.title == nil) and 'none' or shop.title.text:match('^(.+)%s{%w%w%w%w%w%w}.+{%w%w%w%w%w%w}.+$'))
+                            ..
+                            _base:get('helper'):normalize(shop.window.x)
+                            ..
+                            _base:get('helper'):normalize(shop.window.y)
+                            ..
+                            _base:get('helper'):normalize(shop.window.z)
                         )
-                        if newShop ~= nil then
-                            local oldShop = this:getShopById(newShop:getId())
-                            if oldShop == nil then
-                                table.insert(shops, newShop)
-                            else
-                                table.insert(shops, oldShop)
-                            end
+
+                        local oldShop = this:getShopById(id)
+                        if oldShop == nil then
+                            table.insert(shops,
+                                _base:getNew('shop',
+                                    id,
+                                    shop.window.id,
+                                    (shop.title or {}).id,
+                                    (shop.admin or {}).id
+                                )
+                            )
+                        else
+                            table.insert(shops, oldShop)
                         end
                     end
                     private:setShops(shops)

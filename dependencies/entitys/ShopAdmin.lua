@@ -2,7 +2,7 @@ local class = {}
 function class:new(_base, _id)
     local this = {}
     local private = {
-        ['text3d'] = _base:getNew('text3d', _id),
+        ['text3d'] = _base:getNew('text3d', _id):shopThread(),
     }
 
     -- PARAMS

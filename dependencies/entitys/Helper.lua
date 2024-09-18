@@ -6,18 +6,9 @@ function class:new(_base, _symbols)
         ['cache'] = _base:getNew('cache'),
     }
 
-    function this:normalize(num, index)
-        index = index or 1000
-        num = math.floor(num * index) / index
+    function this:normalize(num)
+        num = math.floor(num * 1000) * 0.001
         return num
-    end
-
-    function this:normalizePosition(x, y, z, index)
-        return {
-            ['x'] = this:normalize(x, index),
-            ['y'] = this:normalize(y, index),
-            ['z'] = this:normalize(z, index),
-        }
     end
 
     function this:md5(string)
@@ -71,7 +62,7 @@ function class:new(_base, _symbols)
         return result
     end
 
-    function this:getObjectsByIds(ids)
+    function this:getObjects(ids)
         local objects = {}
         for _, object in ipairs(getAllObjects()) do
             if ids ~= nil then
