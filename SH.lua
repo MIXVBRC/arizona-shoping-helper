@@ -47,7 +47,6 @@ local data = {
 
             -- TRAITS
 
-            
             {
                 ['name'] = 'destructorTrait',
                 ['path'] = 'dependencies.traits.DestructorTrait',
@@ -241,7 +240,6 @@ local data = {
                 ['init'] = true,
                 ['args'] = {
                     'rus',
-                    'ShopingHelper_langs',
                     {
                         ['rus'] = {
                             ['system_textdraw_inventory'] = '»Õ¬≈Õ“¿–‹',

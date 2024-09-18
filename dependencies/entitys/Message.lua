@@ -1,10 +1,12 @@
 local class = {}
-function class:new(_base, _lang, _name, _default)
+function class:new(_base, _lang, _messages)
     local this = {}
     local private = {
         ['lang'] = _lang,
-        ['config'] = _base:getNew('config', _name, _default, true),
+        ['messages'] = _messages,
     }
+
+    -- LANG
 
     function private:getLang()
         return private.lang
@@ -15,6 +17,14 @@ function class:new(_base, _lang, _name, _default)
         return this
     end
 
+    -- LANGS
+
+    function private:getMessage(name)
+        return (private.messages[private:getLang()] or {})[name]
+    end
+
+    -- REPLACE STRING
+
     function private:replaceString(text, replacements)
         if replacements ~= nil then
             for from, to in ipairs(replacements) do
@@ -24,7 +34,8 @@ function class:new(_base, _lang, _name, _default)
         return text
     end
 
-    -- TODO: replase Color:getAll() to Color:get(color_name)
+    -- REPLACE COLOR
+
     function private:replaceColor(text)
         for name, color in pairs(_base:get('color'):getAll()) do
             text = text:gsub('{'..name..'}', '{'..color..'}')
@@ -32,8 +43,10 @@ function class:new(_base, _lang, _name, _default)
         return text
     end
 
+    -- GET
+
     function this:get(name, replacements)
-        local result = private.config:get(private:getLang(), name)
+        local result = private:getMessage(name)
         if result ~= nil then
             result = private:replaceString(result, replacements)
             result = private:replaceColor(result)
