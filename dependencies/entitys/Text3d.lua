@@ -15,6 +15,7 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
         ['xray'] = _xray or false,
         ['player'] = _player or -1,
         ['car'] = _car or -1,
+        ['custom'] = false,
         ['delete'] = false,
     }
 
@@ -145,6 +146,17 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
         return this
     end
 
+    -- CUSTOM
+
+    function this:isCustom()
+        return private.custom
+    end
+
+    function private:setCustom(bool)
+        private.custom = bool
+        return private
+    end
+
     -- DELETE
 
     function this:isDelete()
@@ -152,21 +164,23 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
     end
 
     function this:delete()
-        sampDestroy3dText(this:getId())
+        private.delete = true
+        if this:isCustom() and sampIs3dTextDefined(this:getId()) then
+            sampDestroy3dText(this:getId())
+        end
         return nil
     end
 
     -- DESTRUCTOR
 
     function this:__destructor()
-        _base:get('chat'):push('distruct: ' .. this:getText())
         this:delete()
     end
 
     -- UPDATE
 
     function this:update()
-        if not this:isDelete() then
+        if not this:isDelete() and sampIs3dTextDefined(this:getId()) then
             sampCreate3dTextEx(
                 this:getId(),
                 this:getText(),
@@ -183,21 +197,14 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
         return this
     end
 
-    -- INITS
+    -- RECALCULATE
 
-    function private:init()
-        private:initTraits():initObject()
-        return this
-    end
-
-    function private:initTraits()
-        _base:getNew('destructorTrait', this)
-        return private
-    end
-
-    function private:initObject()
-        if this:getId() ~= nil then
+    function private:recalculate()
+        if sampIs3dTextDefined(this:getId()) then
             local text, alpha_color, x, y, z, distance, xray, player, car = sampGet3dTextInfoById(this:getId())
+            if type(alpha_color) ~= 'string' or not alpha_color:find('^0x%w%w%w%w%w%w%w%w$') then
+                alpha_color = '0xffffffff'
+            end
             this
             :setText(text)
             :setAlpha(alpha_color:match('^(0x%w%w)%w%w%w%w%w%w$'))
@@ -209,6 +216,19 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
             :setXray(xray)
             :setPlayer(player)
             :setCar(car)
+        end
+        return private
+    end
+
+    -- INITS
+
+    function private:init()
+        if this:getId() ~= nil then
+            if sampIs3dTextDefined(this:getId()) then
+                private:recalculate():initThreads()
+            else
+                return nil
+            end
         else
             private:setId(
                 sampCreate3dText(
@@ -222,8 +242,22 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
                     this:getPlayer(),
                     this:getCar()
                 )
-            )
+            ):setCustom(true)
         end
+        _base:getNew('destructorTrait', this)
+        return this
+    end
+
+    function private:initThreads()
+        _base:get('threadManager')
+        :add(
+            nil,
+            function ()
+                while not this:isDelete() and not this:isCustom() do wait(1000)
+                    private:recalculate()
+                end
+            end
+        )
         return private
     end
 

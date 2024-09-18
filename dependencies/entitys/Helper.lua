@@ -74,24 +74,18 @@ function class:new(_base, _symbols)
     function this:getObjectsByIds(ids)
         local objects = {}
         for _, object in ipairs(getAllObjects()) do
-            local objectId = getObjectModel(object)
-            for _, id in ipairs(ids) do
-                if objectId == id then
-                    table.insert(objects, object)
+            if ids ~= nil then
+                local objectId = getObjectModel(object)
+                for _, id in ipairs(ids) do
+                    if objectId == id then
+                        table.insert(objects, object)
+                    end
                 end
+            else
+                table.insert(objects, object)
             end
         end
         return objects
-    end
-
-    function this:getTextIds()
-        local textIds = {}
-        for textId = 0, 2048 do
-            if sampIs3dTextDefined(textId) then
-                table.insert(textIds, textId)
-            end
-        end
-        return textIds
     end
 
     function this:getAngle(x, y)

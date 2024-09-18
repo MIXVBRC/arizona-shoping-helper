@@ -460,17 +460,24 @@ local data = {
                 ['args'] = {},
             },
             {
+                ['name'] = 'shopWindow',
+                ['path'] = 'dependencies.entitys.ShopWindow',
+                ['sort'] = 2000,
+                ['init'] = false,
+                ['args'] = {},
+            },
+            {
                 ['name'] = 'shopTitle',
                 ['path'] = 'dependencies.entitys.ShopTitle',
                 ['sort'] = 2000,
-                ['init'] = true,
+                ['init'] = false,
                 ['args'] = {},
             },
             {
                 ['name'] = 'shopAdmin',
                 ['path'] = 'dependencies.entitys.ShopAdmin',
                 ['sort'] = 2000,
-                ['init'] = true,
+                ['init'] = false,
                 ['args'] = {},
             },
             {
@@ -487,9 +494,16 @@ local data = {
                 ['init'] = false,
                 ['args'] = {},
             },
-        
+
             -- MANAGERS
-        
+
+            {
+                ['name'] = 'tableManager',
+                ['path'] = 'dependencies.managers.TableManager',
+                ['sort'] = 3000,
+                ['init'] = false,
+                ['args'] = {},
+            },
             {
                 ['name'] = 'threadManager',
                 ['path'] = 'dependencies.managers.ThreadManager',
@@ -598,13 +612,6 @@ local data = {
                 ['path'] = 'dependencies.managers.ServerManager',
                 ['sort'] = 3000,
                 ['init'] = true,
-                ['args'] = {},
-            },
-            {
-                ['name'] = 'text3dManager',
-                ['path'] = 'dependencies.managers.Text3dManager',
-                ['sort'] = 3000,
-                ['init'] = false,
                 ['args'] = {},
             },
 

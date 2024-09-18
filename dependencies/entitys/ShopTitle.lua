@@ -1,72 +1,54 @@
 local class = {}
-function class:new(_base, _text, _x, _y, _z)
+function class:new(_base, _id)
     local this = {}
     local private = {
-        ['text'] = _text or '',
-        ['player'] = 'none',
-        ['mod'] = _base:get('message'):get('system_shop_empty'),
-        ['position'] = {
-            ['x'] = _x or 0,
-            ['y'] = _y or 0,
-            ['z'] = _z or 0,
-        },
+        ['text3d'] = _base:getNew('text3d', _id),
     }
 
     -- PARAMS
 
-    function this:getText()
-        return private.text
+    function private:getText3d()
+        return private.text3d
     end
 
-    function this:getPlayer()
-        return private.player
-    end
-
-    function private:setPlayer(player)
-        private.player = player
-        return private
+    function this:getPlayerName()
+        return private:getText3d():getText():match('^(.+)%s{%w%w%w%w%w%w}.+{%w%w%w%w%w%w}.+$')
     end
 
     function this:getMod()
-        return private.mod
-    end
-
-    function private:setMod(mod)
-        private.mod = mod
-        return private
+        return private:getText3d():getText():match('^.+{%w%w%w%w%w%w}(.+){%w%w%w%w%w%w}.+$')
     end
 
     function this:getPosition()
-        return private.position
+        return private:getText3d():getPosition()
     end
 
     function this:getX()
-        return this:getPosition().x
+        return private:getText3d():getX()
     end
 
     function this:getY()
-        return this:getPosition().y
+        return private:getText3d():getY()
     end
 
     function this:getZ()
-        return this:getPosition().z
+        return private:getText3d():getZ()
+    end
+
+    -- DESTRUCTOR
+
+    function this:__destructor()
+        private:getText3d():delete()
     end
 
     -- INITS
 
     function private:init()
-        private:initPlayer():initMod()
-        return this
-    end
-
-    function private:initPlayer()
-        private:setPlayer(this:getText():match('^(.+)%s{......}.+{......}.+$'))
-        return private
-    end
-
-    function private:initMod()
-        private:setMod(this:getText():match('^.+{......}(.+){......}.+$'))
-        return private
+        if private:getText3d() ~= nil then
+            _base:getNew('destructorTrait', this)
+            return this
+        end
+        return nil
     end
 
     return private:init()

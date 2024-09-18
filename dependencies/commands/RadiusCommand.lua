@@ -81,7 +81,7 @@ function class:new(_base, _name, _default, _minmax)
     function private:getShops()
         local shops = {}
         for _, shop in ipairs(_base:get('shopManager'):getShops()) do
-            if not shop:isCentral() and (not private:isPlayer() or shop:getPlayer() ~= _base:get('playerManager'):getName()) then
+            if not shop:isCentral() and (not private:isPlayer() or shop:getPlayerName() ~= _base:get('playerManager'):getName()) then
                 local distance = _base:get('helper'):distanceToPlayer2d(shop:getX(), shop:getY())
                 if distance < private:getDistance() then
                     table.insert(shops, shop)

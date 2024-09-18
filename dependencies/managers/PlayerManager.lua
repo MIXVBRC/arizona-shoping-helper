@@ -98,7 +98,7 @@ function class:new(_base)
                     function ()
                         while _base:get('dialogManager'):isOpened() do wait(1000)
                             local shop = _base:get('shopManager'):getNearby(false, true)
-                            if shop ~= nil and shop:getPlayer() == this:getName() then
+                            if shop ~= nil and shop:getPlayerName() == this:getName() then
                                 local id = _base:get('helper'):getNumber(title:match(_base:get('message'):get('system_regex_match_dialog_title_shop_id')))
                                 _base:get('eventManager'):trigger('onOpenShopAdminingList', id, shop)
                                 return

@@ -3,11 +3,11 @@ function class:new(_base, _name, _default, _minmax)
     local this = {}
     local private = {
         ['name'] = _name,
+        ['text3ds'] = {},
         ['lastShopId'] = nil,
         ['minmax'] = _base:getNew('minMax', _minmax),
         ['config'] = _base:getNew('configManager', _name, _default),
         ['cache'] = _base:getNew('cache'),
-        ['text3dManager'] = _base:getNew('text3dManager'),
     }
 
     -- NAME
@@ -64,6 +64,26 @@ function class:new(_base, _name, _default, _minmax)
 
     function private:getColor(name)
         return private.config:get('colors')[name]
+    end
+
+    -- TEXT3DS
+
+    function private:getText3ds()
+        return private.text3ds
+    end
+
+    function private:setText3ds(text3ds)
+        private.text3ds = text3ds
+        return private
+    end
+
+    function private:getText3d(id)
+        for _, value in ipairs(private:getText3ds()) do
+            if id == value.id then
+                return value.text3d
+            end
+        end
+        return nil
     end
 
     -- LAST SHOP ID
@@ -229,8 +249,24 @@ function class:new(_base, _name, _default, _minmax)
                 while true do wait(0)
                     if private:isActive() then
                         local time = os.time()
+                        local text3ds = {}
                         for _, shop in ipairs(_base:get('shopManager'):getShops()) do
-                            local text3d = shop:getText3d()
+                            local text3d = private:getText3d(shop:getId())
+                            if text3d == nil then
+                                text3d = _base:getNew('text3d',
+                                    nil,
+                                    nil,
+                                    nil,
+                                    nil,
+                                    shop:getX(),
+                                    shop:getY(),
+                                    shop:getZ()
+                                )
+                            end
+                            table.insert(text3ds, {
+                                ['id'] = shop:getId(),
+                                ['text3d'] = text3d,
+                            })
                             local distance = _base:get('helper'):distanceToPlayer3d(shop:getX(), shop:getY(), shop:getZ())
                             local aplpha = _base:get('color'):getAlpha(100 - math.floor(distance * 100 / private:getDistance()))
                             text3d:setAlpha(aplpha)
@@ -243,7 +279,7 @@ function class:new(_base, _name, _default, _minmax)
                             end
                             local shopTypes = {'player'}
                             text3d:setText(shop:getMod())
-                            if _base:get('playerManager'):getName() == shop:getPlayer() then
+                            if _base:get('playerManager'):getName() == shop:getPlayerName() then
                                 shopTypes = {'player'}
                                 text3d:setColor(private:getColor('player'))
                             elseif shop:getMod() == _base:get('message'):get('system_shop_sell') then
@@ -300,11 +336,11 @@ function class:new(_base, _name, _default, _minmax)
                                 text3d:setDistance(0):update()
                             end
                         end
+                        private:setText3ds(text3ds)
                     else
-                        for _, shop in ipairs(_base:get('shopManager'):getShops()) do
-                            local text3d = shop:getText3d()
-                            if text3d:getDistance() > 0 then
-                                text3d:setDistance(0):update()
+                        for _, value in ipairs(private:getText3ds()) do
+                            if value.text3d:getDistance() > 0 then
+                                value.text3d:setDistance(0):update()
                             end
                         end
                         wait(1000)

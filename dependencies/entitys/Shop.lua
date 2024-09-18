@@ -1,18 +1,18 @@
 local class = {}
-function class:new(_base, _id, _x, _y, _z, _title, _admin, _text3d)
+function class:new(_base, _window, _title, _admin)
     local this = {}
     local private = {
-        ['id'] = _id,
+        ['id'] = nil,
         ['position'] = {
-            ['x'] = _x or 0,
-            ['y'] = _y or 0,
-            ['z'] = _z or 0,
+            ['x'] = 0,
+            ['y'] = 0,
+            ['z'] = 0,
         },
         ['empty'] = true,
         ['central'] = false,
+        ['window'] = _window,
         ['title'] = _title,
         ['admin'] = _admin,
-        ['text3d'] = _text3d,
     }
 
     -- PARAMS
@@ -37,14 +37,9 @@ function class:new(_base, _id, _x, _y, _z, _title, _admin, _text3d)
         return this:getPosition().z
     end
 
-    function private:setPosition(position)
-        private.position = position
-        return private
-    end
-
-    function this:getPlayer()
+    function this:getPlayerName()
         if this:getTitle() ~= nil then
-            return this:getTitle():getPlayer()
+            return this:getTitle():getPlayerName()
         end
         return 'none'
     end
@@ -60,18 +55,12 @@ function class:new(_base, _id, _x, _y, _z, _title, _admin, _text3d)
         return private.empty
     end
 
-    function private:setEmpty(bool)
-        private.empty = bool
-        return private
-    end
-
     function this:isCentral()
         return private.central
     end
 
-    function private:setCentral(bool)
-        private.central = bool
-        return private
+    function this:getWindow()
+        return private.window
     end
 
     function this:getTitle()
@@ -82,26 +71,71 @@ function class:new(_base, _id, _x, _y, _z, _title, _admin, _text3d)
         return private.admin
     end
 
-    function this:getText3d()
-        return private.text3d
-    end
-
-    function private:setText3d(text3d)
-        private.text3d = text3d
-        return private
-    end
-
     -- INITS
 
     function private:init()
-        private:initEmpty():initCentral():initText3d()
-        return this
+        if private.window ~= nil then
+            private:initWindow():initTitle():initAdmin():initPosition():initId():initCentral()
+            _base:getNew('destructorTrait', this)
+            return this
+        end
+        return nil
     end
 
-    function private:initEmpty()
-        if this:getTitle() ~= nil then
-            private:setEmpty(false)
+    function private:initWindow()
+        private.window = _base:getNew('shopWindow', private.window)
+        if private.window ~= nil then
+            private.position.x = private.position.x + private.window:getX()
+            private.position.y = private.position.y + private.window:getY()
+            private.position.z = private.position.z + private.window:getZ()
         end
+        return private
+    end
+
+    function private:initTitle()
+        if private.title ~= nil then
+            private.title = _base:getNew('shopTitle', private.title)
+            if private.title ~= nil then
+                private.position.x = private.position.x + private.title:getX()
+                private.position.y = private.position.y + private.title:getY()
+                private.position.z = private.position.z + private.title:getZ()
+                private.empty = false
+            end
+        end
+        return private
+    end
+
+    function private:initAdmin()
+        if private.admin ~= nil then
+            private.admin = _base:getNew('shopAdmin', private.admin)
+            if private.admin ~= nil then
+                private.position.x = private.position.x + private.admin:getX()
+                private.position.y = private.position.y + private.admin:getY()
+                private.position.z = private.position.z + private.admin:getZ()
+            end
+        end
+        return private
+    end
+
+    function private:initPosition()
+        local num = 0
+        for _, value in ipairs({private.window, private.title, private.admin}) do
+            if value ~= nil then
+                num = num + 1
+            end
+        end
+        if num > 0 then
+            private.position = _base:get('helper'):normalizePosition(
+                private.position.x / num,
+                private.position.y / num,
+                private.position.z / num
+            )
+        end
+        return private
+    end
+
+    function private:initId()
+        private.id = _base:get('helper'):md5(this:getPlayerName()..this:getX()..this:getY()..this:getZ())
         return private
     end
 
@@ -115,28 +149,13 @@ function class:new(_base, _id, _x, _y, _z, _title, _admin, _text3d)
                     objectX, objectY, objectZ
                 )
                 if distance < 3 then
-                    private:setCentral(true)
+                    private.central = true
                     _base:get('cache'):add(cacheKey, true)
                 end
             end
         else
-            private:setCentral(true)
+            private.central = true
         end
-        return private
-    end
-
-    function private:initText3d()
-        private:setText3d(
-            _base:getNew('text3d',
-                nil,
-                '',
-                nil,
-                nil,
-                this:getX(),
-                this:getY(),
-                this:getZ()
-            )
-        )
         return private
     end
 

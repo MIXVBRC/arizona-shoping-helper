@@ -60,13 +60,13 @@ function class:new(_base, _centralModelIds)
         return private.centralModelIds
     end
 
-    -- LOGIC
+    -- NEARBY
 
     function this:getNearby(player, admining)
         local nearbyShop = nil
         local minDistance = nil
         for _, shop in ipairs(this:getShops()) do
-            if not player or shop:getPlayer() ~= _base:get('playerManager'):getName() then
+            if not player or shop:getPlayerName() ~= _base:get('playerManager'):getName() then
                 local x, y, z = shop:getX(), shop:getY(), shop:getZ()
                 if admining and shop:getAdmin() ~= nil then
                     x, y, z = shop:getAdmin():getX(), shop:getAdmin():getY(), shop:getAdmin():getZ()
@@ -84,48 +84,47 @@ function class:new(_base, _centralModelIds)
     -- FIND SHOPS
 
     function private:findShops()
-        local shops = {}
+        local windows = {}
         local titles = {}
         local admins = {}
-        for _, textId in ipairs(_base:get('helper'):getTextIds()) do
-            local text, _, x, y, z, _, _, _, _ = sampGet3dTextInfoById(textId)
-            if text == _base:get('message'):get('system_shop') then
-                table.insert(shops, {
+        for id = 0, 2048 do
+            if sampIs3dTextDefined(id) then
+                local text, _, x, y, z, _, _, _, _ = sampGet3dTextInfoById(id)
+                local data = {
+                    ['id'] = id,
                     ['x'] = x,
                     ['y'] = y,
                     ['z'] = z,
-                })
-            elseif text:find('^%a+_%a+%s{......}.+{......}.+$') then
-                table.insert(titles, _base:getNew('shopTitle',
-                    text,
-                    x,
-                    y,
-                    z
-                ))
-            elseif text:find('^' .. _base:get('message'):get('system_shop_product_management') .. '$') then
-                table.insert(admins, _base:getNew('shopAdmin',
-                    text,
-                    x,
-                    y,
-                    z
-                ))
+                }
+                if text == _base:get('message'):get('system_shop') then
+                    table.insert(windows, data)
+                elseif text:find('^%a+_%a+%s{......}.+{......}.+$') then
+                    table.insert(titles, data)
+                elseif text:find('^' .. _base:get('message'):get('system_shop_product_management') .. '$') then
+                    table.insert(admins, data)
+                end
             end
         end
-        for _, shop in ipairs(shops) do
-            for _, title in ipairs(titles) do
-                if 3 > getDistanceBetweenCoords3d(shop.x, shop.y, shop.z, title:getX(), title:getY(), title:getZ()) then
+        local shops = {}
+        for _, window in ipairs(windows) do
+            local shop = {
+                ['window'] = window,
+            }
+            for indexTitle, title in ipairs(titles) do
+                if 3 > getDistanceBetweenCoords3d(window.x, window.y, window.z, title.x, title.y, title.z) then
+                    for indexAdmin, admin in ipairs(admins) do
+                        if 3 > getDistanceBetweenCoords3d(title.x, title.y, title.z, admin.x, admin.y, admin.z) then
+                            shop.admin = admin
+                            table.remove(admins, indexAdmin)
+                            break
+                        end
+                    end
                     shop.title = title
+                    table.remove(titles, indexTitle)
                     break
                 end
             end
-            if shop.title ~= nil then
-                for _, admin in ipairs(admins) do
-                    if 3 > getDistanceBetweenCoords3d(shop.title:getX(), shop.title:getY(), shop.title:getZ(), admin:getX(), admin:getY(), admin:getZ()) then
-                        shop.admin = admin
-                        break
-                    end
-                end
-            end
+            table.insert(shops, shop)
         end
         return shops
     end
@@ -145,24 +144,14 @@ function class:new(_base, _centralModelIds)
                 while true do wait(1000)
                     local shops = {}
                     for _, shop in ipairs(private:findShops()) do
-                        local position = _base:get('helper'):normalizePosition(shop.x, shop.y, shop.z)
-                        local playerName = 'none'
-                        if shop.title ~= nil then
-                            playerName = shop.title:getPlayer()
-                        end
-                        local id = _base:get('helper'):md5(playerName..position.x..position.y..position.z)
-                        local oldShop = private:getShopById(id)
+                        local newShop = _base:getNew('shop',
+                            shop.window.id,
+                            (shop.title or {}).id,
+                            (shop.admin or {}).id
+                        )
+                        local oldShop = private:getShopById(newShop:getId())
                         if oldShop == nil then
-                            table.insert(shops,
-                                _base:getNew('shop',
-                                    id,
-                                    position.x,
-                                    position.y,
-                                    position.z,
-                                    shop.title,
-                                    shop.admin
-                                )
-                            )
+                            table.insert(shops, newShop)
                         else
                             table.insert(shops, oldShop)
                         end
