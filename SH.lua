@@ -496,13 +496,6 @@ local data = {
             -- MANAGERS
 
             {
-                ['name'] = 'tableManager',
-                ['path'] = 'dependencies.managers.TableManager',
-                ['sort'] = 3000,
-                ['init'] = false,
-                ['args'] = {},
-            },
-            {
                 ['name'] = 'threadManager',
                 ['path'] = 'dependencies.managers.ThreadManager',
                 ['sort'] = 3000,
