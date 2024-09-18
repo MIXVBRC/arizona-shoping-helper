@@ -236,7 +236,7 @@ function class:new(_base, _name, _default, _minmax)
                             private.cache:add('segments', segments, 1)
                         end
                         private:drawSegments(segments)
-                        local shop = _base:get('shopManager'):getNearby(private:isPlayer(), true)
+                        local shop = _base:get('shopManager'):getNearbyAdmin(private:isPlayer())
                         if shop ~= nil and not shop:isCentral() then
                             if shop:getAdmin() ~= nil then
                                 local distance = _base:get('helper'):distanceToPlayer2d(shop:getAdmin():getX(), shop:getAdmin():getY())

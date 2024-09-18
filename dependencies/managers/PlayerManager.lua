@@ -97,7 +97,7 @@ function class:new(_base)
                     nil,
                     function ()
                         while _base:get('dialogManager'):isOpened() do wait(1000)
-                            local shop = _base:get('shopManager'):getNearby(false, true)
+                            local shop = _base:get('shopManager'):getNearbyAdmin()
                             if shop ~= nil and shop:getPlayerName() == this:getName() then
                                 local id = _base:get('helper'):getNumber(title:match(_base:get('message'):get('system_regex_match_dialog_title_shop_id')))
                                 _base:get('eventManager'):trigger('onOpenShopAdminingList', id, shop)
@@ -149,6 +149,18 @@ function class:new(_base)
                             end
                         )
                     end
+                end
+            end
+        )
+        :add(
+            'onServerMessage',
+            function (_, text)
+                text = _base:get('helper'):removeColors(text or '')
+                if text:find(_base:get('message'):get('system_regex_find_chat_shop_is_empty')) then
+                    _base:get('eventManager'):trigger('onEnterShop')
+                    private:setShoping(true)
+                    private:setShoping(false)
+                    _base:get('eventManager'):trigger('onOutShop')
                 end
             end
         )

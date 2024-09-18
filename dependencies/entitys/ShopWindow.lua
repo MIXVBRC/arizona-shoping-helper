@@ -7,36 +7,36 @@ function class:new(_base, _id)
 
     -- PARAMS
 
-    function private:getText3d()
+    function this:getText3d()
         return private.text3d
     end
 
     function this:getPosition()
-        return private:getText3d():getPosition()
+        return this:getText3d():getPosition()
     end
 
     function this:getX()
-        return private:getText3d():getX()
+        return this:getText3d():getX()
     end
 
     function this:getY()
-        return private:getText3d():getY()
+        return this:getText3d():getY()
     end
 
     function this:getZ()
-        return private:getText3d():getZ()
+        return this:getText3d():getZ()
     end
 
     -- DESTRUCTOR
 
     function this:__destructor()
-        private:getText3d():delete()
+        this:getText3d():delete()
     end
 
     -- INITS
 
     function private:init()
-        if private:getText3d() ~= nil then
+        if this:getText3d() ~= nil then
             _base:getNew('destructorTrait', this)
             return this
         end

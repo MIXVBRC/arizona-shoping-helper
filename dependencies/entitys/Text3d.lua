@@ -64,9 +64,9 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
         return this
     end
 
-    -- FULL COLOR
+    -- COLOR FULL
 
-    function this:getColotFull()
+    function this:getColorFull()
         return private.alpha .. private.color
     end
 
@@ -196,7 +196,7 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
             sampCreate3dTextEx(
                 this:getId(),
                 this:getText(),
-                this:getColotFull(),
+                this:getColorFull(),
                 this:getX(),
                 this:getY(),
                 this:getZ(),
@@ -220,7 +220,7 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
             this
             :setText(text)
             :setAlpha(alpha_color:match('^(0x%w%w)%w%w%w%w%w%w$'))
-            :setColor(alpha_color:match('^0x%w%w(%w%w%w%w%w%w$)'))
+            :setColor(alpha_color:match('^0x%w%w(%w%w%w%w%w%w)$'))
             :setX(x)
             :setY(y)
             :setZ(z)
@@ -245,7 +245,7 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
             private:setId(
                 sampCreate3dText(
                     this:getText(),
-                    this:getColotFull(),
+                    this:getColorFull(),
                     this:getX(),
                     this:getY(),
                     this:getZ(),

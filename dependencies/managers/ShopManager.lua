@@ -62,16 +62,27 @@ function class:new(_base, _centralModelIds)
 
     -- NEARBY
 
-    function this:getNearby(player, admining)
+    function this:getNearbyWindow(alien)
         local nearbyShop = nil
         local minDistance = nil
         for _, shop in ipairs(this:getShops()) do
-            if not player or shop:getPlayerName() ~= _base:get('playerManager'):getName() then
-                local x, y, z = shop:getX(), shop:getY(), shop:getZ()
-                if admining and shop:getAdmin() ~= nil then
-                    x, y, z = shop:getAdmin():getX(), shop:getAdmin():getY(), shop:getAdmin():getZ()
+            if shop:getTitle() and (not alien or shop:getPlayerName() ~= _base:get('playerManager'):getName()) then
+                local distance = _base:get('helper'):distanceToPlayer3d(shop:getWindow():getX(), shop:getWindow():getY(), shop:getWindow():getZ())
+                if minDistance == nil or distance < minDistance then
+                    minDistance = distance
+                    nearbyShop = shop
                 end
-                local distance = _base:get('helper'):distanceToPlayer3d(x, y, z)
+            end
+        end
+        return nearbyShop, minDistance
+    end
+
+    function this:getNearbyAdmin(alien)
+        local nearbyShop = nil
+        local minDistance = nil
+        for _, shop in ipairs(this:getShops()) do
+            if shop:getAdmin() ~= nil and (not alien or shop:getPlayerName() ~= _base:get('playerManager'):getName()) then
+                local distance = _base:get('helper'):distanceToPlayer3d(shop:getAdmin():getX(), shop:getAdmin():getY(), shop:getAdmin():getZ())
                 if minDistance == nil or distance < minDistance then
                     minDistance = distance
                     nearbyShop = shop

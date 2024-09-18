@@ -271,6 +271,7 @@ local data = {
                             ['system_regex_find_dialog_text_vr'] = '^.*Ваше сообщение является рекламой%?.*$',
                             ['system_regex_find_chat_sale_product'] = '^%[Информация%] Товар .+ успешно выставлен на продажу!$',
                             ['system_regex_find_chat_remove_sale_product'] = '^%[Информация%] Товар .+ успешно удален из продажи!$',
+                            ['system_regex_find_chat_shop_is_empty'] = '^%[Ошибка%] В этом магазине нет товаров!$',
 
                             ['system_regex_gsub_dialog_text_item_match_item'] = 'Предмет: ',
                             ['system_regex_gsub_dialog_text_item_match_bottle'] = 'Эликсир: ',
@@ -296,6 +297,7 @@ local data = {
                             ['message_ad_dialog_title_list'] = '{orange}Рекламные сообщения',
                             ['message_ad_dialog_title_select'] = '{orange}Рекламное сообщение',
                             ['message_ad_dialog_title_add'] = '{orange}Реклама в чат {green}/#1#',
+                            ['message_ad_dialog_title_change_time'] = '{orange}Введите время в минутах ',
                             ['message_ad_dialog_title_chat_select'] = '{orange}Выберите чат',
                             ['message_ad_dialog_title_chat'] = '{orange}Чат {green}/#1#',
                             ['message_ad_dialog_message_add_1'] = '{white}Подстановка значений:',
@@ -699,7 +701,7 @@ local data = {
                     'visit',
                     {
                         ['active'] = false,
-                        ['hiding'] = {
+                        ['types'] = {
                             {
                                 ['name'] = 'player',
                                 ['active'] = true,
@@ -718,14 +720,6 @@ local data = {
                             },
                             {
                                 ['name'] = 'edit',
-                                ['active'] = true,
-                            },
-                            {
-                                ['name'] = 'empty',
-                                ['active'] = true,
-                            },
-                            {
-                                ['name'] = 'time',
                                 ['active'] = true,
                             },
                         },

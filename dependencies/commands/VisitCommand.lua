@@ -97,41 +97,41 @@ function class:new(_base, _name, _default, _minmax)
         return private
     end
 
-    -- HIDINGS
+    -- TYPES
 
-    function private:getHidings()
-        return private.config:get('hiding')
+    function private:getTypes()
+        return private.config:get('types')
     end
 
-    function private:setHidings(hidings)
-        private.config:set('hiding', hidings)
+    function private:setTypes(types)
+        private.config:set('types', types)
         return private
     end
 
-    function private:getHiding(name)
-        for _, hiding in ipairs(private:getHidings()) do
-            if name == hiding.name then
-                return hiding
+    function private:getType(name)
+        for _, type in ipairs(private:getTypes()) do
+            if name == type.name then
+                return type
             end
         end
         return nil
     end
 
-    function private:toggleHiding(name)
-        local hidings = private:getHidings()
-        for _, hiding in ipairs(hidings) do
-            if name == hiding.name then
-                hiding.active = not hiding.active
+    function private:toggleType(name)
+        local types = private:getTypes()
+        for _, type in ipairs(types) do
+            if name == type.name then
+                type.active = not type.active
             end
         end
-        private:setHidings(hidings)
+        private:setTypes(types)
         return private
     end
 
-    function private:isHidingActive(name)
-        for _, hiding in ipairs(private:getHidings()) do
-            if name == hiding.name then
-                return hiding.active
+    function private:isTypeActive(name)
+        for _, type in ipairs(private:getTypes()) do
+            if name == type.name then
+                return type.active
             end
         end
         return nil
@@ -233,9 +233,9 @@ function class:new(_base, _name, _default, _minmax)
                 end
             end
         end)
-        for _, hiding in ipairs(private:getHidings()) do
-            _base:get('commandManager'):add({private:getName(), 'active', hiding.name}, function ()
-                private:toggleHiding(hiding.name)
+        for _, type in ipairs(private:getTypes()) do
+            _base:get('commandManager'):add({private:getName(), 'active', type.name}, function ()
+                private:toggleType(type.name)
             end)
         end
         return private
@@ -247,96 +247,76 @@ function class:new(_base, _name, _default, _minmax)
             nil,
             function ()
                 while true do wait(0)
-                    for _, text3d in ipairs(private:getText3ds()) do
-                        local distance = _base:get('helper'):distanceToPlayer3d(text3d.text3d:getX(), text3d.text3d:getY(), text3d.text3d:getZ())
-                        local aplpha = _base:get('color'):getAlpha(100 - math.floor(distance * 100 / private:getDistance()))
-                        text3d.text3d:setAlpha(aplpha)
-                    end
-                end
-            end
-        )
-        :add(
-            nil,
-            function ()
-                while true do wait(0)
                     if private:isActive() then
                         local time = os.time()
                         local text3ds = {}
                         for _, shop in ipairs(_base:get('shopManager'):getShops()) do
-                            local distance = _base:get('helper'):distanceToPlayer3d(shop:getX(), shop:getY(), shop:getZ())
-                            if distance <= private:getDistance() then
-                                local text3d = private:getText3d(shop:getId())
-                                if text3d == nil then
-                                    text3d = _base:getNew('text3d',
-                                        nil,
-                                        nil,
-                                        nil,
-                                        nil,
-                                        shop:getX(),
-                                        shop:getY(),
-                                        shop:getZ() + 1
-                                    )
-                                end
-                                text3d:setXray(private:isXray())
-                                local shopTypes = {'player'}
-                                text3d:setText(shop:getMod())
-                                if _base:get('playerManager'):getName() == shop:getPlayerName() then
-                                    shopTypes = {'player'}
-                                    text3d:setColor(private:getColor('player'))
-                                elseif shop:getMod() == _base:get('message'):get('system_shop_sell') then
-                                    shopTypes = {'sell'}
-                                    text3d:setColor(private:getColor('sell'))
-                                elseif shop:getMod() == _base:get('message'):get('system_shop_buy') then
-                                    shopTypes = {'buy'}
-                                    text3d:setColor(private:getColor('buy'))
-                                elseif shop:getMod() == _base:get('message'):get('system_shop_sell_buy') then
-                                    shopTypes = {'sell','buy'}
-                                    text3d:setColor(private:getColor('sell_buy'))
-                                elseif shop:getMod() == _base:get('message'):get('system_shop_edit') then
-                                    shopTypes = {'edit'}
-                                    text3d:setColor(private:getColor('edit'))
-                                elseif shop:getMod() == _base:get('message'):get('system_shop_empty') then
-                                    shopTypes = {'empty'}
-                                    text3d:setColor(private:getColor('empty'))
-                                end
-                                local show = false
-                                local visitShop = private:getShop(shop:getId())
-                                if visitShop ~= nil then
-                                    if time <= visitShop.time and (visitShop.mod == shop:getMod() or visitShop.mod == _base:get('message'):get('system_shop_edit')) then
-                                        shopTypes = {'visit'}
-                                        text3d:setColor(private:getColor('visit'))
-                                        if private:isHidingActive('time') then
-                                            text3d:setText(_base:get('helper'):implode(' ', {
-                                                text3d:getText(),
-                                                math.ceil((visitShop.time - time) / 60),
-                                                'min'
-                                            }))
+                            if shop:getTitle() ~= nil then
+                                local distance = _base:get('helper'):distanceToPlayer3d(shop:getX(), shop:getY(), shop:getZ())
+                                if distance <= private:getDistance() then
+                                    local text3d = private:getText3d(shop:getId())
+                                    if text3d == nil then
+                                        text3d = _base:getNew('text3d', nil, nil, nil, nil,
+                                            shop:getX(),
+                                            shop:getY(),
+                                            shop:getZ()
+                                        )
+                                    end
+                                    local aplpha = _base:get('color'):getAlpha(100 - math.floor(distance * 100 / private:getDistance()))
+                                    text3d:setAlpha(aplpha)
+                                    text3d:setXray(private:isXray())
+                                    local shopTypes = {'player'}
+                                    text3d:setText(shop:getMod())
+                                    if _base:get('playerManager'):getName() == shop:getPlayerName() then
+                                        shopTypes = {'player'}
+                                        text3d:setColor(private:getColor('player'))
+                                    elseif shop:getMod() == _base:get('message'):get('system_shop_sell') then
+                                        shopTypes = {'sell'}
+                                        text3d:setColor(private:getColor('sell'))
+                                    elseif shop:getMod() == _base:get('message'):get('system_shop_buy') then
+                                        shopTypes = {'buy'}
+                                        text3d:setColor(private:getColor('buy'))
+                                    elseif shop:getMod() == _base:get('message'):get('system_shop_sell_buy') then
+                                        shopTypes = {'sell','buy'}
+                                        text3d:setColor(private:getColor('sell_buy'))
+                                    elseif shop:getMod() == _base:get('message'):get('system_shop_edit') then
+                                        shopTypes = {'edit'}
+                                        text3d:setColor(private:getColor('edit'))
+                                    end
+                                    local show = false
+                                    local visitShop = private:getShop(shop:getId())
+                                    if visitShop ~= nil then
+                                        if time <= visitShop.time and (visitShop.mod == shop:getMod() or visitShop.mod == _base:get('message'):get('system_shop_edit')) then
+                                            shopTypes = {'visit'}
+                                            text3d:setColor(private:getColor('visit'))
+                                            shop:getWindow():getText3d():setDistance(1):update()
+                                        else
+                                            private:changeShop(shop:getId(), {
+                                                ['time'] = 0,
+                                                ['mod'] = shop:getMod(),
+                                            })
                                         end
-                                    else
-                                        private:changeShop(shop:getId(), {
-                                            ['time'] = 0,
-                                            ['mod'] = shop:getMod(),
-                                        })
-                                    end
-                                    if visitShop.select then
-                                        text3d:setColor(private:getColor('select'))
-                                        text3d:setText(visitShop.text)
-                                        show = true
-                                    end
-                                end
-                                if not show then
-                                    for _, shopType in ipairs(shopTypes) do
-                                        if private:isHidingActive(shopType) then
+                                        if visitShop.select then
+                                            text3d:setColor(private:getColor('select'))
+                                            text3d:setText(visitShop.text)
                                             show = true
                                         end
                                     end
-                                end
-                                if show then
-                                    text3d:update()
-                                    table.insert(text3ds, {
-                                        ['id'] = shop:getId(),
-                                        ['text3d'] = text3d,
-                                    })
+                                    if not show then
+                                        for _, shopType in ipairs(shopTypes) do
+                                            if private:isTypeActive(shopType) then
+                                                show = true
+                                            end
+                                        end
+                                    end
+                                    if show then
+                                        shop:getWindow():getText3d():setDistance(0):update()
+                                        text3d:update()
+                                        table.insert(text3ds, {
+                                            ['id'] = shop:getId(),
+                                            ['text3d'] = text3d,
+                                        })
+                                    end
                                 end
                             end
                         end
@@ -375,7 +355,7 @@ function class:new(_base, _name, _default, _minmax)
         :add(
             'onEnterShop',
             function ()
-                local shop = _base:get('shopManager'):getNearby()
+                local shop = _base:get('shopManager'):getNearbyWindow()
                 if shop ~= nil then
                     private:setLastShopId(shop:getId())
                     local time = os.time() + ( private:getTime() * 60 )

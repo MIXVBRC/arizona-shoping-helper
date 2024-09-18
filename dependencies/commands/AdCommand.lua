@@ -10,11 +10,6 @@ function class:new(_base, _name, _default, _minmax)
         ['config'] = _base:getNew('configManager', _name, _default),
     }
 
-    -- TODO: сделать возможность шаблонизирования сообщения
-    -- TODO: в DialogManager добавить события для диалогов VR и AD и остальных, если есть
-    -- TODO: для каждого чата сделать возможность персонального текста сообщения
-    -- TODO: добавить рекламу в AD, Семью (fam), Альянс (al)
-
     -- NAME
 
     function private:getName()
@@ -348,7 +343,7 @@ function class:new(_base, _name, _default, _minmax)
                 chat.name
             }))
             _base:get('dialogManager'):show(
-                _base:get('message'):get('message_ad_dialog_title_add', {chatName}),
+                _base:get('message'):get('message_ad_dialog_title_change_time'),
                 dialogList,
                 _base:get('message'):get('message_dialog_button_add'),
                 _base:get('message'):get('message_dialog_button_cancel'),
@@ -732,9 +727,6 @@ function class:new(_base, _name, _default, _minmax)
     function private:initCommands()
         _base:get('commandManager')
         :add({private:getName(), 'active'}, private.toggleActive)
-        -- :add({private:getName(), 'push'}, function ()
-        --     private:setPushAt(0)
-        -- end)
         :add({private:getName(), 'add'}, function ()
             private:dialogChatSelect('add')
         end)
@@ -742,24 +734,6 @@ function class:new(_base, _name, _default, _minmax)
             private:dialogChatSelect('change')
         end)
         :add({private:getName(), 'list'}, private.dialogMessageList)
-        -- :add({private:getName(), 'time'}, function (time)
-        --     time = _base:get('helper'):getNumber(time)
-        --     if private:getPushAt() > 0 then
-        --         private:setPushAt(private:getPushAt() - (private:getTime() - time) * 60)
-        --     end
-        --     private:setTime(time)
-        -- end)
-        -- :add({private:getName(), 'left'}, function ()
-        --     _base:get('chat'):push(_base:get('message'):get('message_ad_next_push_time', {
-        --         private:getRemainingTime()
-        --     }))
-        -- end)
-        -- for _, chat in ipairs(private:getChats()) do
-        --     _base:get('commandManager')
-        --     :add({private:getName(), 'active', chat.name}, function ()
-        --         private:toggleChatActive(chat.name)
-        --     end)
-        -- end
         return private
     end
 
