@@ -6,6 +6,7 @@ function class:new(_base, _name, _default, _force)
         ['data'] = _default or {},
         ['force'] = _force or false,
         ['arrayName'] = 'json',
+        ['params'] = {},
     }
 
     -- NAME
@@ -31,6 +32,19 @@ function class:new(_base, _name, _default, _force)
     function private:getArrayDataName(title, name)
         return title .. '-' .. name
     end
+    
+    -- DEFAULT
+
+    function this:getParams()
+        return private.params
+    end
+
+    function private:addParam(title, name)
+        private.params[title] = private.params[title] or {}
+        private.params[title][name] = true
+        _base:get('chat'):push(title .. ' | ' .. name)
+        return private
+    end
 
     -- GET
 
@@ -45,6 +59,7 @@ function class:new(_base, _name, _default, _force)
 
     function this:set(title, name, data)
         if title ~= private:getArrayName() and data ~= private:getArrayName() then
+            private:addParam(title, name)
             private.data[title] = private.data[title] or {}
             private.data[title][name] = data
             private:save()
@@ -128,8 +143,19 @@ function class:new(_base, _name, _default, _force)
         if not private:isForce() then
             private:load()
         end
-        private:save()
+        private:initParams():save()
         return this
+    end
+
+    function private:initParams()
+        for title, values in ipairs(private.data) do
+            if title ~= private:getArrayName() then
+                for name, _ in pairs(values) do
+                    private:addParam(title, name)
+                end
+            end
+        end
+        return private
     end
 
     return private:init()

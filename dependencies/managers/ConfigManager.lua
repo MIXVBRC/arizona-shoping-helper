@@ -4,6 +4,7 @@ function class:new(_base, _name, _default, _config)
     local private = {
         ['name'] = _name,
         ['default'] = _default or {},
+        ['params'] = {},
         ['config'] = _config or _base:get('config'),
     }
 

@@ -810,6 +810,15 @@ function class:new(_base, _name, _default, _minmax)
                 end
             end
         )
+        :add(
+            'onServerMessage',
+            function (_, text)
+                text = _base:get('helper'):removeColors(text or '')
+                if text:find(_base:get('message'):get('system_regex_find_chat_shop_is_close')) then
+                    private:setShopId(nil)
+                end
+            end
+        )
         return private
     end
 

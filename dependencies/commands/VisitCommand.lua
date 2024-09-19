@@ -290,7 +290,7 @@ function class:new(_base, _name, _default, _minmax)
                                             shopTypes = {'visit'}
                                             text3d:setColor(private:getColor('visit'))
                                             shop:getWindow():getText3d():setDistance(1):update()
-                                        else
+                                        elseif visitShop.time > 0 then
                                             private:changeShop(shop:getId(), {
                                                 ['time'] = 0,
                                                 ['mod'] = shop:getMod(),
@@ -335,7 +335,7 @@ function class:new(_base, _name, _default, _minmax)
                     local flag = false
                     local shops = {}
                     for _, shop in pairs(private:getShops()) do
-                        if not shop.select and time < shop.time then
+                        if (not shop.select or not time - shop.select > 86400) and time < shop.time then
                             table.insert(shops, shop)
                         else
                             flag = true

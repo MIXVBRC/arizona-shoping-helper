@@ -58,6 +58,30 @@ local data = {
             -- ENTITYS
 
             {
+                ['name'] = 'color',
+                ['path'] = 'dependencies.entitys.Color',
+                ['sort'] = 2000,
+                ['init'] = true,
+                ['args'] = {
+                    {
+                        ['red'] = '992e2e',
+                        ['green'] = '3cc23c',
+                        ['blue'] = '42bdb5',
+                        ['orange'] = 'ffd700',
+                        ['white'] = 'ffffff',
+                        ['grey'] = '808080',
+                        ['black'] = '000000',
+                    }
+                },
+            },
+            {
+                ['name'] = 'chat',
+                ['path'] = 'dependencies.entitys.Chat',
+                ['sort'] = 2000,
+                ['init'] = true,
+                ['args'] = {},
+            },
+            {
                 ['name'] = 'cache',
                 ['path'] = 'dependencies.entitys.Cache',
                 ['sort'] = 2000,
@@ -247,7 +271,7 @@ local data = {
                             ['system_textdraw_shop_mod_sale'] = 'СКУПКА',
                             ['system_textdraw_shop_shoping'] = 'МАГАЗИН',
                             ['system_textdraw_shop_admining'] = 'НА ПРОДАЖЕ',
-        
+
                             ['system_shop_edit'] = 'редактирует',
                             ['system_shop'] = 'Лавка',
                             ['system_shop_sell'] = 'продаёт',
@@ -272,6 +296,7 @@ local data = {
                             ['system_regex_find_chat_sale_product'] = '^%[Информация%] Товар .+ успешно выставлен на продажу!$',
                             ['system_regex_find_chat_remove_sale_product'] = '^%[Информация%] Товар .+ успешно удален из продажи!$',
                             ['system_regex_find_chat_shop_is_empty'] = '^%[Ошибка%] В этом магазине нет товаров!$',
+                            ['system_regex_find_chat_shop_is_close'] = '^%[Информация%] Ваша лавка была закрыта, из-за того что вы её покинули!$',
 
                             ['system_regex_gsub_dialog_text_item_match_item'] = 'Предмет: ',
                             ['system_regex_gsub_dialog_text_item_match_bottle'] = 'Эликсир: ',
@@ -384,30 +409,6 @@ local data = {
                 ['path'] = 'dependencies.entitys.MinMax',
                 ['sort'] = 2000,
                 ['init'] = false,
-                ['args'] = {},
-            },
-            {
-                ['name'] = 'color',
-                ['path'] = 'dependencies.entitys.Color',
-                ['sort'] = 2000,
-                ['init'] = true,
-                ['args'] = {
-                    {
-                        ['red'] = '992e2e',
-                        ['green'] = '3cc23c',
-                        ['blue'] = '42bdb5',
-                        ['orange'] = 'ffd700',
-                        ['white'] = 'ffffff',
-                        ['grey'] = '808080',
-                        ['black'] = '000000',
-                    }
-                },
-            },
-            {
-                ['name'] = 'chat',
-                ['path'] = 'dependencies.entitys.Chat',
-                ['sort'] = 2000,
-                ['init'] = true,
                 ['args'] = {},
             },
             {
@@ -901,6 +902,7 @@ function class:new(_name, _author, _version, _url, _command, _entities)
         ['entities'] = _entities,
         ['objects'] = {},
         ['classes'] = {},
+        ['commands'] = {},
     }
 
     -- COMMAND
