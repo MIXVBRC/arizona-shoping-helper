@@ -201,7 +201,10 @@ function class:new(_base, _name, _default, _minmax)
             nil,
             function ()
                 while true do wait(0)
-                    if private:isActive() and not _base:get('playerManager'):isSAI() then
+                    if private:isActive()
+                    and not _base:get('playerManager'):isSAI()
+                    and not sampIsScoreboardOpen()
+                    then
                         local segments = private.cache:get('segments')
                         if segments == nil then
                             local shops = private:getShops()

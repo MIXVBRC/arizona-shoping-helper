@@ -46,13 +46,14 @@ function class:new(_base)
         :add(
             nil,
             function ()
-                while true do wait(5000)
+                while true do
                     local ip, port = sampGetCurrentServerAddress()
                     if ip ~= this:getIp() or port ~= this:getPort() then
                         _base:get('eventManager'):trigger('onChangeIpOrPort', ip, port)
                     end
                     private:setIp(ip)
                     private:setPort(port)
+                    wait(5000)
                 end
             end
         )

@@ -59,14 +59,14 @@ function class:new(_base, _name, _code, _price, _textdraw)
 
     -- SCAN
 
-    function this:scan(time, execute)
+    function this:scan(execute)
         _base:get('queueManager')
         :add(
             function ()
                 if not this:isScanned() and sampTextdrawIsExists(this:getTextdraw():getId()) then
                     sampSendClickTextdraw(this:getTextdraw():getId())
                     while not this:isScanned() and not this:isDelete() do wait(0) end
-                    wait(time or 500)
+                    wait(200)
                 end
             end,
             (this:getTextdraw():getX() + this:getTextdraw():getY())
@@ -146,7 +146,6 @@ function class:new(_base, _name, _code, _price, _textdraw)
                 if not this:isDelete() and sampTextdrawIsExists(this:getTextdraw():getId()) then
                     sampSendClickTextdraw(this:getTextdraw():getId())
                     while not this:isBuy() and not this:isDelete() do wait(0) end
-                    wait(500)
                 end
             end,
             1

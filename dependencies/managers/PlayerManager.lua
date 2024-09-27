@@ -2,6 +2,7 @@ local class = {}
 function class:new(_base)
     local this = {}
     local private = {
+        ['afk'] = true,
         ['shoping'] = false,
         ['admining'] = false,
         ['inventory'] = false,
@@ -22,12 +23,17 @@ function class:new(_base)
     -- POSITION
 
     function this:getPosition()
-        local x, y, z = getCharCoordinates(playerPed)
-        return {
-            ['x'] = x,
-            ['y'] = y,
-            ['z'] = z,
-        }
+        local position = private.cache:get('position')
+        if position == nil then
+            local x, y, z = getCharCoordinates(playerPed)
+            position = {
+                ['x'] = x,
+                ['y'] = y,
+                ['z'] = z,
+            }
+            private.cache:add('cursor', position, 0.01)
+        end
+        return position
     end
 
     function this:getX()
@@ -40,6 +46,35 @@ function class:new(_base)
 
     function this:getZ()
         return this:getPosition().z
+    end
+
+    -- CURSOR
+
+    function this.getCursorPosition()
+        local position = private.cache:get('cursor')
+        if position == nil then
+            local x, y = getCursorPos()
+            position = {
+                ['x'] = x,
+                ['y'] = y,
+            }
+            private.cache:add('cursor', position, 0.1)
+        end
+        return position
+    end
+
+    function this:getCursorX()
+        return this:getCursorPosition().x
+    end
+
+    function this:getCursorY()
+        return this:getCursorPosition().y
+    end
+
+    -- AFK
+
+    function this:isAFK()
+        return private.afk
     end
 
     -- SHOPING
@@ -84,7 +119,7 @@ function class:new(_base)
     -- INITS
 
     function private:init()
-        private:initEvents()
+        private:initEvents():initThrades()
         return this
     end
 
@@ -161,6 +196,29 @@ function class:new(_base)
                     private:setShoping(true)
                     private:setShoping(false)
                     _base:get('eventManager'):trigger('onOutShop')
+                end
+            end
+        )
+        return private
+    end
+
+    function private:initThrades()
+        _base:get('threadManager')
+        :add(
+            nil,
+            function ()
+                while true do wait(5000)
+                    private.afk = true
+                    local cursor = private.cache:get('afk_cursor') or {}
+                    if cursor.x ~= this:getCursorX() or cursor.y ~= this:getCursorY() then
+                        private.afk = false
+                        private.cache:add('afk_cursor', this:getCursorPosition())
+                    end
+                    local position = private.cache:get('afk_position') or {}
+                    if position.x ~= this:getX() or position.y ~= this:getY() or position.z ~= this:getZ() then
+                        private.afk = false
+                        private.cache:add('afk_position', this:getPosition())
+                    end
                 end
             end
         )

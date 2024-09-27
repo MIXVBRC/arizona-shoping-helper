@@ -60,20 +60,22 @@ function class:new(_base, _name, _default, _minmax)
             nil,
             function ()
                 while true do wait(0)
-                    if private:isActive() then
-                        if _base:get('playerManager'):isShoping() and not _base:get('dialogManager'):isOpened() then
-                            for _, product in ipairs(_base:get('productManager'):getProducts()) do
-                                _base:get('drawManager'):addBox(
-                                    product:getTextdraw():getX(),
-                                    product:getTextdraw():getY(),
-                                    product:getTextdraw():getWidth(),
-                                    product:getTextdraw():getHeight(),
-                                    _base:get('color'):getAlpha(private:getAlpha()) .. '1f1f1f',
-                                    0,
-                                    '0x00000000',
-                                    100
-                                )
-                            end
+                    if private:isActive()
+                    and _base:get('playerManager'):isShoping()
+                    and not _base:get('dialogManager'):isOpened()
+                    and not sampIsScoreboardOpen()
+                    then
+                        for _, product in ipairs(_base:get('productManager'):getProducts()) do
+                            _base:get('drawManager'):addBox(
+                                product:getTextdraw():getX(),
+                                product:getTextdraw():getY(),
+                                product:getTextdraw():getWidth(),
+                                product:getTextdraw():getHeight(),
+                                _base:get('color'):getAlpha(private:getAlpha()) .. '1f1f1f',
+                                0,
+                                '0x00000000',
+                                100
+                            )
                         end
                     end
                 end

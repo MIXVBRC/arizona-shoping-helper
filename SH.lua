@@ -253,7 +253,7 @@ local data = {
                 ['sort'] = 2000,
                 ['init'] = true,
                 ['args'] = {
-                    'ShopingHelper_base2',
+                    'ShopingHelper_chapa',
                     {},
                 },
             },
@@ -280,6 +280,9 @@ local data = {
                             ['system_shop_empty'] = 'пустая',
                             ['system_shop_product_management'] = 'Управления товарами.',
 
+                            ['system_regex_find_text_shop_id'] = '^Лавка №%d+$',
+                            ['system_regex_find_text_shop_admining'] = '^Управления товарами.$',
+                            ['system_regex_find_text_shop_title'] = '^%a+_%a+%s{......}.+{......}.+$',
                             ['system_regex_find_dialog_title_shop_id'] = '^Лавка №%d+$',
                             ['system_regex_find_dialog_title_buy_product'] = '^Покупка предмета$',
                             ['system_regex_find_dialog_title_sale_product'] = '^Продажа предмета$',
@@ -883,6 +886,18 @@ local data = {
                         ['count'] = {
                             ['min'] = 1,
                         },
+                    },
+                },
+            },
+            {
+                ['name'] = 'profile',
+                ['path'] = 'dependencies.commands.ProfileCommand',
+                ['sort'] = 4000,
+                ['init'] = true,
+                ['args'] = {
+                    'profile',
+                    {
+                        ['profile'] = 'default',
                     },
                 },
             },

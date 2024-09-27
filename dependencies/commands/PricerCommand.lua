@@ -288,6 +288,7 @@ function class:new(_base, _name, _default, _minmax)
                     and _base:get('playerManager'):isShoping()
                     and not _base:get('dialogManager'):isOpened()
                     and not _base:get('swipe'):isSwipe()
+                    and not sampIsScoreboardOpen()
                     then
                         for _, product in ipairs(_base:get('productManager'):getProducts()) do
                             local _product = private:getProduct(product:getSign()) or private:getProduct(product:getCode())
@@ -345,7 +346,7 @@ function class:new(_base, _name, _default, _minmax)
                     if clickedProduct:isScanned() then
                         private:dialogChange(clickedProduct:getName(), clickedProduct:getCode(), mod)
                     else
-                        clickedProduct:scan(500,
+                        clickedProduct:scan(
                             function (scannedProduct)
                                 if scannedProduct:isScanned() then
                                     private:dialogChange(scannedProduct:getName(), scannedProduct:getCode(), mod)

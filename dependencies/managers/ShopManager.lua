@@ -108,11 +108,11 @@ function class:new(_base, _centralModelIds)
                     ['y'] = y,
                     ['z'] = z,
                 }
-                if text == _base:get('message'):get('system_shop') then
+                if text:find(_base:get('message'):get('system_regex_find_text_shop_id')) then
                     table.insert(windows, data)
-                elseif text:find('^%a+_%a+%s{......}.+{......}.+$') then
+                elseif text:find(_base:get('message'):get('system_regex_find_text_shop_title')) then
                     table.insert(titles, data)
-                elseif text:find('^' .. _base:get('message'):get('system_shop_product_management') .. '$') then
+                elseif text:find(_base:get('message'):get('system_regex_find_text_shop_admining')) then
                     table.insert(admins, data)
                 end
             end
@@ -155,30 +155,32 @@ function class:new(_base, _centralModelIds)
             function ()
                 while true do wait(1000)
                     local shops = {}
-                    for _, shop in ipairs(private:findShops()) do
+                    if not _base:get('playerManager'):isAFK() then
+                        for _, shop in ipairs(private:findShops()) do
 
-                        local id = _base:get('helper'):md5(
-                            ((shop.title == nil) and 'none' or shop.title.text:match('^(.+)%s{%w%w%w%w%w%w}.+{%w%w%w%w%w%w}.+$'))
-                            ..
-                            _base:get('helper'):normalize(shop.window.x)
-                            ..
-                            _base:get('helper'):normalize(shop.window.y)
-                            ..
-                            _base:get('helper'):normalize(shop.window.z)
-                        )
-
-                        local oldShop = this:getShopById(id)
-                        if oldShop == nil then
-                            table.insert(shops,
-                                _base:getNew('shop',
-                                    id,
-                                    shop.window.id,
-                                    (shop.title or {}).id,
-                                    (shop.admin or {}).id
-                                )
+                            local id = _base:get('helper'):md5(
+                                ((shop.title == nil) and 'none' or shop.title.text:match('^(.+)%s{%w%w%w%w%w%w}.+{%w%w%w%w%w%w}.+$'))
+                                ..
+                                _base:get('helper'):normalize(shop.window.x)
+                                ..
+                                _base:get('helper'):normalize(shop.window.y)
+                                ..
+                                _base:get('helper'):normalize(shop.window.z)
                             )
-                        else
-                            table.insert(shops, oldShop)
+
+                            local oldShop = this:getShopById(id)
+                            if oldShop == nil then
+                                table.insert(shops,
+                                    _base:getNew('shop',
+                                        id,
+                                        shop.window.id,
+                                        (shop.title or {}).id,
+                                        (shop.admin or {}).id
+                                    )
+                                )
+                            else
+                                table.insert(shops, oldShop)
+                            end
                         end
                     end
                     private:setShops(shops)

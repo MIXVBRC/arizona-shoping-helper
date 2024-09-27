@@ -152,7 +152,7 @@ function class:new(_base, _name, _default, _minmax)
                     if this:isActive() and _base:get('playerManager'):isShoping() and _base:get('swipe'):isSwipe() then
                         for _, product in ipairs(_base:get('productManager'):getProducts()) do
                             if not product:isScanned() and private:haveCode(product:getCode()) then
-                                product:scan(private:getTime())
+                                product:scan()
                             end
                         end
                     end
@@ -174,7 +174,10 @@ function class:new(_base, _name, _default, _minmax)
             nil,
             function ()
                 while true do wait(0)
-                    if not _base:get('dialogManager'):isOpened() and _base:get('playerManager'):isShoping() then
+                    if not _base:get('dialogManager'):isOpened()
+                    and _base:get('playerManager'):isShoping()
+                    and not sampIsScoreboardOpen()
+                    then
                         for _, product in ipairs(_base:get('productManager'):getProducts()) do
                             local haveCode = private:haveCode(product:getCode())
                             if product:isScanned() then

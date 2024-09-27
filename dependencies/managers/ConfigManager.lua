@@ -4,7 +4,6 @@ function class:new(_base, _name, _default, _config)
     local private = {
         ['name'] = _name,
         ['default'] = _default or {},
-        ['params'] = {},
         ['config'] = _config or _base:get('config'),
     }
 
@@ -54,6 +53,7 @@ function class:new(_base, _name, _default, _config)
     end
 
     function private:initDefault()
+        private:getConfig():addDefault(private:getName(), private:getDefault())
         for name, value in pairs(private:getDefault()) do
             if this:get(name) == nil then
                 this:set(name, value)

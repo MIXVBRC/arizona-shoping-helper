@@ -247,7 +247,9 @@ function class:new(_base, _name, _default, _minmax)
             nil,
             function ()
                 while true do wait(0)
-                    if private:isActive() then
+                    if private:isActive()
+                    and not sampIsScoreboardOpen()
+                    then
                         local time = os.time()
                         local text3ds = {}
                         for _, shop in ipairs(_base:get('shopManager'):getShops()) do
