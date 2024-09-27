@@ -253,7 +253,7 @@ local data = {
                 ['sort'] = 2000,
                 ['init'] = true,
                 ['args'] = {
-                    'ShopingHelper_chapa',
+                    'ShopingHelper_base2',
                     {},
                 },
             },
