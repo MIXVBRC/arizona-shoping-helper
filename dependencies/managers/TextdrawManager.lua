@@ -30,7 +30,7 @@ function class:new(_base)
     function private:pushDeleteTextdrawsEvent(textdraws)
         if #textdraws > 0 then
             for _, textdraw in ipairs(textdraws) do
-                _base:get('eventManager'):trigger('onDeleteÑlickableTextdraw', textdraw)
+                _base:get('eventManager'):trigger('onDeleteClickableTextdraw', textdraw)
             end
         end
         return private

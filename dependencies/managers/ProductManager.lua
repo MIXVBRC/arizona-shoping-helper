@@ -78,7 +78,7 @@ function class:new(_base)
             end
         )
         :add(
-            'onDelete—lickableTextdraw',
+            'onDeleteClickableTextdraw',
             function (textdraw)
                 local products = {}
                 for _, product in ipairs(this:getProducts()) do

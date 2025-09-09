@@ -145,15 +145,19 @@ function class:new(_base, _name, _default)
         :add(
             'onShowDialogSaleProduct',
             function (id, _, _, _, _, text)
-                local name = _base:get('helper'):trim(text:match(_base:get('message'):get('system_regex_match_dialog_text_sale_product')))
-                return _base:get('eventManager'):trigger('onShowDialogSaleProductCustom', id, name)
+                if _base:get('playerManager'):isAdmining() and private:isActive() then
+                    local name = _base:get('helper'):trim(text:match(_base:get('message'):get('system_regex_match_dialog_text_sale_product')))
+                    return _base:get('eventManager'):trigger('onShowDialogSaleProductCustom', id, name)
+                end
             end
         )
         :add(
             'onShowDialogSaleProductCount',
             function (id, _, _, _, _, text)
-                local name = _base:get('helper'):trim(text:match(_base:get('message'):get('system_regex_match_dialog_text_sale_product_count')))
-                return _base:get('eventManager'):trigger('onShowDialogSaleProductCustom', id, name, private:getProduct().count)
+                if _base:get('playerManager'):isAdmining() and private:isActive() then
+                    local name = _base:get('helper'):trim(text:match(_base:get('message'):get('system_regex_match_dialog_text_sale_product_count')))
+                    return _base:get('eventManager'):trigger('onShowDialogSaleProductCustom', id, name, private:getProduct().count)
+                end
             end
         )
         :add(

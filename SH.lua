@@ -1,3 +1,5 @@
+-- this file need win-1251 not utf-8 !!!
+
 local data = {
     {
         ['name'] = 'Shoping Helper',
@@ -54,7 +56,7 @@ local data = {
                 ['init'] = false,
                 ['args'] = {},
             },
-        
+
             -- ENTITYS
 
             {
@@ -253,7 +255,7 @@ local data = {
                 ['sort'] = 2000,
                 ['init'] = true,
                 ['args'] = {
-                    'ShopingHelper_base2',
+                    'ShopingHelper_base',
                     {},
                 },
             },
@@ -396,6 +398,77 @@ local data = {
                             ['message_command_name_swiper'] = 'Реклама лавки',
                             ['message_command_name_trade'] = 'Выставление по клику',
                             ['message_command_name_visit'] = 'Послещенные лавки',
+
+                            -- COMMAND HELP CHAT
+
+                            ['message_command_help_sh_swipe']           = '{white}Автоматически переключает показ режима лавки у игроков на скупку или продажу',
+                            ['message_command_help_sh_swipe_active']    = '{white}Активация/деактивация',
+                            ['message_command_help_sh_swipe_mod']       = '{white}Меняет мод свайпера (скупка или продажа)',
+
+                            ['message_command_help_sh_hiding']          = '{white}Затеняет предметы в лавке у игроков',
+                            ['message_command_help_sh_hiding_active']   = '{white}Активация/деактивация',
+                            ['message_command_help_sh_hiding_alpha']    = '{white}Меняет степень затенения от 0 до 100 [стандарт: 80]',
+
+                            ['message_command_help_sh_scan']            = '{white}Сканирует некоторые разные предметы с одинаковыми изображениями (для прайсера и селекта)',
+                            ['message_command_help_sh_scan_active']     = '{white}Активация/деактивация',
+                            ['message_command_help_sh_scan_add']        = '{white}Добавить товар на сканирование (некоторые товары уже есть по стандарту)',
+                            ['message_command_help_sh_scan_clear']      = '{white}Очистить добавленные товары',
+                            ['message_command_help_sh_scan_time']       = '{white}Время сканирования [стандарт: 500]',
+
+                            ['message_command_help_sh_radius']          = '{white}Подсвечивает область установки лавки',
+                            ['message_command_help_sh_radius_active']   = '{white}Активация/деактивация',
+                            ['message_command_help_sh_radius_player']   = '{white}',
+                            ['message_command_help_sh_radius_polygons'] = '{white}Количество отрисовымаемых полигонов [стандарт: 24]',
+                            ['message_command_help_sh_radius_distance'] = '{white}Дистанция видимости области [стандарт: 30]',
+
+                            ['message_command_help_sh_visit']               = '{white}Показывает посещенные лавки',
+                            ['message_command_help_sh_visit_active']        = '{white}Активация/деактивация',
+                            ['message_command_help_sh_visit_clear']         = '{white}Очистить все посещения',
+                            ['message_command_help_sh_visit_xray']          = '{white}Подсвечивание сквозь объекты',
+                            ['message_command_help_sh_visit_distance']      = '{white}Дистанция видимости посещенных лавок [стандарт: 50]',
+                            ['message_command_help_sh_visit_time']          = '{white}Время в секундах, через которое спадает посещение лавки [стандарт: 200]',
+                            ['message_command_help_sh_visit_select']        = '{white}Явно указать посещенную лавку (нужно стоять рядом с лавкой)',
+                            ['message_command_help_sh_visit_active_player'] = '{white}Активация/деактивация подсветки лавки игрока',
+                            ['message_command_help_sh_visit_active_visit']  = '{white}Активация/деактивация подсветки посещенных лавок',
+                            ['message_command_help_sh_visit_active-buy']    = '{white}Активация/деактивация подсветки лавок на скупку',
+                            ['message_command_help_sh_visit_active_sell']   = '{white}Активация/деактивация подсветки лавок на продажу',
+                            ['message_command_help_sh_visit_active_edit']   = '{white}Активация/деактивация подсветки редактируемых лавок',
+
+                            ['message_command_help_sh_select']          = '{white}Обводка предметов в лавках игроков',
+                            ['message_command_help_sh_select_active']   = '{white}Активация/деактивация',
+                            ['message_command_help_sh_select_add']      = '{white}Активация/деактивация режима добавления предметов',
+                            ['message_command_help_sh_select_clear']    = '{white}Очистить список выбранных предметов',
+                            ['message_command_help_sh_select_border']   = '{white}Толщина обводки',
+                            ['message_command_help_sh_select_color']    = '{white}Цвет обводки (в формате HEX)',
+                            ['message_command_help_sh_select_alpha']    = '{white}Прозрачность обводки',
+
+                            ['message_command_help_sh_trade']           = '{white}Быстрое выставление предметов на продажу (при задатии SHIFT можно изменить цену)',
+                            ['message_command_help_sh_trade_active']    = '{white}Активация/деактивация',
+                            ['message_command_help_sh_trade_clear']     = '{white}Очистить весь список предметов',
+
+                            ['message_command_help_sh_pricer']              = '{white}Режим подсвечивания нужных цен предметов в лавках игроков',
+                            ['message_command_help_sh_pricer_active']       = '{white}Активация/деактивация',
+                            ['message_command_help_sh_pricer_add']          = '{white}Активация/деактивация режима добавления цен на предметы',
+                            ['message_command_help_sh_pricer_clear']        = '{white}Очистить весь список предметов',
+                            ['message_command_help_sh_pricer_border']       = '{white}Толщина обводки',
+                            ['message_command_help_sh_pricer_commission']   = '{white}Указания комиссии при продаже предметов у себя [стандарт: 3]',
+                            ['message_command_help_sh_pricer_list']         = '{white}Показать список предметов (так же можно менять цены)',
+
+                            ['message_command_help_sh_ad']          = '{white}Автореклама рекламных компаний',
+                            ['message_command_help_sh_ad_active']   = '{white}Активация/деактивация',
+                            ['message_command_help_sh_ad_add']      = '{white}Добавить реклаиную компанию',
+                            ['message_command_help_sh_ad_chats']    = '{white}Список чатов',
+                            ['message_command_help_sh_ad_list']     = '{white}Список рекламных компаний',
+
+                            ['message_command_help_sh_buyer']           = '{white}Автоскупка предметов прайсера',
+                            ['message_command_help_sh_buyer_active']    = '{white}Активация/деактивация',
+                            ['message_command_help_sh_buyer_price']     = '{white}Максимальная стоимость автоскупки (для безопасности)',
+                            ['message_command_help_sh_buyer_count']     = '{white}Максимальное количество автоскупки',
+
+                            ['message_command_help_sh_profile']         = '{white}Профили скрипта, например можно создать отдельный профиль для Vice City',
+                            ['message_command_help_sh_profile_load']    = '{white}Загрузить профиль по названию (можно не полное название)',
+                            ['message_command_help_sh_profile_list']    = '{white}Список профилей',
+                            ['message_command_help_sh_profile_add']     = '{white}Добавить новый профиль',
                         }
                     }
                 },
@@ -998,5 +1071,16 @@ function main()
         script:get('chat'):setColor(script:get('color'):get('orange'))
         script:get('chat'):addPrefix('[' .. value.name .. ']: ')
         script:get('chat'):push('{' .. script:get('color'):get('white') .. '}' .. value.name)
+
+        -- local font = renderCreateFont("Arial", 8, 5) --creating font
+        -- while true do wait(0)
+        --     for a = 0, 2304	do
+        --         if sampTextdrawIsExists(a) then
+        --             local x, y = sampTextdrawGetPos(a)
+        --             local x1, y1 = convertGameScreenCoordsToWindowScreenCoords(x, y)
+        --             renderFontDrawText(font, a, x1, y1, 0xFFBEBEBE)
+        --         end
+        --     end
+        -- end
     end
 end

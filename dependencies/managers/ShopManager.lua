@@ -123,7 +123,7 @@ function class:new(_base, _centralModelIds)
                 ['window'] = window,
             }
             for indexTitle, title in ipairs(titles) do
-                if 3 > getDistanceBetweenCoords3d(window.x, window.y, window.z, title.x, title.y, title.z) then
+                if 3.5 > getDistanceBetweenCoords3d(window.x, window.y, window.z, title.x, title.y, title.z) then
                     for indexAdmin, admin in ipairs(admins) do
                         if 3 > getDistanceBetweenCoords3d(title.x, title.y, title.z, admin.x, admin.y, admin.z) then
                             shop.admin = admin
