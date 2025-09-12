@@ -36,7 +36,7 @@ function class:new(_, _colors)
         elseif num < 0 then
             num = 0
         end
-        return '0x' .. this:getByNum(255 / 100 * num)
+        return this:getByNum(255 / 100 * num)
     end
 
     return this

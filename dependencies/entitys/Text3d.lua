@@ -4,7 +4,7 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
     local private = {
         ['id'] = _id,
         ['text'] = _text or '',
-        ['alpha'] = _alpha or '0x00',
+        ['alpha'] = _alpha or '00',
         ['color'] = _color or '000000',
         ['position'] = {
             ['x'] = _x or 0,
@@ -67,7 +67,7 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
     -- COLOR FULL
 
     function this:getColorFull()
-        return private.alpha .. private.color
+        return '0x' .. private.color .. private.alpha
     end
 
     -- POSITION
@@ -219,7 +219,7 @@ function class:new(_base, _id, _text, _alpha, _color, _x, _y, _z, _distance, _xr
             end
             this
             :setText(text)
-            :setAlpha(alpha_color:match('^(0x%w%w)%w%w%w%w%w%w$'))
+            :setAlpha(alpha_color:match('^0x(%w%w)%w%w%w%w%w%w$'))
             :setColor(alpha_color:match('^0x%w%w(%w%w%w%w%w%w)$'))
             :setX(x)
             :setY(y)

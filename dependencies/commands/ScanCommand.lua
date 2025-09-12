@@ -149,7 +149,7 @@ function class:new(_base, _name, _default, _minmax)
             nil,
             function ()
                 while true do wait(0)
-                    if this:isActive() and _base:get('playerManager'):isShoping() and _base:get('swipe'):isSwipe() then
+                    if this:isActive() and _base:get('playerManager'):isShoping() and not _base:get('swipe'):isSwipe() then
                         for _, product in ipairs(_base:get('productManager'):getProducts()) do
                             if not product:isScanned() and private:haveCode(product:getCode()) then
                                 product:scan()
@@ -186,7 +186,7 @@ function class:new(_base, _name, _default, _minmax)
                                     'S',
                                     product:getTextdraw():getX() + product:getTextdraw():getWidth() - 15,
                                     product:getTextdraw():getY() + 5,
-                                    _base:get('color'):getAlpha(100) .. _base:get('color'):get('blue'),
+                                    '0x' .. _base:get('color'):getAlpha(100) .. _base:get('color'):get('blue'),
                                     5
                                 )
                             end
@@ -198,7 +198,7 @@ function class:new(_base, _name, _default, _minmax)
                                     product:getTextdraw():getHeight(),
                                     '0x00000000',
                                     private.border,
-                                    _base:get('color'):getAlpha(50) .. _base:get('color'):get('white'),
+                                    '0x' .. _base:get('color'):getAlpha(50) .. _base:get('color'):get('white'),
                                     1
                                 )
                             elseif not haveCode and product:isScanned() and this:isAdd() then
@@ -209,7 +209,7 @@ function class:new(_base, _name, _default, _minmax)
                                     product:getTextdraw():getHeight(),
                                     '0x00000000',
                                     private.border,
-                                    _base:get('color'):getAlpha(50) .. _base:get('color'):get('orange'),
+                                    '0x' .. _base:get('color'):getAlpha(50) .. _base:get('color'):get('orange'),
                                     1
                                 )
                             end

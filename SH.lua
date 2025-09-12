@@ -399,7 +399,7 @@ local data = {
                             ['message_command_name_trade'] = 'Выставление по клику',
                             ['message_command_name_visit'] = 'Послещенные лавки',
 
-                            -- COMMAND HELP CHAT
+                            -- COMMAND HELP
 
                             ['message_command_help_sh_swipe']           = '{white}Автоматически переключает показ режима лавки у игроков на скупку или продажу',
                             ['message_command_help_sh_swipe_active']    = '{white}Активация/деактивация',
@@ -411,7 +411,7 @@ local data = {
 
                             ['message_command_help_sh_scan']            = '{white}Сканирует некоторые разные предметы с одинаковыми изображениями (для прайсера и селекта)',
                             ['message_command_help_sh_scan_active']     = '{white}Активация/деактивация',
-                            ['message_command_help_sh_scan_add']        = '{white}Добавить товар на сканирование (некоторые товары уже есть по стандарту)',
+                            ['message_command_help_sh_scan_add']        = '{white}Добавить товар на сканирование',
                             ['message_command_help_sh_scan_clear']      = '{white}Очистить добавленные товары',
                             ['message_command_help_sh_scan_time']       = '{white}Время сканирования [стандарт: 500]',
 

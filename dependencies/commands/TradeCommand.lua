@@ -132,8 +132,9 @@ function class:new(_base, _name, _default)
                 if _base:get('playerManager'):isAdmining() and private:isActive() then
                     local count = 1
                     for _, childTextdraw in ipairs(textdraw:getChilds()) do
-                        if _base:get('helper'):isNumber(childTextdraw:getText()) then
-                            count = _base:get('helper'):getNumber(childTextdraw:getText())
+                        local text = childTextdraw:getText():gsub(',','')
+                        if _base:get('helper'):isNumber(text) then
+                            count = _base:get('helper'):getNumber(text)
                             break
                         end
                     end

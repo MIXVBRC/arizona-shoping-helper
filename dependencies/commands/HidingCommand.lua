@@ -71,7 +71,7 @@ function class:new(_base, _name, _default, _minmax)
                                 product:getTextdraw():getY(),
                                 product:getTextdraw():getWidth(),
                                 product:getTextdraw():getHeight(),
-                                _base:get('color'):getAlpha(private:getAlpha()) .. '1f1f1f',
+                                '0x' .. _base:get('color'):getAlpha(private:getAlpha()) .. '1f1f1f',
                                 0,
                                 '0x00000000',
                                 100

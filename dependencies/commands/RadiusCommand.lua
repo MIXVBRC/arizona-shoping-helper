@@ -165,7 +165,7 @@ function class:new(_base, _name, _default, _minmax)
                     local _, aX, aY, aZ, _, _ = convert3DCoordsToScreenEx(pointA:getX(), pointA:getY(), pointA:getZ())
                     local _, bX, bY, bZ, _, _ = convert3DCoordsToScreenEx(pointB:getX(), pointB:getY(), pointB:getZ())
                     if aZ > 0 and bZ > 0 then
-                        _base:get('renderManager'):pushLine(aX, aY, bX, bY, 1, alpha .. private:getColor('circle'))
+                        _base:get('renderManager'):pushLine(aX, aY, bX, bY, 1, '0x' .. alpha .. private:getColor('circle'))
                     end
                 end
             end

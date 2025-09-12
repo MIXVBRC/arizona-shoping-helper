@@ -313,7 +313,7 @@ function class:new(_base, _name, _default, _minmax)
                                             product:getTextdraw():getHeight(),
                                             '0x00000000',
                                             private:getBorder(),
-                                            _base:get('color'):getAlpha(100) .. color,
+                                            '0x' .. _base:get('color'):getAlpha(100) .. color,
                                             50
                                         )
                                         _base:get('drawManager'):addText(
@@ -321,7 +321,7 @@ function class:new(_base, _name, _default, _minmax)
                                             _base:get('helper'):formatPrice(price),
                                             product:getTextdraw():getX() + 5,
                                             product:getTextdraw():getY() + 5,
-                                            _base:get('color'):getAlpha(100) .. color,
+                                            '0x' .. _base:get('color'):getAlpha(100) .. color,
                                             50
                                         )
                                         break

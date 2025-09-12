@@ -180,7 +180,7 @@ function class:new(_base, _name, _default, _minmax)
                                     product:getTextdraw():getHeight(),
                                     '0x00000000',
                                     private:getBorder(),
-                                    _base:get('color'):getAlpha(private:getAlpha()) .. private:getColor(),
+                                    '0x' .. _base:get('color'):getAlpha(private:getAlpha()) .. private:getColor(),
                                     5
                                 )
                             end
