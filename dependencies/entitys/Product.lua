@@ -36,8 +36,12 @@ function class:new(_base, _name, _code, _price, _textdraw)
         return this:getCode()
     end
 
-    function this:getPrice()
+    function this:getPriceObj()
         return private.price
+    end
+
+    function this:getPrice()
+        return this:getPriceObj():get()
     end
 
     function this:getTextdraw()

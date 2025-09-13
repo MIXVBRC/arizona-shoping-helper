@@ -23,13 +23,14 @@ function class:new(_base)
 
     -- CREATE PRODUCT
 
-    function this:createProduct(name, code, price, textdraw)
+    function this:createProduct(name, code, priceTextdraw, textdraw)
         local product = nil
-        if code ~= nil and price ~= nil and textdraw ~= nil then
+        if code ~= nil and priceTextdraw ~= nil and textdraw ~= nil then
+            local priceObj = _base:getNew('price', priceTextdraw)
             product = _base:getNew('product',
                 name,
                 code,
-                price,
+                priceObj,
                 textdraw
             )
             private:addProduct(product)
@@ -51,14 +52,14 @@ function class:new(_base)
             'onTextdrawAddChild',
             function (textdraw)
                 if _base:get('playerManager'):isShoping() then
-                    local price = nil
+                    local priceTextdraw = nil
                     for _, childTextdraw in ipairs(textdraw:getChilds()) do
                         if _base:get('helper'):isPrice(childTextdraw:getText()) then
-                            price = _base:get('helper'):extractPrice(childTextdraw:getText())
+                            priceTextdraw = childTextdraw
                             break
                         end
                     end
-                    if price ~= nil then
+                    if priceTextdraw ~= nil then
                         if #this:getProducts() > 0 then
                             for _, product in ipairs(this:getProducts()) do
                                 if textdraw:getId() == product:getTextdraw():getId() then
@@ -68,11 +69,11 @@ function class:new(_base)
                         end
                         local code = textdraw:getCode()
                         for _, childTextdraw in ipairs(textdraw:getChilds()) do
-                            if not _base:get('helper'):isPrice(childTextdraw:getText()) then
+                            if childTextdraw:getId() ~= priceTextdraw:getId() then
                                 code = _base:get('helper'):md5(code .. childTextdraw:getCode())
                             end
                         end
-                        this:createProduct(nil, code, price, textdraw)
+                        this:createProduct(nil, code, priceTextdraw, textdraw)
                     end
                 end
             end

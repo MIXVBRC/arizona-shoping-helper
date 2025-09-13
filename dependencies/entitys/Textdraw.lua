@@ -123,7 +123,7 @@ function class:new(_base, _id, _model, _text, _color, _selectable, _x, _y, _widt
         return this
     end
 
-    -- PAREND
+    -- PARENT
 
     function this:getParent()
         return private.parent
@@ -136,6 +136,28 @@ function class:new(_base, _id, _model, _text, _color, _selectable, _x, _y, _widt
         private:setWidth(textdraw:getWidth() - 2)
         private:setHeight(textdraw:getHeight() - 2)
         return this
+    end
+
+    -- CHANGE TEXT
+
+    function this:changeText(text)
+        if not sampTextdrawIsExists(this:getId()) then
+            _base:get('queueManager')
+            :add(
+                function ()
+                    while true do wait(0)
+                        if sampTextdrawIsExists(this:getId()) then
+                            sampTextdrawSetString(this:getId(), text)
+                            break
+                        end
+                    end
+                end,
+                1
+            )
+            :push()
+        else
+            sampTextdrawSetString(this:getId(), text)
+        end
     end
 
     -- LOGIC

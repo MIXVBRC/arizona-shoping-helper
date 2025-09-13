@@ -399,6 +399,8 @@ local data = {
                             ['message_command_name_trade'] = 'Выставление по клику',
                             ['message_command_name_visit'] = 'Послещенные лавки',
 
+                            ['error_zero_price'] = 'Цена не должна быть меньше или равна нулю!',
+
                             -- COMMAND HELP
 
                             ['message_command_help_sh_swipe']           = '{white}Автоматически переключает показ режима лавки у игроков на скупку или продажу',
@@ -460,10 +462,10 @@ local data = {
                             ['message_command_help_sh_ad_chats']    = '{white}Список чатов',
                             ['message_command_help_sh_ad_list']     = '{white}Список рекламных компаний',
 
-                            ['message_command_help_sh_buyer']           = '{white}Автоскупка предметов прайсера',
+                            ['message_command_help_sh_buyer']           = '{white}Быстрая покупка товара при зажатой CTRL',
                             ['message_command_help_sh_buyer_active']    = '{white}Активация/деактивация',
-                            ['message_command_help_sh_buyer_price']     = '{white}Максимальная стоимость автоскупки (для безопасности)',
-                            ['message_command_help_sh_buyer_count']     = '{white}Максимальное количество автоскупки',
+                            ['message_command_help_sh_buyer_price']     = '{white}Максимальная стоимость покупаемого товара',
+                            ['message_command_help_sh_buyer_count']     = '{white}Максимально покупаемое количество товара',
 
                             ['message_command_help_sh_profile']         = '{white}Профили скрипта, например можно создать отдельный профиль для Vice City',
                             ['message_command_help_sh_profile_load']    = '{white}Загрузить профиль по названию (можно не полное название)',
@@ -504,6 +506,13 @@ local data = {
             {
                 ['name'] = 'textdraw',
                 ['path'] = 'dependencies.entitys.Textdraw',
+                ['sort'] = 2000,
+                ['init'] = false,
+                ['args'] = {},
+            },
+            {
+                ['name'] = 'price',
+                ['path'] = 'dependencies.entitys.Price',
                 ['sort'] = 2000,
                 ['init'] = false,
                 ['args'] = {},
@@ -878,6 +887,11 @@ local data = {
                         ['add'] = false,
                         ['border'] = 2,
                         ['commission'] = 3,
+                        ['vc'] = {
+                            ['active'] = false,
+                            ['buy'] = 100,
+                            ['sell'] = 100,
+                        },
                     },
                     {
                         ['border'] = {
@@ -887,6 +901,14 @@ local data = {
                         ['commission'] = {
                             ['min'] = 0,
                             ['max'] = 100,
+                        },
+                        ['vc-buy'] = {
+                            ['min'] = 50,
+                            ['max'] = 200,
+                        },
+                        ['vc-sell'] = {
+                            ['min'] = 50,
+                            ['max'] = 200,
                         },
                     },
                 },
@@ -1082,5 +1104,7 @@ function main()
         --         end
         --     end
         -- end
+
+        -- sampTextdrawSetString(id, text)
     end
 end
