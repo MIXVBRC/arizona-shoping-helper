@@ -70,57 +70,6 @@ function class:new(_base, _name, _default, _minmax)
         return private
     end
 
-    -- VC
-
-    function private:getVC()
-        return private.config:get('vc')
-    end
-
-    function private:setVC(vc)
-        private.config:set('vc', vc)
-        return private
-    end
-
-    function private:setVCValue(name, value)
-        local vc = private:getVC()
-        vc[name] = value
-        private:setVC(vc)
-        return private
-    end
-
-    -- VC -- ACTIVE
-
-    function private:isVCActive()
-        return private:getVC()['active']
-    end
-
-    function private:toggleVCActive()
-        private:setVCValue('active', not private:isVCActive())
-        return private
-    end
-
-    -- VC -- BUY
-
-    function private:getVCBuy()
-        return private:getVC()['buy']
-    end
-
-    function private:setVCBuy(value)
-        private:setVCValue('buy', private.minmax:get(value, 'vc-buy'))
-        return private
-    end
-
-    -- VC -- SELL
-
-    function private:getVCSell()
-        return private:getVC()['sell']
-    end
-
-    function private:setVCSell(value)
-        private:setVCValue('sell', private.minmax:get(value, 'vc-sell'))
-        return private
-    end
-
     -- PRODUCTS
 
     function private:getProducts()
@@ -326,13 +275,6 @@ function class:new(_base, _name, _default, _minmax)
             private:setCommission(_base:get('helper'):getNumber(commission))
         end)
         :add({private:getName(), 'list'}, private.dialogChangeList)
-        :add({private:getName(), 'vc', 'active'}, private.toggleVCActive)
-        :add({private:getName(), 'vc', 'buy'}, function (value)
-            private:setVCBuy(_base:get('helper'):getNumber(value))
-        end)
-        :add({private:getName(), 'vc', 'sell'}, function (value)
-            private:setVCSell(_base:get('helper'):getNumber(value))
-        end)
         return private
     end
 
@@ -413,19 +355,6 @@ function class:new(_base, _name, _default, _minmax)
                         )
                     end
                     return false
-                end
-            end,
-            1000
-        )
-        :add(
-            'onCreateProduct',
-            function (product)
-                if private:isVCActive() then
-                    local price = product:getPriceObj()
-                    if price:isVC() then
-                        local value = price:get() * private:getVCBuy()
-                        price:change(value)
-                    end
                 end
             end,
             1000

@@ -1,9 +1,9 @@
--- this file need win-1251 not utf-8 !!!
+-- this file need win-1251 !!!
 
 local data = {
     {
         ['name'] = 'Shoping Helper',
-        ['author'] = 'MIXVBRC',
+        ['author'] = 'MIXVBRC (Maks Fedorov)',
         ['version'] = '1.0.0',
         ['url'] = 'https://vk.com/mixvbrc',
         ['command'] = 'sh',
@@ -429,7 +429,7 @@ local data = {
                             ['message_command_help_sh_visit_xray']          = '{white}Подсвечивание сквозь объекты',
                             ['message_command_help_sh_visit_distance']      = '{white}Дистанция видимости посещенных лавок [стандарт: 50]',
                             ['message_command_help_sh_visit_time']          = '{white}Время в секундах, через которое спадает посещение лавки [стандарт: 200]',
-                            ['message_command_help_sh_visit_select']        = '{white}Явно указать посещенную лавку (нужно стоять рядом с лавкой)',
+                            ['message_command_help_sh_visit_select']        = '{white}Выделить последнюю посещенную равку (можно вписывать слова)',
                             ['message_command_help_sh_visit_active_player'] = '{white}Активация/деактивация подсветки лавки игрока',
                             ['message_command_help_sh_visit_active_visit']  = '{white}Активация/деактивация подсветки посещенных лавок',
                             ['message_command_help_sh_visit_active-buy']    = '{white}Активация/деактивация подсветки лавок на скупку',
@@ -887,11 +887,6 @@ local data = {
                         ['add'] = false,
                         ['border'] = 2,
                         ['commission'] = 3,
-                        ['vc'] = {
-                            ['active'] = false,
-                            ['buy'] = 100,
-                            ['sell'] = 100,
-                        },
                     },
                     {
                         ['border'] = {
@@ -901,14 +896,6 @@ local data = {
                         ['commission'] = {
                             ['min'] = 0,
                             ['max'] = 100,
-                        },
-                        ['vc-buy'] = {
-                            ['min'] = 50,
-                            ['max'] = 200,
-                        },
-                        ['vc-sell'] = {
-                            ['min'] = 50,
-                            ['max'] = 200,
                         },
                     },
                 },
@@ -985,17 +972,42 @@ local data = {
                 },
             },
             {
-                ['name'] = 'profile',
-                ['path'] = 'dependencies.commands.ProfileCommand',
+                ['name'] = 'vc',
+                ['path'] = 'dependencies.commands.ViceCityCommand',
                 ['sort'] = 4000,
                 ['init'] = true,
                 ['args'] = {
-                    'profile',
+                    'vc',
                     {
-                        ['profile'] = 'default',
+                        ['active'] = false,
+                        ['buy'] = 100,
+                        ['sell'] = 100,
+                    },
+                    {
+                        ['buy'] = {
+                            ['min'] = 50,
+                            ['max'] = 200,
+                        },
+                        ['sell'] = {
+                            ['min'] = 50,
+                            ['max'] = 200,
+                        },
                     },
                 },
             },
+            -- deprecated
+            -- {
+            --     ['name'] = 'profile',
+            --     ['path'] = 'dependencies.commands.ProfileCommand',
+            --     ['sort'] = 4000,
+            --     ['init'] = true,
+            --     ['args'] = {
+            --         'profile',
+            --         {
+            --             ['profile'] = 'default',
+            --         },
+            --     },
+            -- },
         },
     }
 }

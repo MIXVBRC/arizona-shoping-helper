@@ -246,7 +246,7 @@ function class:new(_base, _name, _default, _minmax)
         :add(
             nil,
             function ()
-                while true do wait(0)
+                while true do wait(1000)
                     if private:isActive()
                     and not sampIsScoreboardOpen()
                     then
@@ -337,7 +337,7 @@ function class:new(_base, _name, _default, _minmax)
                     local flag = false
                     local shops = {}
                     for _, shop in pairs(private:getShops()) do
-                        if (not shop.select or not time - shop.time > 86400) and time < shop.time then
+                        if ( not shop.select or not ( time - shop.time > 86400 ) ) and time < shop.time then
                             table.insert(shops, shop)
                         else
                             flag = true

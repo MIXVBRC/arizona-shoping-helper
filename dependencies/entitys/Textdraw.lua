@@ -138,26 +138,35 @@ function class:new(_base, _id, _model, _text, _color, _selectable, _x, _y, _widt
         return this
     end
 
-    -- CHANGE TEXT
+    -- EXECUTE AFTER EXIST
 
-    function this:changeText(text)
+    function private:executeAfterExist(_execute)
         if not sampTextdrawIsExists(this:getId()) then
             _base:get('queueManager')
             :add(
                 function ()
-                    while true do wait(0)
+                    while true do
                         if sampTextdrawIsExists(this:getId()) then
-                            sampTextdrawSetString(this:getId(), text)
+                            _execute()
                             break
                         end
+                        wait(0) -- faster if after break while
                     end
                 end,
                 1
             )
             :push()
         else
-            sampTextdrawSetString(this:getId(), text)
+            _execute()
         end
+    end
+
+    -- CHANGE TEXT
+
+    function this:changeText(text)
+        private:executeAfterExist(function ()
+            sampTextdrawSetString(this:getId(), text)
+        end)
     end
 
     -- LOGIC
@@ -172,6 +181,8 @@ function class:new(_base, _id, _model, _text, _color, _selectable, _x, _y, _widt
         end
         return this
     end
+
+    
 
     -- INITS
 
